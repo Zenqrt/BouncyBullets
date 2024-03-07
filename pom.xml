@@ -11,10 +11,9 @@
 
   <name>BouncyBullets</name>
 
-    <description>A first person shooter minigame based on the main mechanic of bullets bouncing off of surfaces.
-    </description>
+    <description>A first person shooter minigame based on the main mechanic of bullets bouncing off of surfaces.</description>
     <properties>
-    <java.version>1.8</java.version>
+    <java.version>18</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
