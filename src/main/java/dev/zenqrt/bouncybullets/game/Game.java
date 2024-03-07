@@ -1,11 +1,11 @@
 package dev.zenqrt.bouncybullets.game;
 
-public class Game<E> {
+public class Game<S extends GameState<?>> {
 
     private final int id;
-    private GameState<E> gameState;
+    private S gameState;
 
-    public Game(int id, GameState<E> startingGameState) {
+    public Game(int id, S startingGameState) {
         this.id = id;
         this.gameState = startingGameState;
     }
@@ -18,11 +18,11 @@ public class Game<E> {
         return id;
     }
 
-    public GameState<E> getGameState() {
+    public S getGameState() {
         return gameState;
     }
 
-    public void setGameState(GameState<E> gameState) {
+    public void setGameState(S gameState) {
         this.gameState = gameState;
     }
 }
