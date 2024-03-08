@@ -4,15 +4,14 @@ import dev.zenqrt.bouncybullets.event.PlayerJoinGameEvent;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
 import dev.zenqrt.bouncybullets.game.impl.PaperGameEventHandler;
 import dev.zenqrt.bouncybullets.game.impl.PaperGameState;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import dev.zenqrt.bouncybullets.item.GameItem;
+import dev.zenqrt.bouncybullets.item.items.LoadoutGameItem;
+import dev.zenqrt.bouncybullets.item.items.VoteMapGameItem;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
 import java.util.UUID;
@@ -20,6 +19,8 @@ import java.util.UUID;
 public final class WaitingGameState extends PaperGameState {
 
     private static final Location SPAWN_LOCATION = new Location(Bukkit.getWorld("world"), 0, 0, 0);
+    private static final LoadoutGameItem LOADOUT_ITEM = new LoadoutGameItem();
+    private static final VoteMapGameItem VOTE_MAP_ITEM = new VoteMapGameItem();
 
     private final int gameId;
     private final Map<UUID, BouncyBulletPlayer> players;
@@ -33,6 +34,8 @@ public final class WaitingGameState extends PaperGameState {
 
     @Override
     public void registerEvents() {
+        GameItem.registerGameItemEvents(this.eventHandler, LOADOUT_ITEM, VOTE_MAP_ITEM);
+
         this.eventHandler.registerEvent(PlayerJoinGameEvent.class, event -> {
             if (event.getGame().getId() == gameId) {
                 Player player = event.getPlayer();
@@ -55,16 +58,9 @@ public final class WaitingGameState extends PaperGameState {
     }
 
     private static void givePlayerItems(Player player) {
-        ItemStack loadoutItem = new ItemStack(Material.NETHER_STAR);
-        loadoutItem.editMeta(meta -> meta.displayName(Component.text("Loadout", NamedTextColor.YELLOW)));
-
-        ItemStack votingItem = new ItemStack(Material.BELL);
-        votingItem.editMeta(meta -> meta.displayName(Component.text("Vote Map", NamedTextColor.YELLOW)));
-
         Inventory inventory = player.getInventory();
-        inventory.setItem(0, loadoutItem);
-        inventory.setItem(4, votingItem);
+        inventory.setItem(0, LOADOUT_ITEM.buildItemStack());
+        inventory.setItem(4, VOTE_MAP_ITEM.buildItemStack());
     }
-
 
 }
