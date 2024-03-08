@@ -6,7 +6,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class PlayerJoinGameEvent extends PlayerEvent {
+public final class PlayerJoinGameEvent extends PlayerEvent {
 
     private static final HandlerList HANDLERS = new HandlerList();
 
