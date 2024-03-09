@@ -13,4 +13,9 @@ public final class ActiveGameState extends PaperGameState {
     public void registerEvents() {
 
     }
+
+    @Override
+    protected void onStateStart() {
+        System.out.println("Active game start");
+    }
 }

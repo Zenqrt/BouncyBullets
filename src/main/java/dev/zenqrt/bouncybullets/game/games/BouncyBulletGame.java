@@ -16,11 +16,13 @@ public final class BouncyBulletGame extends PaperGame {
     private final Map<UUID, BouncyBulletPlayer> players = new HashMap<>();
 
     public BouncyBulletGame(int id) {
-        super(id, createStartingGameState(id, new HashMap<>()));
+        super(id, null);
+
+        this.gameState = createStartingGameState(this, players);
     }
 
-    private static PaperGameState createStartingGameState(int gameId, Map<UUID, BouncyBulletPlayer> players) {
-        return new WaitingGameState(new PaperGameEventHandler(), gameId, players);
+    private static PaperGameState createStartingGameState(BouncyBulletGame game, Map<UUID, BouncyBulletPlayer> players) {
+        return new WaitingGameState(new PaperGameEventHandler(), game, players);
     }
 
     public void insertPlayer(BouncyBulletPlayer player) {

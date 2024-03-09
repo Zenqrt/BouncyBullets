@@ -1,6 +1,7 @@
 package dev.zenqrt.bouncybullets.game.games.states;
 
 import dev.zenqrt.bouncybullets.event.PlayerJoinGameEvent;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
 import dev.zenqrt.bouncybullets.game.impl.PaperGameEventHandler;
 import dev.zenqrt.bouncybullets.game.impl.PaperGameState;
@@ -22,13 +23,13 @@ public final class WaitingGameState extends PaperGameState {
     private static final LoadoutGameItem LOADOUT_ITEM = new LoadoutGameItem();
     private static final VoteMapGameItem VOTE_MAP_ITEM = new VoteMapGameItem();
 
-    private final int gameId;
+    private final BouncyBulletGame game;
     private final Map<UUID, BouncyBulletPlayer> players;
 
-    public WaitingGameState(PaperGameEventHandler eventHandler, int gameId, Map<UUID, BouncyBulletPlayer> players) {
+    public WaitingGameState(PaperGameEventHandler eventHandler, BouncyBulletGame game, Map<UUID, BouncyBulletPlayer> players) {
         super(eventHandler);
 
-        this.gameId = gameId;
+        this.game = game;
         this.players = players;
     }
 
@@ -37,12 +38,14 @@ public final class WaitingGameState extends PaperGameState {
         GameItem.registerGameItemEvents(this.eventHandler, LOADOUT_ITEM, VOTE_MAP_ITEM);
 
         this.eventHandler.registerEvent(PlayerJoinGameEvent.class, event -> {
-            if (event.getGame().getId() == gameId) {
+            if (event.getGame().getId() == game.getId()) {
                 Player player = event.getPlayer();
 
                 player.teleport(SPAWN_LOCATION);
                 player.setGameMode(GameMode.ADVENTURE);
                 givePlayerItems(player);
+
+                game.switchGameState(new ActiveGameState(new PaperGameEventHandler()));
             }
         });
     }
