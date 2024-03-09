@@ -45,7 +45,7 @@ public final class WaitingGameState extends PaperGameState {
                 player.setGameMode(GameMode.ADVENTURE);
                 givePlayerItems(player);
 
-                game.switchGameState(new ActiveGameState(new PaperGameEventHandler()));
+                game.switchGameState(new ActiveGameState(new PaperGameEventHandler(), players));
             }
         });
     }
