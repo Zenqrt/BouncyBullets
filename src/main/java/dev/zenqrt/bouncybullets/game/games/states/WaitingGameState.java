@@ -14,6 +14,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -35,7 +36,7 @@ public final class WaitingGameState extends PaperGameState {
 
     @Override
     public void registerEvents() {
-        GameItem.registerGameItemEvents(this.eventHandler, LOADOUT_ITEM, VOTE_MAP_ITEM);
+        GameItem.registerGameItemEvents(this.eventHandler, List.of(LOADOUT_ITEM, VOTE_MAP_ITEM));
 
         this.eventHandler.registerEvent(PlayerJoinGameEvent.class, event -> {
             if (event.getGame().getId() == game.getId()) {

@@ -18,7 +18,6 @@ public final class FreeForAllGameType implements GameType {
 
     @Override
     public void start() {
-
     }
 
     @Override

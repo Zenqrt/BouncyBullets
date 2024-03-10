@@ -34,8 +34,8 @@ public abstract class GameItem {
         this.description = description;
     }
 
-    public static void registerGameItemEvents(PaperGameEventHandler eventHandler, GameItem... gameItems) {
-        Map<String, GameItem> gameItemMap = Stream.of(gameItems)
+    public static void registerGameItemEvents(PaperGameEventHandler eventHandler, List<GameItem> gameItems) {
+        Map<String, GameItem> gameItemMap = gameItems.stream()
                         .collect(Collectors.toMap(GameItem::getKey, Function.identity()));
 
         eventHandler.registerEvent(PlayerInteractEvent.class, event -> {

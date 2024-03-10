@@ -1,4 +1,4 @@
 package dev.zenqrt.bouncybullets.game.games;
 
-public record Loadout() {
+public record Loadout(Gun gun) {
 }

@@ -10,10 +10,8 @@ import org.bukkit.Particle;
 
 public final class PistolGunItem extends GunItem {
 
-    private static final BulletProperties PROPERTIES = new BulletProperties(3, 200, -0.10F, 3, 0.1F);
-
-    public PistolGunItem() {
-        super("pistol", Material.GOLDEN_HOE, Component.text("BB (Boing Boing) Pistol", NamedTextColor.YELLOW), PROPERTIES);
+    public PistolGunItem(BulletProperties properties) {
+        super("pistol", Material.GOLDEN_HOE, Component.text("BB (Boing Boing) Pistol", NamedTextColor.YELLOW), properties);
     }
 
     @Override

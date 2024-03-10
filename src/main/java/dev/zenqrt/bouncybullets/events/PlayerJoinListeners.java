@@ -2,6 +2,7 @@ package dev.zenqrt.bouncybullets.events;
 
 import dev.zenqrt.bouncybullets.BouncyBullets;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
+import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.game.games.Loadout;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -30,7 +31,7 @@ public final class PlayerJoinListeners implements Listener {
                 player,
                 0,
                 0,
-                new Loadout()
+                new Loadout(Gun.PISTOL)
         );
         BouncyBullets.getGame().insertPlayer(bouncyBulletPlayer);
     }
