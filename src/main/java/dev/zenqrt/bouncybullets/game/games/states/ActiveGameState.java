@@ -5,6 +5,8 @@ import dev.zenqrt.bouncybullets.game.impl.PaperGameEventHandler;
 import dev.zenqrt.bouncybullets.game.impl.PaperGameState;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.items.PistolGunItem;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.PlayerInventory;
 
 import java.util.Map;
 import java.util.UUID;
@@ -28,6 +30,13 @@ public final class ActiveGameState extends PaperGameState {
 
     @Override
     protected void onStateStart() {
-        players.forEach((uuid, player) -> player.player().getInventory().addItem(PISTOL_ITEM.buildItemStack()));
+        players.forEach((uuid, player) -> setupPlayer(player.player()));
+    }
+
+    private static void setupPlayer(Player player) {
+
+        PlayerInventory inventory = player.getInventory();
+        inventory.clear();
+        inventory.addItem(PISTOL_ITEM.buildItemStack());
     }
 }

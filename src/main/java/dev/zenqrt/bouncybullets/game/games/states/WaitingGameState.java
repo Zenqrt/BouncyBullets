@@ -54,16 +54,21 @@ public final class WaitingGameState extends PaperGameState {
     }
 
     private static void setupPlayer(Player player) {
-        player.getInventory().clear();
         player.setGameMode(GameMode.ADVENTURE);
+
+        player.setLevel(0);
+        player.setExp(0);
         player.setHealth(20);
         player.setFoodLevel(20);
+
+        Inventory inventory = player.getInventory();
+        inventory.clear();
+        givePlayerItems(inventory);
+
         player.teleport(SPAWN_LOCATION);
-        givePlayerItems(player);
     }
 
-    private static void givePlayerItems(Player player) {
-        Inventory inventory = player.getInventory();
+    private static void givePlayerItems(Inventory inventory) {
         inventory.setItem(0, LOADOUT_ITEM.buildItemStack());
         inventory.setItem(4, VOTE_MAP_ITEM.buildItemStack());
     }
