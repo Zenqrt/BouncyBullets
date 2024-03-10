@@ -39,11 +39,7 @@ public final class WaitingGameState extends PaperGameState {
 
         this.eventHandler.registerEvent(PlayerJoinGameEvent.class, event -> {
             if (event.getGame().getId() == game.getId()) {
-                Player player = event.getPlayer();
-
-                player.teleport(SPAWN_LOCATION);
-                player.setGameMode(GameMode.ADVENTURE);
-                givePlayerItems(player);
+                setupPlayer(event.getPlayer());
 
                 game.switchGameState(new ActiveGameState(new PaperGameEventHandler(), players));
             }
@@ -54,10 +50,16 @@ public final class WaitingGameState extends PaperGameState {
     protected void onStateStart() {
         SPAWN_LOCATION.getWorld().setSpawnLocation(SPAWN_LOCATION);
 
-        players.forEach(((uuid, player) -> {
-            player.player().teleport(SPAWN_LOCATION);
-            givePlayerItems(player.player());
-        }));
+        players.forEach(((uuid, player) -> setupPlayer(player.player())));
+    }
+
+    private static void setupPlayer(Player player) {
+        player.getInventory().clear();
+        player.setGameMode(GameMode.ADVENTURE);
+        player.setHealth(20);
+        player.setFoodLevel(20);
+        player.teleport(SPAWN_LOCATION);
+        givePlayerItems(player);
     }
 
     private static void givePlayerItems(Player player) {
