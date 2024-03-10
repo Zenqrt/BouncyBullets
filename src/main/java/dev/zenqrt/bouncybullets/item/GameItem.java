@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -68,6 +69,7 @@ public abstract class GameItem {
             meta.displayName(displayName);
             meta.lore(description);
             meta.getPersistentDataContainer().set(ITEM_KEY, PersistentDataType.STRING, key);
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         });
 
         return itemStack;

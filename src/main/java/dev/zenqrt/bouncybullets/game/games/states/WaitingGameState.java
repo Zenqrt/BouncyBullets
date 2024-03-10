@@ -19,7 +19,7 @@ import java.util.UUID;
 
 public final class WaitingGameState extends PaperGameState {
 
-    private static final Location SPAWN_LOCATION = new Location(Bukkit.getWorld("world"), 0, 0, 0);
+    private static final Location SPAWN_LOCATION = new Location(Bukkit.getWorld("world"), 213.5, 65, 84.5);
     private static final LoadoutGameItem LOADOUT_ITEM = new LoadoutGameItem();
     private static final VoteMapGameItem VOTE_MAP_ITEM = new VoteMapGameItem();
 
