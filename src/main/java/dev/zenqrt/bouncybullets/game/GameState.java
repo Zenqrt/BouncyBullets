@@ -16,10 +16,12 @@ public abstract class GameState<T extends EventNode<?>> {
     protected void onStateEnd() {}
 
     public final void start() {
+        registerEvents();
         onStateStart();
     }
 
     public final void end() {
+        this.eventNode.unregisterAllListeners();
         onStateEnd();
     }
 
