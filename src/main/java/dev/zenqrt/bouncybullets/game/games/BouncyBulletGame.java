@@ -3,7 +3,6 @@ package dev.zenqrt.bouncybullets.game.games;
 import dev.zenqrt.bouncybullets.event.PlayerJoinGameEvent;
 import dev.zenqrt.bouncybullets.game.games.states.WaitingGameState;
 import dev.zenqrt.bouncybullets.game.impl.PaperGame;
-import dev.zenqrt.bouncybullets.game.impl.PaperGameEventHandler;
 import dev.zenqrt.bouncybullets.game.impl.PaperGameState;
 import org.bukkit.Bukkit;
 
@@ -22,7 +21,7 @@ public final class BouncyBulletGame extends PaperGame {
     }
 
     private static PaperGameState createStartingGameState(BouncyBulletGame game, Map<UUID, BouncyBulletPlayer> players) {
-        return new WaitingGameState(new PaperGameEventHandler(), game, players);
+        return new WaitingGameState(game, players);
     }
 
     public void insertPlayer(BouncyBulletPlayer player) {

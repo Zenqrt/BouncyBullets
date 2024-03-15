@@ -1,11 +1,13 @@
 package dev.zenqrt.bouncybullets.game;
 
-public abstract class GameState<H extends GameEventHandler<?>> {
+import dev.zenqrt.bouncybullets.game.event.EventNode;
 
-    protected final H eventHandler;
+public abstract class GameState<T extends EventNode<?>> {
 
-    public GameState(H eventHandler) {
-        this.eventHandler = eventHandler;
+    protected final T eventNode;
+
+    public GameState(T eventNode) {
+        this.eventNode = eventNode;
     }
 
     public abstract void registerEvents();
@@ -14,12 +16,10 @@ public abstract class GameState<H extends GameEventHandler<?>> {
     protected void onStateEnd() {}
 
     protected final void start() {
-        registerEvents();
         onStateStart();
     }
 
     protected final void end() {
-        eventHandler.unregisterAllEvents();
         onStateEnd();
     }
 

@@ -1,13 +1,10 @@
 package dev.zenqrt.bouncybullets.game.games;
 
-import dev.zenqrt.bouncybullets.game.impl.PaperGameEventHandler;
-import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.items.GunItem;
 import dev.zenqrt.bouncybullets.item.items.PistolGunItem;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 public enum Gun {
     PISTOL(new BulletProperties(3, 200, -0.10F, 3, 0.1F), PistolGunItem::new);
