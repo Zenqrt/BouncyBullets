@@ -15,11 +15,11 @@ public abstract class GameState<T extends EventNode<?>> {
     protected void onStateStart() {}
     protected void onStateEnd() {}
 
-    protected final void start() {
+    public final void start() {
         onStateStart();
     }
 
-    protected final void end() {
+    public final void end() {
         onStateEnd();
     }
 

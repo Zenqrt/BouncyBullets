@@ -1,7 +1,8 @@
 package dev.zenqrt.bouncybullets.game.games;
 
 import dev.zenqrt.bouncybullets.event.PlayerJoinGameEvent;
-import dev.zenqrt.bouncybullets.game.games.states.WaitingGameState;
+import dev.zenqrt.bouncybullets.event.PlayerQuitGameEvent;
+import dev.zenqrt.bouncybullets.game.games.states.PregameGameState;
 import dev.zenqrt.bouncybullets.game.impl.PaperGame;
 import dev.zenqrt.bouncybullets.game.impl.PaperGameState;
 import org.bukkit.Bukkit;
@@ -21,13 +22,19 @@ public final class BouncyBulletGame extends PaperGame {
     }
 
     private static PaperGameState createStartingGameState(BouncyBulletGame game, Map<UUID, BouncyBulletPlayer> players) {
-        return new WaitingGameState(game, players);
+        return new PregameGameState(game, players);
     }
 
     public void insertPlayer(BouncyBulletPlayer player) {
         players.put(player.uuid(), player);
 
         Bukkit.getPluginManager().callEvent(new PlayerJoinGameEvent(player.player(), this));
+    }
+
+    public void removePlayer(UUID uuid) {
+        BouncyBulletPlayer player = players.remove(uuid);
+
+        Bukkit.getPluginManager().callEvent(new PlayerQuitGameEvent(player.player(), this));
     }
 
     public boolean canJoinGame() {

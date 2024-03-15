@@ -1,40 +1,45 @@
 package dev.zenqrt.bouncybullets.game.games.states;
 
 import dev.zenqrt.bouncybullets.BouncyBullets;
+import dev.zenqrt.bouncybullets.event.PlayerQuitGameEvent;
 import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
-import dev.zenqrt.bouncybullets.game.event.impl.PaperEventNode;
-import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
 import dev.zenqrt.bouncybullets.game.impl.PaperGameState;
-import org.bukkit.event.Event;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Map;
 import java.util.UUID;
 
-
-// NOTE: Players should not be passed in here. Try figuring out another way to transition states that isn't in the state classes.
 public final class CountdownGameState extends PaperGameState {
 
-    private final BouncyBulletGame game;
+    private final PregameGameState pregameState;
     private final Map<UUID, BouncyBulletPlayer> players;
-    private final WaitingGameState fallbackState;
+    private final int minPlayerCount;
+    private final CountdownTask countdownTask;
 
-    public CountdownGameState(BouncyBulletGame game, Map<UUID, BouncyBulletPlayer> players, WaitingGameState fallbackState) {
-        this.game = game;
+    public CountdownGameState(PregameGameState pregameState, Map<UUID, BouncyBulletPlayer> players, int minPlayerCount) {
+        this.pregameState = pregameState;
         this.players = players;
-        this.fallbackState = fallbackState;
+        this.minPlayerCount = minPlayerCount;
+        this.countdownTask = new CountdownTask(15);
     }
 
     @Override
     public void registerEvents() {
-        this.eventNode.registerListener(PaperEventListener.builder());
+        this.eventNode.registerListener(PaperEventListener.builder(PlayerQuitGameEvent.class)
+                .filter(event -> event.getGame().getId() == pregameState.game.getId())
+                .filter(event -> players.size() < minPlayerCount)
+                .handler(event -> {
+                    countdownTask.cancel();
+                    pregameState.switchPreviousState();
+                })
+                .build());
     }
 
     @Override
     protected void onStateStart() {
-        new CountdownTask(15)
-                .runTaskTimer(BouncyBullets.getInstance(), 0, 20);
+        countdownTask.runTaskTimer(BouncyBullets.getInstance(), 0, 20);
     }
 
     private class CountdownTask extends BukkitRunnable {
@@ -48,11 +53,22 @@ public final class CountdownGameState extends PaperGameState {
         @Override
         public void run() {
             if (timeLeft == 0) {
-                game.switchGameState(new ActiveGameState(players));
+                pregameState.switchNextState();
                 this.cancel();
+                return;
+            }
+
+            if (timeLeft <= 5 || timeLeft % 15 == 0) {
+                broadcastTimer();
             }
 
             timeLeft--;
+        }
+
+        private void broadcastTimer() {
+            players.forEach(((uuid, player) -> player.player().sendMessage(
+                    MiniMessage.miniMessage().deserialize("The game starts in <yellow>" + timeLeft + "</yellow> seconds!")
+            )));
         }
     }
 }
