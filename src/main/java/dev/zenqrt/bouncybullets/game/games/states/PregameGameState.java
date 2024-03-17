@@ -37,17 +37,19 @@ public final class PregameGameState extends PaperGameState {
 
         WaitingGameState waitingState = new WaitingGameState(this, players, MIN_PLAYER_COUNT);
         this.states = List.of(waitingState, new CountdownGameState(this, players, MIN_PLAYER_COUNT));
+        this.currentState = states.get(0);
     }
 
     void switchNextState() {
+        if (currentStateIndex + 1 >= states.size()) {
+            game.switchGameState(new ActiveGameState(game, players));
+            return;
+        }
+
         currentState.end();
 
         currentState = states.get(++currentStateIndex);
         currentState.start();
-
-        if (currentStateIndex >= states.size() - 1) {
-            game.switchGameState(new ActiveGameState(players));
-        }
     }
 
     void switchPreviousState() {
@@ -72,6 +74,7 @@ public final class PregameGameState extends PaperGameState {
         SPAWN_LOCATION.getWorld().setSpawnLocation(SPAWN_LOCATION);
 
         players.forEach(((uuid, player) -> setupPlayer(player.player())));
+        currentState.start();
     }
 
     private static void setupPlayer(Player player) {
