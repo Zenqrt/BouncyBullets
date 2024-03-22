@@ -26,7 +26,7 @@ public final class WaitingGameState extends PaperGameState {
                 .filter(event -> event.getGame().getId() == pregameState.game.getId())
                 .handler(event -> {
                     if (this.players.size() >= minPlayerCount) {
-                        pregameState.switchNextState();
+                    pregameState.switchNextState();
                     }
                 }).build());
     }

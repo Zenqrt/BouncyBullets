@@ -6,10 +6,7 @@ import dev.zenqrt.bouncybullets.game.games.BulletProperties;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import org.bukkit.FluidCollisionMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -80,7 +77,7 @@ public abstract class GunItem extends GameItem {
 
             spawnBulletParticle(location);
 
-            RayTraceResult entityResult = location.getWorld().rayTraceEntities(location, currentDirection.clone().multiply(-1), segmentLength, 0.1, entity -> entity instanceof LivingEntity && entity != shooter);
+            RayTraceResult entityResult = location.getWorld().rayTraceEntities(location, currentDirection.clone().multiply(-1), segmentLength, 0.1, entity -> entity instanceof Player player && player.getGameMode() == GameMode.ADVENTURE && entity != shooter);
 
             if (entityResult != null) {
                 LivingEntity hitEntity = Objects.requireNonNull((LivingEntity) entityResult.getHitEntity());

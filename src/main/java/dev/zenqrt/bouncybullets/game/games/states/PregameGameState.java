@@ -8,11 +8,19 @@ import dev.zenqrt.bouncybullets.game.impl.PaperGameState;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.items.LoadoutGameItem;
 import dev.zenqrt.bouncybullets.item.items.VoteMapGameItem;
+import dev.zenqrt.bouncybullets.map.FreeForAllGameMap;
+import dev.zenqrt.bouncybullets.player.GamePlayerList;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.scoreboard.Criteria;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
+import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.List;
 import java.util.Map;
@@ -26,12 +34,12 @@ public final class PregameGameState extends PaperGameState {
     private static final VoteMapGameItem VOTE_MAP_ITEM = new VoteMapGameItem();
 
     private final List<PaperGameState> states;
-    private final Map<UUID, BouncyBulletPlayer> players;
+    private final GamePlayerList players;
     private int currentStateIndex = 0;
     final BouncyBulletGame game;
     private PaperGameState currentState;
 
-    public PregameGameState(BouncyBulletGame game, Map<UUID, BouncyBulletPlayer> players) {
+    public PregameGameState(BouncyBulletGame game, GamePlayerList players) {
         this.game = game;
         this.players = players;
 
@@ -42,7 +50,7 @@ public final class PregameGameState extends PaperGameState {
 
     void switchNextState() {
         if (currentStateIndex + 1 >= states.size()) {
-            game.switchGameState(new ActiveGameState(game, players));
+            game.switchGameState(new ActiveGameState(game, players, new FreeForAllGameMap(null, null, null, null)));
             return;
         }
 
@@ -63,6 +71,9 @@ public final class PregameGameState extends PaperGameState {
     public void registerEvents() {
         GameItem.registerGameItemEvents(this.eventNode, List.of(LOADOUT_ITEM, VOTE_MAP_ITEM));
 
+        this.eventNode.registerListener(PaperEventListener.builder(PlayerDropItemEvent.class)
+                .handler(event -> event.setCancelled(true))
+                .build());
         this.eventNode.registerListener(PaperEventListener.builder(PlayerJoinGameEvent.class)
                 .filter(event -> event.getGame().getId() == game.getId())
                 .handler(event -> setupPlayer(event.getPlayer()))

@@ -1,6 +1,9 @@
 package dev.zenqrt.bouncybullets.map;
 
-import java.io.File;
+import org.bukkit.Location;
 
-public record FreeForAllGameMap(File folder, File worldFile) implements GameMap {
+import java.io.File;
+import java.util.List;
+
+public record FreeForAllGameMap(File folder, File worldFile, List<Location> spawnLocations, List<Location> itemSpawnLocations) implements GameMap {
 }

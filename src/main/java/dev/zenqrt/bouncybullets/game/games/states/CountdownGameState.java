@@ -5,6 +5,7 @@ import dev.zenqrt.bouncybullets.event.PlayerQuitGameEvent;
 import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
 import dev.zenqrt.bouncybullets.game.impl.PaperGameState;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -66,9 +67,11 @@ public final class CountdownGameState extends PaperGameState {
         }
 
         private void broadcastTimer() {
-            players.forEach(((uuid, player) -> player.player().sendMessage(
-                    MiniMessage.miniMessage().deserialize("The game starts in <yellow>" + timeLeft + "</yellow> seconds!")
-            )));
+            players.forEach(((uuid, player) -> {
+                player.player().sendMessage(
+                    MiniMessage.miniMessage().deserialize("The game starts in <yellow>" + timeLeft + "</yellow> seconds!"));
+                player.player().playSound(Sound.sound(org.bukkit.Sound.BLOCK_NOTE_BLOCK_HAT, Sound.Source.MASTER, 1, 1), Sound.Emitter.self());
+            }));
         }
     }
 }
