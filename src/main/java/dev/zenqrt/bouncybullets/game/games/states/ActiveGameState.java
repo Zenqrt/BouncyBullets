@@ -17,6 +17,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -25,8 +26,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.Map;
-import java.util.UUID;
+import java.util.Comparator;
 import java.util.stream.Stream;
 
 public final class ActiveGameState extends PaperGameState {
@@ -78,7 +78,7 @@ public final class ActiveGameState extends PaperGameState {
                     Player player = event.getPlayer();
                     player.setGameMode(GameMode.SPECTATOR);
                     player.showTitle(Title.title(Component.text("YOU DIED!", NamedTextColor.RED).decorate(TextDecoration.BOLD), Component.empty()));
-                    players.updatePlayer(player.getUniqueId(), BouncyBulletPlayer::addDeath);
+                    BouncyBulletPlayer updatedPlayer = players.updatePlayer(player.getUniqueId(), BouncyBulletPlayer::addDeath);
 
                     EntityDamageEvent lastDamageEvent = player.getLastDamageCause();
 
@@ -90,8 +90,24 @@ public final class ActiveGameState extends PaperGameState {
                             killer.playSound(KILL_SOUND, Sound.Emitter.self());
                         }
                     }
+
+                    new DeathSpectatorTask(updatedPlayer, 5)
+                            .runTaskTimer(BouncyBullets.getInstance(), 0, 20);
                 })
                 .build());
+    }
+
+    private Location chooseBestSpawnLocation() {
+        return gameMap.spawnLocations().stream()
+                .min(Comparator.comparing(this::closestDistanceToPlayer))
+                .orElseThrow();
+    }
+
+    private double closestDistanceToPlayer(Location location) {
+        return players.values().stream()
+                .mapToDouble(player -> location.distance(player.player().getLocation()))
+                .min()
+                .orElse(0);
     }
 
     @Override
@@ -120,8 +136,37 @@ public final class ActiveGameState extends PaperGameState {
         public void run() {
             if (--timeLeft == 0) {
                 this.cancel();
-                game.switchGameState(new EndingGameState());
+                game.switchGameState(new EndingGameState(players));
             }
+        }
+    }
+
+    private final class DeathSpectatorTask extends BukkitRunnable {
+
+        private final BouncyBulletPlayer player;
+        private int timeLeft;
+
+        DeathSpectatorTask(BouncyBulletPlayer player, int respawnTime) {
+            this.player = player;
+            this.timeLeft = respawnTime;
+        }
+
+        @Override
+        public void run() {
+            Player bukkitPlayer = player.player();
+
+            if (--timeLeft == 0) {
+                this.cancel();
+
+                setupPlayer(bukkitPlayer, player.loadout());
+                bukkitPlayer.setGameMode(GameMode.ADVENTURE);
+                bukkitPlayer.setSpectatorTarget(null);
+                bukkitPlayer.teleport(chooseBestSpawnLocation());
+                bukkitPlayer.clearTitle();
+                return;
+            }
+
+            bukkitPlayer.sendActionBar(Component.text("Respawning in " + timeLeft + "..."));
         }
     }
 }

@@ -8,8 +8,11 @@ import java.util.function.Function;
 
 public final class GamePlayerList extends HashMap<UUID, BouncyBulletPlayer> {
 
-    public void updatePlayer(UUID uuid, Function<BouncyBulletPlayer, BouncyBulletPlayer> updateHandler) {
-        this.replace(uuid, updateHandler.apply(this.get(uuid)));
+    public BouncyBulletPlayer updatePlayer(UUID uuid, Function<BouncyBulletPlayer, BouncyBulletPlayer> updateHandler) {
+        BouncyBulletPlayer newPlayer = updateHandler.apply(this.get(uuid));
+        this.replace(uuid, newPlayer);
+
+        return newPlayer;
     }
 
 }
