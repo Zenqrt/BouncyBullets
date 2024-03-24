@@ -6,6 +6,7 @@ import dev.zenqrt.bouncybullets.player.GamePlayerList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
+import org.bukkit.entity.Player;
 
 import java.util.Comparator;
 
@@ -19,10 +20,15 @@ public final class EndingGameState extends PaperGameState {
 
     @Override
     public void registerEvents() {
-        players.forEach((uuid, player) ->
-                player.player().showTitle(Title.title(
-                        Component.text("The winner is...", NamedTextColor.AQUA),
-                        Component.text(getWinner().player().getName(), NamedTextColor.YELLOW))));
+        players.forEach((uuid, player) -> {
+            Player bukkitPlayer = player.player();
+
+            bukkitPlayer.showTitle(Title.title(
+                    Component.text("The winner is...", NamedTextColor.AQUA),
+                    Component.text(getWinner().player().getName(), NamedTextColor.YELLOW)));
+            bukkitPlayer.sendMessage(Component.text("The winner of the game is ", NamedTextColor.AQUA)
+                    .append(Component.text(getWinner().player().getName(), NamedTextColor.YELLOW)));
+        });
     }
 
     private BouncyBulletPlayer getWinner() {

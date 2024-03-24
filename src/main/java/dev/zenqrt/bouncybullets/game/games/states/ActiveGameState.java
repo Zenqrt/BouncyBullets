@@ -23,6 +23,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.PlayerInventory;
@@ -55,6 +56,10 @@ public final class ActiveGameState extends PaperGameState {
                 .map(gun -> (GameItem) gun.getItem())
                 .toList()
         );
+        this.eventNode.registerListener(PaperEventListener.builder(FoodLevelChangeEvent.class)
+                .filter(event -> players.containsKey(event.getEntity().getUniqueId()))
+                .handler(event -> event.setFoodLevel(20))
+                .build());
         this.eventNode.registerListener(PaperEventListener.builder(EntityDamageEvent.class)
                 .filter(event -> event.getEntity() instanceof Player player && players.containsKey(player.getUniqueId()))
                 .filter(event -> event.getCause() == EntityDamageEvent.DamageCause.FALL)
