@@ -36,6 +36,10 @@ public abstract class GunItem extends GameItem {
     public void onInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
+        if (player.getGameMode() != GameMode.ADVENTURE) {
+            return;
+        }
+
         player.getWorld().playSound(getShootingSound(), player.getX(), player.getY(), player.getZ());
         new ShootBulletTask(player, player.getEyeLocation()).runTaskTimer(BouncyBullets.getInstance(), 0, 1);
     }

@@ -1,33 +1,29 @@
 package dev.zenqrt.bouncybullets.game.games.states;
 
+import dev.zenqrt.bouncybullets.BouncyBullets;
 import dev.zenqrt.bouncybullets.event.PlayerJoinGameEvent;
 import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
-import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
 import dev.zenqrt.bouncybullets.game.impl.PaperGameState;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.items.LoadoutGameItem;
 import dev.zenqrt.bouncybullets.item.items.VoteMapGameItem;
 import dev.zenqrt.bouncybullets.map.FreeForAllGameMap;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.scoreboard.Criteria;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.util.Vector;
 
+import java.io.File;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 public final class PregameGameState extends PaperGameState {
 
+    private static final File MAPS_FOLDER = new File(BouncyBullets.getInstance().getDataFolder(), "maps");
     private static final int MIN_PLAYER_COUNT = 2;
     private static final Location SPAWN_LOCATION = new Location(Bukkit.getWorld("world"), 213.5, 65, 84.5);
     private static final LoadoutGameItem LOADOUT_ITEM = new LoadoutGameItem();
@@ -35,6 +31,7 @@ public final class PregameGameState extends PaperGameState {
 
     private final List<PaperGameState> states;
     private final GamePlayerList players;
+    private final FreeForAllGameMap gameMap;
     private int currentStateIndex = 0;
     final BouncyBulletGame game;
     private PaperGameState currentState;
@@ -42,15 +39,23 @@ public final class PregameGameState extends PaperGameState {
     public PregameGameState(BouncyBulletGame game, GamePlayerList players) {
         this.game = game;
         this.players = players;
+        this.gameMap = loadGameMap("test");
 
         WaitingGameState waitingState = new WaitingGameState(this, players, MIN_PLAYER_COUNT);
-        this.states = List.of(waitingState, new CountdownGameState(this, players, MIN_PLAYER_COUNT));
+        this.states = List.of(waitingState, new CountdownGameState(this, players, MIN_PLAYER_COUNT), new SetupMapGameState(this, this.game.getId(), gameMap));
         this.currentState = states.get(0);
+    }
+
+    private static FreeForAllGameMap loadGameMap(String mapName) {
+        File gameMapFolder = new File(MAPS_FOLDER, mapName);
+        File worldFolder = new File(gameMapFolder, "world");
+
+        return new FreeForAllGameMap(gameMapFolder, worldFolder, List.of(new Vector(17, -10, 32)), List.of());
     }
 
     void switchNextState() {
         if (currentStateIndex + 1 >= states.size()) {
-            game.switchGameState(new ActiveGameState(game, players, new FreeForAllGameMap(null, null, null, null)));
+            game.switchGameState(new ActiveGameState(game, players, gameMap));
             return;
         }
 

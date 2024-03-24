@@ -5,6 +5,6 @@ import java.io.File;
 public interface GameMap {
 
     File folder();
-    File worldFile();
+    File worldFolder();
 
 }

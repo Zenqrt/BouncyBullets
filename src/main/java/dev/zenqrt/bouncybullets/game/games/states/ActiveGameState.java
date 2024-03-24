@@ -16,8 +16,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -26,6 +28,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
@@ -37,11 +40,13 @@ public final class ActiveGameState extends PaperGameState {
     private final BouncyBulletGame game;
     private final GamePlayerList players;
     private final FreeForAllGameMap gameMap;
+    private final World world;
 
     public ActiveGameState(BouncyBulletGame game, GamePlayerList players, FreeForAllGameMap gameMap) {
         this.game = game;
         this.players = players;
         this.gameMap = gameMap;
+        this.world = Bukkit.getWorld("game_world_" + game.getId());
     }
 
     @Override
@@ -77,7 +82,8 @@ public final class ActiveGameState extends PaperGameState {
 
                     Player player = event.getPlayer();
                     player.setGameMode(GameMode.SPECTATOR);
-                    player.showTitle(Title.title(Component.text("YOU DIED!", NamedTextColor.RED).decorate(TextDecoration.BOLD), Component.empty()));
+                    player.showTitle(Title.title(Component.text("YOU DIED!", NamedTextColor.RED).decorate(TextDecoration.BOLD), Component.empty(),
+                            Title.Times.times(Duration.ZERO, Duration.ofSeconds(2), Duration.ofSeconds(1))));
                     BouncyBulletPlayer updatedPlayer = players.updatePlayer(player.getUniqueId(), BouncyBulletPlayer::addDeath);
 
                     EntityDamageEvent lastDamageEvent = player.getLastDamageCause();
@@ -99,11 +105,13 @@ public final class ActiveGameState extends PaperGameState {
 
     private Location chooseBestSpawnLocation() {
         return gameMap.spawnLocations().stream()
+                .map(location -> location.toLocation(world))
                 .min(Comparator.comparing(this::closestDistanceToPlayer))
                 .orElseThrow();
     }
 
     private double closestDistanceToPlayer(Location location) {
+
         return players.values().stream()
                 .mapToDouble(player -> location.distance(player.player().getLocation()))
                 .min()
@@ -112,7 +120,10 @@ public final class ActiveGameState extends PaperGameState {
 
     @Override
     protected void onStateStart() {
-        players.forEach((uuid, player) -> setupPlayer(player.player(), player.loadout()));
+        players.forEach((uuid, player) -> {
+            setupPlayer(player.player(), player.loadout());
+            player.player().teleport(gameMap.spawnLocations().get(0).toLocation(world));
+        });
 
         new GameTimerTask(GAME_TIME).runTaskTimer(BouncyBullets.getInstance(), 0, 20);
     }
@@ -160,7 +171,6 @@ public final class ActiveGameState extends PaperGameState {
 
                 setupPlayer(bukkitPlayer, player.loadout());
                 bukkitPlayer.setGameMode(GameMode.ADVENTURE);
-                bukkitPlayer.setSpectatorTarget(null);
                 bukkitPlayer.teleport(chooseBestSpawnLocation());
                 bukkitPlayer.clearTitle();
                 return;

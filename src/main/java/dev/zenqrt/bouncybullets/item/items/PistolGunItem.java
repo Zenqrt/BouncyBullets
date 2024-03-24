@@ -16,7 +16,7 @@ public final class PistolGunItem extends GunItem {
 
     @Override
     protected Sound getShootingSound() {
-        return Sound.sound(org.bukkit.Sound.ENTITY_IRON_GOLEM_DAMAGE.key(), Sound.Source.PLAYER, 1, 2);
+        return Sound.sound(org.bukkit.Sound.ENTITY_IRON_GOLEM_HURT.key(), Sound.Source.PLAYER, 1, 2);
     }
 
     @Override
