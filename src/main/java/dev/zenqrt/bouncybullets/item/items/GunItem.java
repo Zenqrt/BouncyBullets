@@ -8,6 +8,8 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -87,7 +89,7 @@ public abstract class GunItem extends GameItem {
                 LivingEntity hitEntity = Objects.requireNonNull((LivingEntity) entityResult.getHitEntity());
                 double damage = bulletProperties.damage() + (bulletProperties.damage() * (bulletProperties.damageChange() * bounces));
 
-                hitEntity.damage(damage, shooter);
+                hitEntity.damage(damage, DamageSource.builder(DamageType.MOB_PROJECTILE).withCausingEntity(shooter).build());
                 hitEntity.setNoDamageTicks(0);
 
                 Location hitLocation = entityResult.getHitPosition().toLocation(location.getWorld());

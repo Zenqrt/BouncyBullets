@@ -1,6 +1,7 @@
 package dev.zenqrt.bouncybullets;
 
 import dev.zenqrt.bouncybullets.events.PlayerJoinListeners;
+import dev.zenqrt.bouncybullets.events.PlayerListeners;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -29,6 +30,7 @@ public final class BouncyBullets extends JavaPlugin {
         game.start();
 
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerListeners(), this);
 
         registerCommand("freeze", (player, args) -> {
             boolean canMoveOn = !game.getGameState().canMoveOn();
@@ -45,7 +47,8 @@ public final class BouncyBullets extends JavaPlugin {
         registerCommand("backup", (player, args) -> {
             Bukkit.broadcast(Component.text("Saving backup of the world...").decorate(TextDecoration.ITALIC));
             try {
-                FileUtils.copyDirectory(player.getWorld().getWorldFolder(), new File(getDataFolder(), "backups/world-" + Instant.now().toString().replace(":", "-")));
+                File newDirectory = new File(getDataFolder(), "backups/world-" + Instant.now().toString().replace(":", "-"));
+                FileUtils.copyDirectory(player.getWorld().getWorldFolder(), newDirectory, file -> !file.getName().equals("session.lock"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
