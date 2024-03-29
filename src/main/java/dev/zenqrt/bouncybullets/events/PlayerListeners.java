@@ -1,5 +1,6 @@
 package dev.zenqrt.bouncybullets.events;
 
+import org.bukkit.damage.DamageType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -15,7 +16,7 @@ public final class PlayerListeners implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onEntityDamageEvent(EntityDamageEvent event) {
-        if (event.getCause() != EntityDamageEvent.DamageCause.PROJECTILE) {
+        if (event.getDamageSource().getDamageType() != DamageType.MOB_PROJECTILE) {
             event.setCancelled(true);
         }
     }
