@@ -1,14 +1,14 @@
 package dev.zenqrt.bouncybullets.game.games.states;
 
 import dev.zenqrt.bouncybullets.event.PlayerJoinGameEvent;
+import dev.zenqrt.bouncybullets.game.EventGameState;
 import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
-import dev.zenqrt.bouncybullets.game.impl.PaperGameState;
 
 import java.util.Map;
 import java.util.UUID;
 
-public final class WaitingGameState extends PaperGameState {
+public final class WaitingGameState extends EventGameState {
 
     private final PregameGameState pregameState;
     private final Map<UUID, BouncyBulletPlayer> players;
@@ -26,7 +26,7 @@ public final class WaitingGameState extends PaperGameState {
                 .filter(event -> event.getGame().getId() == pregameState.game.getId())
                 .handler(event -> {
                     if (this.players.size() >= minPlayerCount) {
-                    pregameState.switchNextState();
+                        pregameState.switchNextState();
                     }
                 }).build());
     }

@@ -1,32 +1,32 @@
 package dev.zenqrt.bouncybullets.game;
 
-import dev.zenqrt.bouncybullets.game.event.EventNode;
+public abstract class GameState {
 
-public abstract class GameState<T extends EventNode<?>> {
-
-    protected final T eventNode;
+    private boolean active;
     private boolean canMoveOn;
 
-    public GameState(T eventNode) {
-        this.eventNode = eventNode;
+    public GameState() {
         this.canMoveOn = true;
     }
-
-    public abstract void registerEvents();
 
     protected void onStateStart() {}
     protected void onStateEnd() {}
 
     public final void start() {
-        registerEvents();
+        if (active)
+            return;
+
+        active = true;
+
         onStateStart();
     }
 
     public final void end() {
-        if (!canMoveOn)
+        if (!canMoveOn || !active)
             return;
 
-        this.eventNode.unregisterAllListeners();
+        active = false;
+
         onStateEnd();
     }
 

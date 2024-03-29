@@ -1,17 +1,17 @@
 package dev.zenqrt.bouncybullets.gametype;
 
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
-import dev.zenqrt.bouncybullets.map.FreeForAllGameMap;
+import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
 
 import java.util.Map;
 import java.util.UUID;
 
 public final class FreeForAllGameType implements GameType {
 
-    private final FreeForAllGameMap map;
+    private final FreeForAllActiveGameMap map;
     private final Map<UUID, BouncyBulletPlayer> players;
 
-    public FreeForAllGameType(FreeForAllGameMap map, Map<UUID, BouncyBulletPlayer> players) {
+    public FreeForAllGameType(FreeForAllActiveGameMap map, Map<UUID, BouncyBulletPlayer> players) {
         this.map = map;
         this.players = players;
     }
@@ -21,7 +21,7 @@ public final class FreeForAllGameType implements GameType {
     }
 
     @Override
-    public FreeForAllGameMap getMap() {
+    public FreeForAllActiveGameMap getMap() {
         return map;
     }
 }

@@ -3,6 +3,7 @@ package dev.zenqrt.bouncybullets;
 import dev.zenqrt.bouncybullets.events.PlayerJoinListeners;
 import dev.zenqrt.bouncybullets.events.PlayerListeners;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
+import dev.zenqrt.bouncybullets.map.GameMapRegistry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -22,15 +23,24 @@ public final class BouncyBullets extends JavaPlugin {
     private static BouncyBulletGame game;
     private static BouncyBullets instance;
 
+
     @Override
     public void onEnable() {
         instance = this;
+        GameMapRegistry.registerGameMaps(new File(getDataFolder(), "maps"));
+        Bukkit.getWorlds().forEach(world -> world.setAutoSave(false));
+
         game = new BouncyBulletGame(1);
 
         game.start();
 
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListeners(), this);
+
+        registerCommand("tpgameworld", (player, args) -> {
+            player.sendMessage(Component.text("Teleporting...", NamedTextColor.GRAY).decorate(TextDecoration.ITALIC));
+            player.teleport(Bukkit.getWorld("game_world_" + game.getId()).getSpawnLocation());
+        });
 
         registerCommand("freeze", (player, args) -> {
             boolean canMoveOn = !game.getGameState().canMoveOn();
@@ -60,6 +70,8 @@ public final class BouncyBullets extends JavaPlugin {
     @Override
     public void onDisable() {
     }
+
+
 
     public static BouncyBulletGame getGame() {
         return game;

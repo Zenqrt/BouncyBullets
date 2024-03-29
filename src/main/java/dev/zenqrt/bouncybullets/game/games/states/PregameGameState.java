@@ -1,99 +1,84 @@
 package dev.zenqrt.bouncybullets.game.games.states;
 
-import dev.zenqrt.bouncybullets.BouncyBullets;
 import dev.zenqrt.bouncybullets.event.PlayerJoinGameEvent;
+import dev.zenqrt.bouncybullets.game.GameStateSequence;
 import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
+import dev.zenqrt.bouncybullets.game.event.impl.PaperEventNode;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
-import dev.zenqrt.bouncybullets.game.impl.PaperGameState;
+import dev.zenqrt.bouncybullets.generator.VoidGenerator;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.items.LoadoutGameItem;
 import dev.zenqrt.bouncybullets.item.items.VoteMapGameItem;
-import dev.zenqrt.bouncybullets.map.FreeForAllGameMap;
+import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
+import dev.zenqrt.bouncybullets.map.GameMap;
+import dev.zenqrt.bouncybullets.map.GameMapRegistry;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.apache.commons.io.FileUtils;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.util.Vector;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public final class PregameGameState extends PaperGameState {
+public final class PregameGameState extends GameStateSequence {
 
-    private static final File MAPS_FOLDER = new File(BouncyBullets.getInstance().getDataFolder(), "maps");
     private static final int MIN_PLAYER_COUNT = 2;
-    private static final Location SPAWN_LOCATION = new Location(Bukkit.getWorld("world"), 213.5, 65, 84.5);
+    private static final int MAX_PLAYER_COUNT = 8;
+    private static final Location SPAWN_LOCATION = new Location(Bukkit.getWorld("world"), 213.5, 66, 84.5);
     private static final LoadoutGameItem LOADOUT_ITEM = new LoadoutGameItem();
-    private static final VoteMapGameItem VOTE_MAP_ITEM = new VoteMapGameItem();
 
-    private final List<PaperGameState> states;
+    private final PaperEventNode<Event> eventNode = new PaperEventNode<>();
+    private final Map<GameMap, Integer> mapVotes = new HashMap<>();
+    private final VoteMapGameItem voteMapItem = new VoteMapGameItem(mapVotes);
     private final GamePlayerList players;
-    private final FreeForAllGameMap gameMap;
-    private int currentStateIndex = 0;
     final BouncyBulletGame game;
-    private PaperGameState currentState;
 
     public PregameGameState(BouncyBulletGame game, GamePlayerList players) {
         this.game = game;
         this.players = players;
-        this.gameMap = loadGameMap("test");
 
-        WaitingGameState waitingState = new WaitingGameState(this, players, MIN_PLAYER_COUNT);
-        this.states = List.of(waitingState, new CountdownGameState(this, players, MIN_PLAYER_COUNT), new SetupMapGameState(this, this.game.getId(), gameMap));
-        this.currentState = states.get(0);
+        GameMapRegistry.getGameMaps().forEach((key, value) -> mapVotes.put(value, 0));
+
+        this.addState(new WaitingGameState(this, players, MIN_PLAYER_COUNT));
+        this.addState(new CountdownGameState(this, players, MIN_PLAYER_COUNT));
     }
 
-    private static FreeForAllGameMap loadGameMap(String mapName) {
-        File gameMapFolder = new File(MAPS_FOLDER, mapName);
-        File worldFolder = new File(gameMapFolder, "world");
-
-        return new FreeForAllGameMap(gameMapFolder, worldFolder, List.of(new Vector(17, -10, 32)), List.of());
-    }
-
-    void switchNextState() {
-        if (currentStateIndex + 1 >= states.size()) {
-            game.switchGameState(new ActiveGameState(game, players, gameMap));
-            return;
-        }
-
-        currentState.end();
-
-        currentState = states.get(++currentStateIndex);
-        currentState.start();
-    }
-
-    void switchPreviousState() {
-        currentState.end();
-
-        currentState = states.get(--currentStateIndex);
-        currentState.start();
-    }
-
-    @Override
     public void registerEvents() {
-        GameItem.registerGameItemEvents(this.eventNode, List.of(LOADOUT_ITEM, VOTE_MAP_ITEM));
+        GameItem.registerGameItemEvents(this.eventNode, List.of(LOADOUT_ITEM, new VoteMapGameItem(mapVotes)));
 
         this.eventNode.registerListener(PaperEventListener.builder(PlayerDropItemEvent.class)
                 .handler(event -> event.setCancelled(true))
                 .build());
         this.eventNode.registerListener(PaperEventListener.builder(PlayerJoinGameEvent.class)
                 .filter(event -> event.getGame().getId() == game.getId())
-                .handler(event -> setupPlayer(event.getPlayer()))
+                .handler(event -> {
+                    players.sendMessage(MiniMessage.miniMessage().deserialize("<green>{player} joined the game! ({playerCount}/{maxPlayers})")
+                            .replaceText(builder -> builder.matchLiteral("{player}").replacement(event.getPlayer().name()))
+                            .replaceText(builder -> builder.matchLiteral("{playerCount}").replacement(String.valueOf(players.size())))
+                            .replaceText(builder -> builder.matchLiteral("{maxPlayers}").replacement(String.valueOf(MAX_PLAYER_COUNT))));
+                    setupPlayer(event.getPlayer());
+                })
                 .build());
     }
 
     @Override
     protected void onStateStart() {
-        SPAWN_LOCATION.getWorld().setSpawnLocation(SPAWN_LOCATION);
+        registerEvents();
 
+        SPAWN_LOCATION.getWorld().setSpawnLocation(SPAWN_LOCATION);
         players.forEach(((uuid, player) -> setupPlayer(player.player())));
-        currentState.start();
+
+        super.onStateStart();
     }
 
-    private static void setupPlayer(Player player) {
+    private void setupPlayer(Player player) {
         player.setGameMode(GameMode.ADVENTURE);
 
         player.setLevel(0);
@@ -108,9 +93,47 @@ public final class PregameGameState extends PaperGameState {
         player.teleport(SPAWN_LOCATION);
     }
 
-    private static void givePlayerItems(Inventory inventory) {
+    private void givePlayerItems(Inventory inventory) {
         inventory.setItem(0, LOADOUT_ITEM.buildItemStack());
-        inventory.setItem(4, VOTE_MAP_ITEM.buildItemStack());
+        inventory.setItem(4, voteMapItem.buildItemStack());
     }
 
+    @Override
+    protected void onStateEnd() {
+        super.onStateEnd();
+        eventNode.unregisterAllListeners();
+
+        GameMap gameMap = getVotedMap();
+        FreeForAllActiveGameMap activeGameMap = loadGameMap(gameMap);
+
+        game.switchGameState(new ActiveGameState(game, players, activeGameMap));
+    }
+
+    private FreeForAllActiveGameMap loadGameMap(GameMap gameMap) {
+        String worldName = "game_world_" + game.getId();
+
+        try {
+            FileUtils.copyDirectory(gameMap.worldFolder(), new File(Bukkit.getWorldContainer().getParentFile(), worldName));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        World world = Bukkit.createWorld(new WorldCreator(worldName)
+                .generator(new VoidGenerator()));
+
+        if (world == null) {
+            throw new RuntimeException("Failed to load world: " + worldName);
+        }
+
+        world.setAutoSave(false);
+
+        return new FreeForAllActiveGameMap(world, gameMap.configurationFile());
+    }
+
+    private GameMap getVotedMap() {
+        return mapVotes.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElseThrow();
+    }
 }

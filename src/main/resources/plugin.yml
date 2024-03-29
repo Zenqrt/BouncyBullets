@@ -9,3 +9,6 @@ commands:
     description: Freezes the current game state.
   backup:
     description: Creates a backup of the current world.
+  tpgameworld:
+    description: Teleports to the game world.
+

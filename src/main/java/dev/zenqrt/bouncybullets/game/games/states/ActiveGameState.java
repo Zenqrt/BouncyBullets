@@ -2,24 +2,22 @@ package dev.zenqrt.bouncybullets.game.games.states;
 
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent;
 import dev.zenqrt.bouncybullets.BouncyBullets;
+import dev.zenqrt.bouncybullets.game.EventGameState;
 import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
 import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.game.games.Loadout;
-import dev.zenqrt.bouncybullets.game.impl.PaperGameState;
 import dev.zenqrt.bouncybullets.item.GameItem;
-import dev.zenqrt.bouncybullets.map.FreeForAllGameMap;
+import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -30,23 +28,22 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.Duration;
 import java.util.Comparator;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
-public final class ActiveGameState extends PaperGameState {
+public final class ActiveGameState extends EventGameState {
 
     private static final int GAME_TIME = 300; // 5 minutes
     private static final Sound KILL_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.MASTER, 1, 1);
 
     private final BouncyBulletGame game;
     private final GamePlayerList players;
-    private final FreeForAllGameMap gameMap;
-    private final World world;
+    private final FreeForAllActiveGameMap gameMap;
 
-    public ActiveGameState(BouncyBulletGame game, GamePlayerList players, FreeForAllGameMap gameMap) {
+    public ActiveGameState(BouncyBulletGame game, GamePlayerList players, FreeForAllActiveGameMap gameMap) {
         this.game = game;
         this.players = players;
         this.gameMap = gameMap;
-        this.world = Bukkit.getWorld("game_world_" + game.getId());
     }
 
     @Override
@@ -100,7 +97,7 @@ public final class ActiveGameState extends PaperGameState {
 
     private Location chooseBestSpawnLocation() {
         return gameMap.spawnLocations().stream()
-                .map(location -> location.toLocation(world))
+                .map(location -> location.toLocation(gameMap.world()))
                 .min(Comparator.comparing(this::closestDistanceToPlayer))
                 .orElseThrow();
     }
@@ -115,9 +112,13 @@ public final class ActiveGameState extends PaperGameState {
 
     @Override
     protected void onStateStart() {
+        super.onStateStart();
+
         players.forEach((uuid, player) -> {
             setupPlayer(player.player(), player.loadout());
-            player.player().teleport(gameMap.spawnLocations().get(0).toLocation(world));
+
+            Location randomSpawn = gameMap.spawnLocations().get(ThreadLocalRandom.current().nextInt(gameMap.spawnLocations().size())).toLocation(gameMap.world());
+            player.player().teleport(randomSpawn);
         });
 
         new GameTimerTask(GAME_TIME).runTaskTimer(BouncyBullets.getInstance(), 0, 20);

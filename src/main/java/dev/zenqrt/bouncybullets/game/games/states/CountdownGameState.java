@@ -2,9 +2,9 @@ package dev.zenqrt.bouncybullets.game.games.states;
 
 import dev.zenqrt.bouncybullets.BouncyBullets;
 import dev.zenqrt.bouncybullets.event.PlayerQuitGameEvent;
+import dev.zenqrt.bouncybullets.game.EventGameState;
 import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
-import dev.zenqrt.bouncybullets.game.impl.PaperGameState;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -12,7 +12,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.Map;
 import java.util.UUID;
 
-public final class CountdownGameState extends PaperGameState {
+public final class CountdownGameState extends EventGameState {
 
     private final PregameGameState pregameState;
     private final Map<UUID, BouncyBulletPlayer> players;
@@ -31,16 +31,19 @@ public final class CountdownGameState extends PaperGameState {
         this.eventNode.registerListener(PaperEventListener.builder(PlayerQuitGameEvent.class)
                 .filter(event -> event.getGame().getId() == pregameState.game.getId())
                 .filter(event -> players.size() < minPlayerCount)
-                .handler(event -> {
-                    countdownTask.cancel();
-                    pregameState.switchPreviousState();
-                })
+                .handler(event -> pregameState.switchPreviousState())
                 .build());
     }
 
     @Override
     protected void onStateStart() {
+        super.onStateStart();
         countdownTask.runTaskTimer(BouncyBullets.getInstance(), 0, 20);
+    }
+
+    @Override
+    protected void onStateEnd() {
+        countdownTask.cancel();
     }
 
     private class CountdownTask extends BukkitRunnable {
@@ -55,7 +58,6 @@ public final class CountdownGameState extends PaperGameState {
         public void run() {
             if (timeLeft == 0) {
                 pregameState.switchNextState();
-                this.cancel();
                 return;
             }
 

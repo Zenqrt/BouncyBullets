@@ -1,28 +1,34 @@
 package dev.zenqrt.bouncybullets.game;
 
-public class Game<S extends GameState<?>> {
+public class Game extends GameState {
 
     private final int id;
-    protected S gameState;
+    protected GameState gameState;
 
-    public Game(int id, S startingGameState) {
+    public Game(int id, GameState startingGameState) {
         this.id = id;
         this.gameState = startingGameState;
     }
 
-    public void start() {
+    @Override
+    protected void onStateStart() {
         gameState.start();
+    }
+
+    @Override
+    protected void onStateEnd() {
+        gameState.end();
     }
 
     public int getId() {
         return id;
     }
 
-    public S getGameState() {
+    public GameState getGameState() {
         return gameState;
     }
 
-    public void switchGameState(S gameState) {
+    public void switchGameState(GameState gameState) {
         this.gameState.end();
         this.gameState = gameState;
 

@@ -1,7 +1,7 @@
 package dev.zenqrt.bouncybullets.game.games.states;
 
+import dev.zenqrt.bouncybullets.game.EventGameState;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
-import dev.zenqrt.bouncybullets.game.impl.PaperGameState;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 
 import java.util.Comparator;
 
-public final class EndingGameState extends PaperGameState {
+public final class EndingGameState extends EventGameState {
 
     private final GamePlayerList players;
 

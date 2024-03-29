@@ -2,9 +2,4 @@ package dev.zenqrt.bouncybullets.map;
 
 import java.io.File;
 
-public interface GameMap {
-
-    File folder();
-    File worldFolder();
-
-}
+public record GameMap(File configurationFile, File worldFolder) {}
