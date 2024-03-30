@@ -1,24 +1,19 @@
 package dev.zenqrt.bouncybullets.item;
 
 import dev.zenqrt.bouncybullets.BouncyBullets;
-import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.event.impl.PaperEventNode;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.Event;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public abstract class GameItem {
 
@@ -28,6 +23,7 @@ public abstract class GameItem {
     private final Material material;
     private final Component displayName;
     private final List<Component> description;
+    protected final PaperEventNode<Event> eventNode = new PaperEventNode<>();
 
     public GameItem(String key, Material material, Component displayName, List<Component> description) {
         this.key = key;
@@ -36,26 +32,31 @@ public abstract class GameItem {
         this.description = description;
     }
 
-    public static void registerGameItemEvents(PaperEventNode<Event> eventNode, List<GameItem> gameItems) {
-        Map<String, GameItem> gameItemMap = gameItems.stream()
-                        .collect(Collectors.toMap(GameItem::getKey, Function.identity()));
-
-        eventNode.registerListener(PaperEventListener.builder(PlayerInteractEvent.class)
-                .filter(event -> event.getItem() != null && event.getItem().hasItemMeta())
-                .handler(event -> {
-                    PersistentDataContainer dataContainer = Objects.requireNonNull(event.getItem()).getItemMeta().getPersistentDataContainer();
-
-                    if (dataContainer.has(ITEM_KEY)) {
-                        GameItem gameItem = gameItemMap.get(dataContainer.get(ITEM_KEY, PersistentDataType.STRING));
-
-                        if (gameItem != null) {
-                            gameItem.onInteract(event);
-                        }
-                    }
-                }).build());
+    public static void registerGameItemEvents(List<GameItem> gameItems) {
+        gameItems.forEach(GameItem::registerEvents);
     }
 
-    public abstract void onInteract(PlayerInteractEvent event);
+    public static boolean filterGameItem(@Nullable ItemStack itemStack, GameItem gameItem) {
+        if (itemStack == null || !itemStack.hasItemMeta()) {
+            return false;
+        }
+
+        ItemMeta itemMeta = itemStack.getItemMeta();
+
+        if (itemMeta == null) {
+            return false;
+        }
+
+        PersistentDataContainer dataContainer = itemMeta.getPersistentDataContainer();
+
+        return dataContainer.has(ITEM_KEY) && dataContainer.get(ITEM_KEY, PersistentDataType.STRING).equals(gameItem.getKey());
+    }
+
+    public abstract void registerEvents();
+
+    public void unregisterEvents() {
+        this.eventNode.unregisterAllListeners();
+    }
 
     public ItemStack buildItemStack() {
         ItemStack itemStack = new ItemStack(material);

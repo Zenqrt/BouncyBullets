@@ -3,7 +3,7 @@ package dev.zenqrt.bouncybullets.item.items;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
-import com.github.stefvanschie.inventoryframework.pane.component.ToggleButton;
+import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.map.GameMap;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
@@ -37,6 +37,13 @@ public final class VoteMapGameItem extends GameItem {
     }
 
     @Override
+    public void registerEvents() {
+        this.eventNode.registerListener(PaperEventListener.builder(PlayerInteractEvent.class)
+                .filter(event -> filterGameItem(event.getItem(), this))
+                .handler(this::onInteract)
+                .build());
+    }
+
     public void onInteract(PlayerInteractEvent event) {
         ChestGui voteGui = new ChestGui(3, "Vote Map");
         voteGui.setOnGlobalClick(clickEvent -> clickEvent.setCancelled(true));

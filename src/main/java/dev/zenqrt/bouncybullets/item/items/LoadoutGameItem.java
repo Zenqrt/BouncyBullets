@@ -1,5 +1,6 @@
 package dev.zenqrt.bouncybullets.item.items;
 
+import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -19,6 +20,14 @@ public final class LoadoutGameItem extends GameItem {
     }
 
     @Override
+    public void registerEvents() {
+        this.eventNode.registerListener(PaperEventListener.builder(PlayerInteractEvent.class)
+                .filter(event -> filterGameItem(event.getItem(), this))
+                .handler(this::onInteract)
+                .build());
+
+    }
+
     public void onInteract(PlayerInteractEvent event) {
         System.out.println("Wow! I'm supposed to do something!");
     }

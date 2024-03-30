@@ -48,7 +48,7 @@ public final class ActiveGameState extends EventGameState {
 
     @Override
     public void registerEvents() {
-        GameItem.registerGameItemEvents(eventNode, Stream.of(Gun.values())
+        GameItem.registerGameItemEvents(Stream.of(Gun.values())
                 .map(gun -> (GameItem) gun.getItem())
                 .toList()
         );

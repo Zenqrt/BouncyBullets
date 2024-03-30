@@ -51,7 +51,7 @@ public final class PregameGameState extends GameStateSequence {
     }
 
     public void registerEvents() {
-        GameItem.registerGameItemEvents(this.eventNode, List.of(LOADOUT_ITEM, new VoteMapGameItem(mapVotes)));
+        GameItem.registerGameItemEvents(List.of(LOADOUT_ITEM, new VoteMapGameItem(mapVotes)));
 
         this.eventNode.registerListener(PaperEventListener.builder(PlayerDropItemEvent.class)
                 .handler(event -> event.setCancelled(true))

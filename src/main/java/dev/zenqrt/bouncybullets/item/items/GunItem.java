@@ -2,10 +2,13 @@ package dev.zenqrt.bouncybullets.item.items;
 
 import com.destroystokyo.paper.ParticleBuilder;
 import dev.zenqrt.bouncybullets.BouncyBullets;
+import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BulletProperties;
+import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
 import org.bukkit.damage.DamageSource;
@@ -13,40 +16,85 @@ import org.bukkit.damage.DamageType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class GunItem extends GameItem {
 
-    private final BulletProperties bulletProperties;
+    private final Gun gun;
+    private final Map<UUID, Long> lastShootTimes = new HashMap<>();
 
-    public GunItem(String key, Material material, Component displayName, BulletProperties gunProperties) {
-        super(key, material, displayName, buildGunPropertyDescription(gunProperties));
+    public GunItem(String key, Material material, Component displayName, Gun gun) {
+        super(key, material, displayName, buildGunPropertyDescription(gun));
 
-        this.bulletProperties = gunProperties;
+        this.gun = gun;
     }
 
     protected abstract Sound getShootingSound();
     protected abstract ParticleBuilder getBulletParticleBuilder();
 
     @Override
-    public void onInteract(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
+    public void registerEvents() {
+        this.eventNode.registerListener(PaperEventListener.builder(PlayerInteractEvent.class)
+                .filter(event -> filterGameItem(event.getItem(), this))
+                .filter(event -> event.getAction().isRightClick())
+                .handler(event -> {
+                    Player player = event.getPlayer();
 
-        if (player.getGameMode() != GameMode.ADVENTURE) {
-            return;
-        }
+                    if (player.getGameMode() != GameMode.ADVENTURE) {
+                        return;
+                    }
 
-        player.getWorld().playSound(getShootingSound(), player.getX(), player.getY(), player.getZ());
-        new ShootBulletTask(player, player.getEyeLocation()).runTaskTimer(BouncyBullets.getInstance(), 0, 1);
+                    if (lastShootTimes.containsKey(player.getUniqueId())) {
+                        long lastShootTime = lastShootTimes.get(player.getUniqueId());
+
+                        if (System.currentTimeMillis() - lastShootTime < gun.getGunProperties().shootDelayMillis()) {
+                            return;
+                        }
+
+                        lastShootTimes.put(player.getUniqueId(), System.currentTimeMillis());
+                    } else {
+                        lastShootTimes.put(player.getUniqueId(), System.currentTimeMillis());
+                    }
+
+                    player.getWorld().playSound(getShootingSound(), player.getX(), player.getY(), player.getZ());
+                    new ShootBulletTask(player, player.getEyeLocation(), player.hasPotionEffect(PotionEffectType.SLOW)).runTaskTimer(BouncyBullets.getInstance(), 0, 1);
+                })
+                .build());
+        this.eventNode.registerListener(PaperEventListener.builder(PlayerInteractEvent.class)
+                .filter(event -> filterGameItem(event.getItem(), this))
+                .filter(event -> event.getAction().isLeftClick())
+                .handler(event -> {
+                    event.setCancelled(true);
+
+                    Player player = event.getPlayer();
+
+                    if (player.hasPotionEffect(PotionEffectType.SLOW)) {
+                        player.removePotionEffect(PotionEffectType.SLOW);
+                    } else {
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, 2, false, false, false));
+                    }
+                })
+                .build());
+        this.eventNode.registerListener(PaperEventListener.builder(PlayerSwapHandItemsEvent.class)
+                .filter(event -> filterGameItem(event.getOffHandItem(), this))
+                .handler(event -> {
+                    event.setCancelled(true);
+
+                    Player player = event.getPlayer();
+                    player.sendMessage(Component.text("I'm supposed to reload but I can't do that yet!", NamedTextColor.GOLD));
+                })
+                .build());
     }
 
-    private static List<Component> buildGunPropertyDescription(BulletProperties gunProperties) {
+    private static List<Component> buildGunPropertyDescription(Gun gun) {
         return Collections.emptyList();
     }
 
@@ -60,11 +108,20 @@ public abstract class GunItem extends GameItem {
         private int tickSinceBounce = 0;
         private int currentTick = 0;
 
-        private ShootBulletTask(Player shooter, Location startLocation) {
+        private ShootBulletTask(Player shooter, Location startLocation, boolean focused) {
             this.shooter = shooter;
+
             this.bounceLocation = startLocation;
             this.lastBulletLocation = startLocation;
-            this.currentDirection = startLocation.getDirection().normalize();
+
+            double recoilRange = focused ? gun.getGunProperties().recoilRangeFocused() : gun.getGunProperties().recoilRange();
+            this.currentDirection = startLocation.getDirection().normalize()
+                    .add(new Vector(randomRecoil(recoilRange), randomRecoil(recoilRange), randomRecoil(recoilRange)))
+                    .normalize();
+        }
+
+        private static double randomRecoil(double range) {
+            return ThreadLocalRandom.current().nextDouble(-range, range);
         }
 
         @Override
@@ -74,6 +131,7 @@ public abstract class GunItem extends GameItem {
                 return;
             }
 
+            BulletProperties bulletProperties = gun.getBulletProperties();
 
             double segmentLength = (bulletProperties.speed() + (bulletProperties.speed() * (bulletProperties.speedChange() * bounces))) / 20;
             double distance = segmentLength * tickSinceBounce++;
