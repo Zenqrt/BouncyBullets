@@ -98,7 +98,7 @@ public final class ActiveGameState extends EventGameState {
     private Location chooseBestSpawnLocation() {
         return gameMap.spawnLocations().stream()
                 .map(location -> location.toLocation(gameMap.world()))
-                .min(Comparator.comparing(this::closestDistanceToPlayer))
+                .max(Comparator.comparing(this::closestDistanceToPlayer))
                 .orElseThrow();
     }
 
