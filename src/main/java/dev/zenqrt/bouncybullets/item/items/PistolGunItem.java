@@ -1,7 +1,7 @@
 package dev.zenqrt.bouncybullets.item.items;
 
 import com.destroystokyo.paper.ParticleBuilder;
-import dev.zenqrt.bouncybullets.game.games.BulletProperties;
+import dev.zenqrt.bouncybullets.game.games.Gun;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -10,8 +10,8 @@ import org.bukkit.Particle;
 
 public final class PistolGunItem extends GunItem {
 
-    public PistolGunItem(BulletProperties properties) {
-        super("pistol", Material.GOLDEN_HOE, Component.text("BB (Boing Boing) Pistol", NamedTextColor.YELLOW), properties);
+    public PistolGunItem(Gun gun) {
+        super("pistol", Material.GOLDEN_HOE, Component.text("BB (Boing Boing) Pistol", NamedTextColor.YELLOW), gun);
     }
 
     @Override

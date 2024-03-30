@@ -13,10 +13,10 @@ public enum Gun {
     private final BulletProperties bulletProperties;
     private final GunItem item;
 
-    Gun(GunProperties gunProperties, BulletProperties bulletProperties, Function<BulletProperties, GunItem> itemFunction) {
+    Gun(GunProperties gunProperties, BulletProperties bulletProperties, Function<Gun, GunItem> itemFunction) {
         this.gunProperties = gunProperties;
         this.bulletProperties = bulletProperties;
-        this.item = itemFunction.apply(bulletProperties);
+        this.item = itemFunction.apply(this);
     }
 
     public GunProperties getGunProperties() {
