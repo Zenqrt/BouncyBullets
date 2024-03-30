@@ -22,7 +22,7 @@ public abstract class GameState {
     }
 
     public final void end() {
-        if (!canMoveOn || !active)
+        if (!(canMoveOn && active))
             return;
 
         active = false;

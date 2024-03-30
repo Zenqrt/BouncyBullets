@@ -4,19 +4,16 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public record FreeForAllActiveGameMap(World world, List<Location> spawnLocations, List<Location> itemSpawnLocations) implements ActiveGameMap {
 
-    public FreeForAllActiveGameMap(World world, File configurationFile) {
-        this(world, parseLocations(world, configurationFile, "spawn-locations"), parseLocations(world, configurationFile, "item-spawn-locations"));
+    public FreeForAllActiveGameMap(World world, YamlConfiguration configuration) {
+        this(world, parseLocations(world, configuration, "spawn-locations"), parseLocations(world, configuration, "item-spawn-locations"));
     }
 
-    private static List<Location> parseLocations(World world, File configurationFile, String key) {
-        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(configurationFile);
-
+    private static List<Location> parseLocations(World world, YamlConfiguration configuration, String key) {
         if (configuration.get(key) == null)
             return List.of();
 

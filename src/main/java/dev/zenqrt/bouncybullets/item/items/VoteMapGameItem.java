@@ -6,6 +6,7 @@ import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.component.ToggleButton;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.map.GameMap;
+import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+// TODO: Needs to be implemented
 public final class VoteMapGameItem extends GameItem {
 
     private final Map<GameMap, Integer> mapVotes;
@@ -38,6 +40,7 @@ public final class VoteMapGameItem extends GameItem {
     public void onInteract(PlayerInteractEvent event) {
         ChestGui voteGui = new ChestGui(3, "Vote Map");
         voteGui.setOnGlobalClick(clickEvent -> clickEvent.setCancelled(true));
+        voteGui.update();
 
         OutlinePane pane = new OutlinePane(0, 0, 7, 1);
 
@@ -50,7 +53,7 @@ public final class VoteMapGameItem extends GameItem {
                     voteGui.update();
                 });
             } else {
-                guiItem.setAction(click -> event.getPlayer().sendMessage(Component.text("You have already voted for this map", NamedTextColor.RED)));
+                guiItem.setAction(click -> event.getPlayer().sendMessage(Component.text("You have already voted for this map!", NamedTextColor.RED)));
             }
 
             pane.addItem(guiItem);
@@ -63,14 +66,23 @@ public final class VoteMapGameItem extends GameItem {
     private ItemStack createMapItemStack(UUID uuid, GameMap gameMap) {
         ItemStack itemStack = new ItemStack(Material.FILLED_MAP);
         itemStack.editMeta(meta -> {
-            meta.displayName(Component.text(gameMap.worldFolder().getName(), NamedTextColor.YELLOW));
+            meta.displayName(AdventureUtils.noItalic(Component.text(gameMap.displayName(), NamedTextColor.YELLOW)));
 
             if (selectedMaps.get(uuid) == gameMap) {
-                meta.lore(Collections.singletonList(Component.text("Selected", NamedTextColor.GREEN)));
+                meta.lore(Collections.singletonList(AdventureUtils.noItalic(Component.text("Selected", NamedTextColor.GREEN))));
                 meta.addEnchant(Enchantment.DURABILITY, 1, false);
                 meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
         });
         return itemStack;
     }
+
+
+//    private class GameMapOptionItem extends GuiItem {
+//
+//        GameMapOptionItem() {
+//            super()
+//        }
+//
+//    }
 }

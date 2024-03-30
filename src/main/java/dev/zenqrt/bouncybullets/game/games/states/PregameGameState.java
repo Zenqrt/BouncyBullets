@@ -127,7 +127,7 @@ public final class PregameGameState extends GameStateSequence {
 
         world.setAutoSave(false);
 
-        return new FreeForAllActiveGameMap(world, gameMap.configurationFile());
+        return new FreeForAllActiveGameMap(world, gameMap.configuration());
     }
 
     private GameMap getVotedMap() {

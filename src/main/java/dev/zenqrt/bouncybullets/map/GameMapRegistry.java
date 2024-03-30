@@ -1,6 +1,7 @@
 package dev.zenqrt.bouncybullets.map;
 
 import com.google.common.base.Preconditions;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.util.Collections;
@@ -20,7 +21,8 @@ public final class GameMapRegistry {
 
         for (File file : folders) {
             if (file.isDirectory()) {
-                gameMaps.put(file.getName(), new GameMap(new File(file, "config.yml"), new File(file, "world")));
+                YamlConfiguration configuration = YamlConfiguration.loadConfiguration(new File(file, "config.yml"));
+                gameMaps.put(file.getName(), new GameMap(configuration.getString("display-name"), new File(file, "world"), configuration));
             }
         }
     }
