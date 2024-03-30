@@ -33,7 +33,6 @@ import java.util.stream.Stream;
 
 public final class ActiveGameState extends EventGameState {
 
-    private static final int GAME_TIME = 300; // 5 minutes
     private static final Sound KILL_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.MASTER, 1, 1);
 
     private final BouncyBulletGame game;
@@ -123,7 +122,7 @@ public final class ActiveGameState extends EventGameState {
             player.player().teleport(randomSpawn);
         });
 
-        new GameTimerTask(GAME_TIME).runTaskTimer(BouncyBullets.getInstance(), 0, 20);
+        new GameTimerTask(game.getGameSettings().gameTime()).runTaskTimer(BouncyBullets.getInstance(), 0, 20);
     }
 
     private static void setupPlayer(Player player, Loadout loadout) {

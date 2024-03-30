@@ -3,6 +3,7 @@ package dev.zenqrt.bouncybullets;
 import dev.zenqrt.bouncybullets.events.PlayerJoinListeners;
 import dev.zenqrt.bouncybullets.events.PlayerListeners;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
+import dev.zenqrt.bouncybullets.game.games.GameSettings;
 import dev.zenqrt.bouncybullets.map.GameMapRegistry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -31,7 +32,7 @@ public final class BouncyBullets extends JavaPlugin {
         GameMapRegistry.registerGameMaps(new File(getDataFolder(), "maps"));
         Bukkit.getWorlds().forEach(world -> world.setAutoSave(false));
 
-        game = new BouncyBulletGame(1);
+        game = new BouncyBulletGame(1, new GameSettings(2, 8, 300));
 
         game.start();
 

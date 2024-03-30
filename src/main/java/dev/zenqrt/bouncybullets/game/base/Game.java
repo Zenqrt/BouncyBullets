@@ -1,4 +1,4 @@
-package dev.zenqrt.bouncybullets.game;
+package dev.zenqrt.bouncybullets.game.base;
 
 public class Game extends GameState {
 

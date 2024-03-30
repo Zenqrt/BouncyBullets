@@ -1,4 +1,4 @@
-package dev.zenqrt.bouncybullets.game;
+package dev.zenqrt.bouncybullets.game.base;
 
 import java.util.ArrayList;
 import java.util.List;

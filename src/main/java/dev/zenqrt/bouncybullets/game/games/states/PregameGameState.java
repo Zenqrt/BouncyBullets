@@ -1,7 +1,7 @@
 package dev.zenqrt.bouncybullets.game.games.states;
 
 import dev.zenqrt.bouncybullets.event.PlayerJoinGameEvent;
-import dev.zenqrt.bouncybullets.game.GameStateSequence;
+import dev.zenqrt.bouncybullets.game.base.GameStateSequence;
 import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.event.impl.PaperEventNode;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
@@ -29,8 +29,6 @@ import java.util.Map;
 
 public final class PregameGameState extends GameStateSequence {
 
-    private static final int MIN_PLAYER_COUNT = 2;
-    private static final int MAX_PLAYER_COUNT = 8;
     private static final Location SPAWN_LOCATION = new Location(Bukkit.getWorld("world"), 213.5, 66, 84.5);
     private static final LoadoutGameItem LOADOUT_ITEM = new LoadoutGameItem();
 
@@ -46,8 +44,8 @@ public final class PregameGameState extends GameStateSequence {
 
         GameMapRegistry.getGameMaps().forEach((key, value) -> mapVotes.put(value, 0));
 
-        this.addState(new WaitingGameState(this, players, MIN_PLAYER_COUNT));
-        this.addState(new CountdownGameState(this, players, MIN_PLAYER_COUNT));
+        this.addState(new WaitingGameState(this, players, game.getGameSettings().minPlayers()));
+        this.addState(new CountdownGameState(this, players, game.getGameSettings().minPlayers()));
     }
 
     public void registerEvents() {
@@ -62,7 +60,7 @@ public final class PregameGameState extends GameStateSequence {
                     players.sendMessage(MiniMessage.miniMessage().deserialize("<green>{player} joined the game! ({playerCount}/{maxPlayers})")
                             .replaceText(builder -> builder.matchLiteral("{player}").replacement(event.getPlayer().name()))
                             .replaceText(builder -> builder.matchLiteral("{playerCount}").replacement(String.valueOf(players.size())))
-                            .replaceText(builder -> builder.matchLiteral("{maxPlayers}").replacement(String.valueOf(MAX_PLAYER_COUNT))));
+                            .replaceText(builder -> builder.matchLiteral("{maxPlayers}").replacement(String.valueOf(game.getGameSettings().maxPlayers()))));
                     setupPlayer(event.getPlayer());
                 })
                 .build());
