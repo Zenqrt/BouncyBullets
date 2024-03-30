@@ -76,6 +76,8 @@ public final class ActiveGameState extends EventGameState {
                     player.setGameMode(GameMode.SPECTATOR);
                     player.showTitle(Title.title(Component.text("YOU DIED!", NamedTextColor.RED).decorate(TextDecoration.BOLD), Component.empty(),
                             Title.Times.times(Duration.ZERO, Duration.ofSeconds(2), Duration.ofSeconds(1))));
+                    player.clearActivePotionEffects();
+
                     BouncyBulletPlayer updatedPlayer = players.updatePlayer(player.getUniqueId(), BouncyBulletPlayer::addDeath);
 
                     EntityDamageEvent lastDamageEvent = player.getLastDamageCause();
