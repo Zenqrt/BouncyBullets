@@ -20,15 +20,11 @@ public final class EndingGameState extends EventGameState {
 
     @Override
     public void registerEvents() {
-        players.forEach((uuid, player) -> {
-            Player bukkitPlayer = player.player();
-
-            bukkitPlayer.showTitle(Title.title(
-                    Component.text("The winner is...", NamedTextColor.AQUA),
-                    Component.text(getWinner().player().getName(), NamedTextColor.YELLOW)));
-            bukkitPlayer.sendMessage(Component.text("The winner of the game is ", NamedTextColor.AQUA)
-                    .append(Component.text(getWinner().player().getName(), NamedTextColor.YELLOW)));
-        });
+        players.showTitle(Title.title(
+                Component.text("The winner is...", NamedTextColor.AQUA),
+                Component.text(getWinner().player().getName(), NamedTextColor.YELLOW)));
+        players.sendMessage(Component.text("The winner of the game is ", NamedTextColor.AQUA)
+                .append(Component.text(getWinner().player().getName(), NamedTextColor.YELLOW)));
     }
 
     private BouncyBulletPlayer getWinner() {

@@ -86,6 +86,7 @@ public final class ActiveGameState extends EventGameState {
                             player.setSpectatorTarget(killer);
 
                             killer.playSound(KILL_SOUND, Sound.Emitter.self());
+                            players.sendMessage(Component.text(player.getName() + " was killed by " + killer.getName(), NamedTextColor.RED));
                         }
                     }
 

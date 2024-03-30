@@ -4,22 +4,19 @@ import dev.zenqrt.bouncybullets.BouncyBullets;
 import dev.zenqrt.bouncybullets.event.PlayerQuitGameEvent;
 import dev.zenqrt.bouncybullets.game.EventGameState;
 import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
-import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
+import dev.zenqrt.bouncybullets.player.GamePlayerList;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.Map;
-import java.util.UUID;
-
 public final class CountdownGameState extends EventGameState {
 
     private final PregameGameState pregameState;
-    private final Map<UUID, BouncyBulletPlayer> players;
+    private final GamePlayerList players;
     private final int minPlayerCount;
     private final CountdownTask countdownTask;
 
-    public CountdownGameState(PregameGameState pregameState, Map<UUID, BouncyBulletPlayer> players, int minPlayerCount) {
+    public CountdownGameState(PregameGameState pregameState, GamePlayerList players, int minPlayerCount) {
         this.pregameState = pregameState;
         this.players = players;
         this.minPlayerCount = minPlayerCount;
@@ -69,11 +66,8 @@ public final class CountdownGameState extends EventGameState {
         }
 
         private void broadcastTimer() {
-            players.forEach(((uuid, player) -> {
-                player.player().sendMessage(
-                    MiniMessage.miniMessage().deserialize("The game starts in <yellow>" + timeLeft + "</yellow> seconds!"));
-                player.player().playSound(Sound.sound(org.bukkit.Sound.BLOCK_NOTE_BLOCK_HAT, Sound.Source.MASTER, 1, 1), Sound.Emitter.self());
-            }));
+            players.sendMessage(MiniMessage.miniMessage().deserialize("The game starts in <yellow>" + timeLeft + "</yellow> seconds!"));
+            players.playSound(Sound.sound(org.bukkit.Sound.BLOCK_NOTE_BLOCK_HAT, Sound.Source.MASTER, 1, 1), Sound.Emitter.self());
         }
     }
 }
