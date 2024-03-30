@@ -103,7 +103,6 @@ public final class ActiveGameState extends EventGameState {
     }
 
     private double closestDistanceToPlayer(Location location) {
-
         return players.values().stream()
                 .mapToDouble(player -> location.distance(player.player().getLocation()))
                 .min()

@@ -74,33 +74,15 @@ public abstract class GunItem extends GameItem {
                 return;
             }
 
-            tickSinceBounce++;
 
             double segmentLength = (bulletProperties.speed() + (bulletProperties.speed() * (bulletProperties.speedChange() * bounces))) / 20;
-            double distance = segmentLength * tickSinceBounce;
+            double distance = segmentLength * tickSinceBounce++;
             Vector increment = currentDirection.clone().multiply(distance);
             Location location = bounceLocation.clone().add(increment);
 
             spawnBulletParticle(location);
 
-            RayTraceResult entityResult = location.getWorld().rayTraceEntities(location, currentDirection.clone().multiply(-1), segmentLength, 0.1, entity -> entity instanceof Player player && player.getGameMode() == GameMode.ADVENTURE && entity != shooter);
-
-            if (entityResult != null) {
-                LivingEntity hitEntity = Objects.requireNonNull((LivingEntity) entityResult.getHitEntity());
-                double damage = bulletProperties.damage() + (bulletProperties.damage() * (bulletProperties.damageChange() * bounces));
-
-                hitEntity.damage(damage, DamageSource.builder(DamageType.MOB_PROJECTILE).withCausingEntity(shooter).build());
-                hitEntity.setNoDamageTicks(0);
-
-                Location hitLocation = entityResult.getHitPosition().toLocation(location.getWorld());
-                shooter.playSound(Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP.key(), Sound.Source.PLAYER, 1, 2), Sound.Emitter.self());
-                spawnCenterParticle(lastBulletLocation, hitLocation);
-
-                this.cancel();
-                return;
-            }
-
-            RayTraceResult result = location.getWorld().rayTraceBlocks(bounceLocation, currentDirection, distance, FluidCollisionMode.NEVER, true);
+            RayTraceResult result = location.getWorld().rayTraceBlocks(location, currentDirection, segmentLength, FluidCollisionMode.NEVER, true);
 
             if (result != null) {
                 if (++bounces > bulletProperties.numberOfBounces()) {
@@ -125,7 +107,23 @@ public abstract class GunItem extends GameItem {
                     case NORTH, SOUTH -> this.currentDirection = currentDirection.setZ(-currentDirection.getZ());
                 }
 
+                return;
+            }
 
+            RayTraceResult entityResult = location.getWorld().rayTraceEntities(location, currentDirection.clone(), segmentLength, 0.1, entity -> entity instanceof Player player && player.getGameMode() == GameMode.ADVENTURE && entity != shooter);
+
+            if (entityResult != null) {
+                LivingEntity hitEntity = Objects.requireNonNull((LivingEntity) entityResult.getHitEntity());
+                double damage = bulletProperties.damage() + (bulletProperties.damage() * (bulletProperties.damageChange() * bounces));
+
+                hitEntity.damage(damage, DamageSource.builder(DamageType.MOB_PROJECTILE).withCausingEntity(shooter).build());
+                hitEntity.setNoDamageTicks(0);
+
+                Location hitLocation = entityResult.getHitPosition().toLocation(location.getWorld());
+                shooter.playSound(Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP.key(), Sound.Source.PLAYER, 1, 2), Sound.Emitter.self());
+                spawnCenterParticle(lastBulletLocation, hitLocation);
+
+                this.cancel();
                 return;
             }
 

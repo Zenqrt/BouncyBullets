@@ -13,4 +13,9 @@ public abstract class EventGameState extends GameState {
     protected void onStateStart() {
         registerEvents();
     }
+
+    @Override
+    protected void onStateEnd() {
+        this.eventNode.unregisterAllListeners();
+    }
 }

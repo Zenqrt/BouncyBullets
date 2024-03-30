@@ -9,6 +9,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -56,9 +57,13 @@ public final class BouncyBullets extends JavaPlugin {
 
         registerCommand("backup", (player, args) -> {
             Bukkit.broadcast(Component.text("Saving backup of the world...").decorate(TextDecoration.ITALIC));
+
+            World world = player.getWorld();
+            world.save();
+
             try {
                 File newDirectory = new File(getDataFolder(), "backups/world-" + Instant.now().toString().replace(":", "-"));
-                FileUtils.copyDirectory(player.getWorld().getWorldFolder(), newDirectory, file -> !file.getName().equals("session.lock"));
+                FileUtils.copyDirectory(world.getWorldFolder(), newDirectory, file -> !file.getName().equals("session.lock"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
