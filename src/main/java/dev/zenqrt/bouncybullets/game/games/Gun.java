@@ -2,12 +2,16 @@ package dev.zenqrt.bouncybullets.game.games;
 
 import dev.zenqrt.bouncybullets.item.items.GunItem;
 import dev.zenqrt.bouncybullets.item.items.PistolGunItem;
+import dev.zenqrt.bouncybullets.item.items.SMGGunItem;
+import dev.zenqrt.bouncybullets.item.items.SilencedPistolGunItem;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.function.Function;
 
 public enum Gun {
-    PISTOL(new GunProperties(250, 0.05, 0.02), new BulletProperties(3, 200, -0.10F, 3, 0.1F), PistolGunItem::new);
+    PISTOL(new GunProperties(5, 0.05, 0.02), new BulletProperties(3, 200, -0.10F, 3, 0.1F), PistolGunItem::new),
+    SILENCED_PISTOL(new GunProperties(5, 0.05, 0.02), new BulletProperties(3, 200, -0.10F, 2, 0.1F), SilencedPistolGunItem::new),
+    SMG(new GunProperties(1, 0.05, 0.02), new BulletProperties(2, 350, -0.2F, 1, 0.2F), SMGGunItem::new);
 
     private final GunProperties gunProperties;
     private final BulletProperties bulletProperties;

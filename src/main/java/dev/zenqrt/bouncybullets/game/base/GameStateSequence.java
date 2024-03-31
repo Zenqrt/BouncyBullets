@@ -39,14 +39,18 @@ public abstract class GameStateSequence extends GameState {
 
         GameState currentState = states.get(currentStateIndex);
 
-        currentState.end();
+        if (!currentState.end())
+            return;
+
         states.get(++currentStateIndex).start();
     }
 
     public void switchPreviousState() {
         GameState currentState = states.get(currentStateIndex);
 
-        currentState.end();
+        if (!currentState.end())
+            return;
+
         states.get(--currentStateIndex).start();
     }
 

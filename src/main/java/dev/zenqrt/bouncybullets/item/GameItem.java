@@ -20,7 +20,7 @@ public abstract class GameItem {
     private static final NamespacedKey ITEM_KEY = new NamespacedKey(BouncyBullets.getInstance(), "game_item");
 
     private final String key;
-    private final Material material;
+    protected final Material material;
     private final Component displayName;
     private final List<Component> description;
     protected final PaperEventNode<Event> eventNode = new PaperEventNode<>();

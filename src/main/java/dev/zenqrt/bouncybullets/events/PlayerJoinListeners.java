@@ -2,8 +2,8 @@ package dev.zenqrt.bouncybullets.events;
 
 import dev.zenqrt.bouncybullets.BouncyBullets;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
-import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.game.games.Loadout;
+import dev.zenqrt.bouncybullets.game.games.kit.StealthPlayerClass;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
@@ -32,7 +32,7 @@ public final class PlayerJoinListeners implements Listener {
                 player,
                 0,
                 0,
-                new Loadout(Gun.PISTOL)
+                new Loadout(new StealthPlayerClass())
         );
         BouncyBullets.getGame().insertPlayer(bouncyBulletPlayer);
     }

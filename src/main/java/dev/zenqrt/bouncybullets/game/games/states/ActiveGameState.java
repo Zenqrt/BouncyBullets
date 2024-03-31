@@ -8,6 +8,7 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
 import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.game.games.Loadout;
+import dev.zenqrt.bouncybullets.game.games.kit.EventPlayerClass;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
@@ -51,6 +52,11 @@ public final class ActiveGameState extends EventGameState {
                 .map(gun -> (GameItem) gun.getItem())
                 .toList()
         );
+        players.forEach((uuid, player) -> {
+            if (player.loadout().playerClass() instanceof EventPlayerClass eventPlayerClass) {
+                eventPlayerClass.registerEvents(player);
+            }
+        });
         this.eventNode.registerListener(PaperEventListener.builder(PlayerTeleportEvent.class)
                 .filter(event -> event.getCause() == PlayerTeleportEvent.TeleportCause.SPECTATE)
                 .handler(event ->  {
@@ -77,8 +83,6 @@ public final class ActiveGameState extends EventGameState {
                             Title.Times.times(Duration.ZERO, Duration.ofSeconds(2), Duration.ofSeconds(1))));
                     player.clearActivePotionEffects();
 
-                    BouncyBulletPlayer updatedPlayer = players.updatePlayer(player.getUniqueId(), BouncyBulletPlayer::addDeath);
-
                     EntityDamageEvent lastDamageEvent = player.getLastDamageCause();
 
                     if (lastDamageEvent != null) {
@@ -90,6 +94,8 @@ public final class ActiveGameState extends EventGameState {
                             players.sendMessage(Component.text(player.getName() + " was killed by " + killer.getName(), NamedTextColor.RED));
                         }
                     }
+
+                    BouncyBulletPlayer updatedPlayer = players.updatePlayer(player.getUniqueId(), BouncyBulletPlayer::addDeath);
 
                     new DeathSpectatorTask(updatedPlayer, 5)
                             .runTaskTimer(BouncyBullets.getInstance(), 0, 20);
@@ -129,7 +135,7 @@ public final class ActiveGameState extends EventGameState {
         PlayerInventory inventory = player.getInventory();
         inventory.clear();
 
-        inventory.setItem(0, loadout.gun().buildItemStack());
+        loadout.giveItems(inventory);
     }
 
     private final class GameTimerTask extends BukkitRunnable {
