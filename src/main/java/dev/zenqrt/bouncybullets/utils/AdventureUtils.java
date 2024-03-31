@@ -16,6 +16,7 @@ public final class AdventureUtils {
 
         StringBuilder output = new StringBuilder();
         StringBuilder word = new StringBuilder();
+        StringBuilder lastTag = new StringBuilder();
         int currentLength = 0;
         boolean inTag = false;
 
@@ -24,36 +25,37 @@ public final class AdventureUtils {
                 inTag = true;
 
                 if (currentLength + word.length() > wrapLength) {
-                    System.out.println("IN tag append at " + currentLength);
-                    output.append('\n');
+                    output.append('\n').append(lastTag);
                     currentLength = 0;
                 }
 
                 output.append(word);
                 currentLength += word.length();
                 word.setLength(0);
+                lastTag.setLength(0);
+                lastTag.append(ch);
 
                 output.append(ch);
             } else if (ch == '>') {
                 inTag = false;
                 output.append(ch);
+                lastTag.append(ch);
             } else if (!inTag) {
                 word.append(ch);
                 if (ch == ' ' && currentLength + word.length() > wrapLength) {
-                    System.out.println("Regular append at " + currentLength);
-                    output.append(word).append('\n');
+                    output.append(word).append('\n').append(lastTag);
                     word.setLength(0);
                     currentLength = 0;
                 }
             } else {
                 output.append(ch);
+                lastTag.append(ch);
             }
         }
 
         if (!word.isEmpty()) {
             if (currentLength + word.length() > wrapLength) {
-                System.out.println("idk what this is at " + currentLength);
-                output.append('\n');
+                output.append('\n').append(lastTag);
             }
             output.append(word);
         }

@@ -12,7 +12,7 @@ public final class AdventureUtilsTests {
         String text = "<gray>Upon killing a player, receive a <aqua>Speed II <gray>effect for <green>5 <gray>seconds.";
 
         String actual = AdventureUtils.wrapTextIgnoringTags(text, 30);
-        String expected = "<gray>Upon killing a player, receive \na <aqua>Speed II <gray>effect for <green>5 <gray>\nseconds.";
+        String expected = "<gray>Upon killing a player, receive \n<gray>a <aqua>Speed II <gray>effect for <green>5 <gray>\n<gray>seconds.";
 
         Assertions.assertEquals(expected, actual);
     }
