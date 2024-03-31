@@ -7,6 +7,7 @@ import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.map.GameMap;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
+import dev.zenqrt.bouncybullets.utils.GuiUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -46,6 +47,7 @@ public final class VoteMapGameItem extends GameItem {
 
     public void onInteract(PlayerInteractEvent event) {
         ChestGui voteGui = new ChestGui(3, "Vote Map");
+        voteGui.addPane(GuiUtils.createBackgroundPane(voteGui.getRows()));
         voteGui.setOnGlobalClick(clickEvent -> clickEvent.setCancelled(true));
         voteGui.update();
 
@@ -73,10 +75,10 @@ public final class VoteMapGameItem extends GameItem {
     private ItemStack createMapItemStack(UUID uuid, GameMap gameMap) {
         ItemStack itemStack = new ItemStack(Material.FILLED_MAP);
         itemStack.editMeta(meta -> {
-            meta.displayName(AdventureUtils.noItalic(Component.text(gameMap.displayName(), NamedTextColor.YELLOW)));
+            meta.displayName(AdventureUtils.withoutItalics(gameMap.displayName(), NamedTextColor.YELLOW));
 
             if (selectedMaps.get(uuid) == gameMap) {
-                meta.lore(Collections.singletonList(AdventureUtils.noItalic(Component.text("Selected", NamedTextColor.GREEN))));
+                meta.lore(Collections.singletonList(AdventureUtils.withoutItalics("Selected", NamedTextColor.GREEN)));
                 meta.addEnchant(Enchantment.DURABILITY, 1, false);
                 meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }

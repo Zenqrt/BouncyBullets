@@ -4,7 +4,6 @@ import com.destroystokyo.paper.ParticleBuilder;
 import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -12,7 +11,7 @@ import org.bukkit.Particle;
 public final class SMGGunItem extends GunItem {
 
     public SMGGunItem(Gun gun) {
-        super("smg", Material.IRON_HORSE_ARMOR, AdventureUtils.noItalic(Component.text("SMG", NamedTextColor.YELLOW)), gun);
+        super("smg", Material.IRON_HORSE_ARMOR, AdventureUtils.withoutItalics("SMG", NamedTextColor.YELLOW), gun);
     }
 
     @Override

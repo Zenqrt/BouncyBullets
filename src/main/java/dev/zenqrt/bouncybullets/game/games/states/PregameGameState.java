@@ -30,17 +30,20 @@ import java.util.Map;
 public final class PregameGameState extends GameStateSequence {
 
     private static final Location SPAWN_LOCATION = new Location(Bukkit.getWorld("world"), 213.5, 66, 84.5);
-    private static final LoadoutGameItem LOADOUT_ITEM = new LoadoutGameItem();
 
     private final PaperEventNode<Event> eventNode = new PaperEventNode<>();
     private final Map<GameMap, Integer> mapVotes = new HashMap<>();
-    private final VoteMapGameItem voteMapItem = new VoteMapGameItem(mapVotes);
+    private final VoteMapGameItem voteMapItem;
+    private final LoadoutGameItem loadoutItem;
     private final GamePlayerList players;
     final BouncyBulletGame game;
 
     public PregameGameState(BouncyBulletGame game, GamePlayerList players) {
         this.game = game;
         this.players = players;
+
+        this.voteMapItem = new VoteMapGameItem(mapVotes);
+        this.loadoutItem = new LoadoutGameItem(players);
 
         GameMapRegistry.getGameMaps().forEach((key, value) -> mapVotes.put(value, 0));
 
@@ -49,7 +52,7 @@ public final class PregameGameState extends GameStateSequence {
     }
 
     public void registerEvents() {
-        GameItem.registerGameItemEvents(List.of(LOADOUT_ITEM, new VoteMapGameItem(mapVotes)));
+        GameItem.registerGameItemEvents(List.of(loadoutItem, new VoteMapGameItem(mapVotes)));
 
         this.eventNode.registerListener(PaperEventListener.builder(PlayerDropItemEvent.class)
                 .handler(event -> event.setCancelled(true))
@@ -92,7 +95,7 @@ public final class PregameGameState extends GameStateSequence {
     }
 
     private void givePlayerItems(Inventory inventory) {
-        inventory.setItem(0, LOADOUT_ITEM.buildItemStack());
+        inventory.setItem(0, loadoutItem.buildItemStack());
         inventory.setItem(4, voteMapItem.buildItemStack());
     }
 

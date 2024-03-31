@@ -1,5 +1,6 @@
 package dev.zenqrt.bouncybullets.game.games;
 
+import dev.zenqrt.bouncybullets.game.games.kit.PlayerClass;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
@@ -20,6 +21,10 @@ public record BouncyBulletPlayer(UUID uuid, Player player, int kills, int deaths
 
     public BouncyBulletPlayer addDeath() {
         return withDeaths(this.deaths + 1);
+    }
+
+    public BouncyBulletPlayer withPlayerClass(PlayerClass playerClass) {
+        return new BouncyBulletPlayer(uuid, player, kills, deaths, new Loadout(playerClass));
     }
 
 }

@@ -7,7 +7,6 @@ import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.items.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -20,7 +19,7 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.List;
 
-public final class StealthPlayerClass extends EventPlayerClass {
+final class StealthPlayerClass extends EventPlayerClass {
 
     private static final Gun PRIMARY_GUN = Gun.SMG;
     private static final Gun SECONDARY_GUN = Gun.SILENCED_PISTOL;
@@ -57,7 +56,7 @@ public final class StealthPlayerClass extends EventPlayerClass {
     private static class InvisibilityAbility extends ActiveAbilityItem {
 
         InvisibilityAbility() {
-            super("stealth_active_ability", Material.POTION, AdventureUtils.noItalic(Component.text("Invisibility Cloak", NamedTextColor.LIGHT_PURPLE)), List.of(), 1200);
+            super("stealth_active_ability", Material.POTION, AdventureUtils.withoutItalics("Invisibility Cloak", NamedTextColor.LIGHT_PURPLE), List.of(), 1200);
         }
 
         @Override
