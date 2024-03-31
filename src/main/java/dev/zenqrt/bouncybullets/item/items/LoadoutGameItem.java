@@ -58,7 +58,7 @@ public final class LoadoutGameItem extends GameItem {
         private final BouncyBulletPlayer player;
 
         public ClassSelectGui(BouncyBulletPlayer player) {
-            super(3, "Class selection");
+            super(3, "Class Selection");
 
             this.player = player;
             this.setOnGlobalClick(event -> event.setCancelled(true));
@@ -76,7 +76,7 @@ public final class LoadoutGameItem extends GameItem {
                 icon.editMeta(meta -> {
                     meta.displayName(AdventureUtils.withoutItalics(playerClass.getPlayerClass().getName(), NamedTextColor.YELLOW));
 
-                    List<Component> lore = new ArrayList<>(wrapDescription(playerClass, 32));
+                    List<Component> lore = new ArrayList<>(wrapDescription(playerClass, 30));
                     lore.add(Component.empty());
                     lore.add(AdventureUtils.withoutItalics("Click to select", NamedTextColor.YELLOW));
 
@@ -86,7 +86,7 @@ public final class LoadoutGameItem extends GameItem {
 
                 if (player.loadout().playerClass() == playerClass.getPlayerClass()) {
                     icon.editMeta(meta -> {
-                        List<Component> lore = new ArrayList<>(wrapDescription(playerClass, 32));
+                        List<Component> lore = new ArrayList<>(wrapDescription(playerClass, 30));
                         lore.add(Component.empty());
                         lore.add(AdventureUtils.withoutItalics("Selected", NamedTextColor.GREEN));
 
