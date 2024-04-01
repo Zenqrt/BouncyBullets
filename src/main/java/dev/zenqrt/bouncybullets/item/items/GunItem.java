@@ -7,6 +7,7 @@ import dev.zenqrt.bouncybullets.game.games.BulletProperties;
 import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
+import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -129,7 +130,12 @@ public abstract class GunItem extends GameItem {
     }
 
     private static List<Component> buildGunPropertyDescription(Gun gun) {
-        return Collections.emptyList();
+        return MiniMessageUtils.wordWrapLore(List.of(
+                "<gray>Damage: <red>" + gun.getBulletProperties().damage() + "❤",
+                "<gray>Speed: <yellow>" + gun.getBulletProperties().speed() + " b/s",
+                "<gray>Bounces: <yellow>" + gun.getBulletProperties().numberOfBounces()
+
+        ), 30);
     }
 
     private class ShootBulletTask extends BukkitRunnable {

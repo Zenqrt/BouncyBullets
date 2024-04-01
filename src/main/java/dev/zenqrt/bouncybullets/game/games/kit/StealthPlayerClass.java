@@ -1,11 +1,13 @@
 package dev.zenqrt.bouncybullets.game.games.kit;
 
+import dev.zenqrt.bouncybullets.BouncyBullets;
 import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
 import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.items.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
+import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
@@ -13,11 +15,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.TreeMap;
 
 final class StealthPlayerClass extends EventPlayerClass {
@@ -60,8 +67,17 @@ final class StealthPlayerClass extends EventPlayerClass {
 
     private static class InvisibilityAbility extends ActiveAbilityItem {
 
+        private static final int COOLDOWN = 1200;
+        private static final Sound REFILL_SOUND = Sound.sound(org.bukkit.Sound.BLOCK_BREWING_STAND_BREW, Sound.Source.PLAYER, 1, 1);
+
         InvisibilityAbility() {
-            super("stealth_active_ability", Material.POTION, AdventureUtils.withoutItalics("Invisibility Cloak", NamedTextColor.LIGHT_PURPLE), List.of(), 1200);
+            super("stealth_active_ability", Material.POTION, AdventureUtils.withoutItalics("Invisibility Cloak", NamedTextColor.LIGHT_PURPLE), MiniMessageUtils.wordWrapLore(
+                    List.of("<gray>Upon right click, become invisible for <green>5</green> seconds."), 30
+            ), meta -> {
+                PotionMeta potionMeta = (PotionMeta) meta;
+                potionMeta.setBasePotionType(PotionType.INVISIBILITY);
+                potionMeta.addItemFlags(ItemFlag.HIDE_ITEM_SPECIFICS);
+            });
         }
 
         @Override
@@ -71,8 +87,23 @@ final class StealthPlayerClass extends EventPlayerClass {
             player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 20 * 5, 1, false, true, true));
             player.playSound(Sound.sound(org.bukkit.Sound.ENTITY_GENERIC_DRINK, Sound.Source.PLAYER, 1, 1));
 
-            event.getItem().setType(Material.GLASS_BOTTLE);
-            player.setCooldown(Material.GLASS_BOTTLE, 1200);
+            ItemStack originalItem = Objects.requireNonNull(event.getItem());
+
+            ItemStack usedItem = new ItemStack(Material.GLASS_BOTTLE);
+            usedItem.setItemMeta(originalItem.getItemMeta());
+
+            player.getInventory().setItemInMainHand(usedItem);
+            player.setCooldown(Material.GLASS_BOTTLE, COOLDOWN);
+
+            int slotInteracted = event.getPlayer().getInventory().getHeldItemSlot();
+
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    player.getInventory().setItem(slotInteracted, originalItem.clone());
+                    player.playSound(REFILL_SOUND, Sound.Emitter.self());
+                }
+            }.runTaskLater(BouncyBullets.getInstance(), COOLDOWN);
         }
     }
 }

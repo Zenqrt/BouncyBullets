@@ -9,12 +9,11 @@ import dev.zenqrt.bouncybullets.game.games.kit.PlayerClass;
 import dev.zenqrt.bouncybullets.game.games.kit.PlayerClasses;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
-import dev.zenqrt.bouncybullets.utils.ComponentSplitting;
 import dev.zenqrt.bouncybullets.utils.GuiUtils;
+import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -23,7 +22,6 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 public final class ClassSelectGui extends ChestGui {
 
@@ -55,7 +53,9 @@ public final class ClassSelectGui extends ChestGui {
                 playerClass.getPlayerClass().getItems().forEach((slot, item) -> lore.add(AdventureUtils.withoutItalics("• ", NamedTextColor.DARK_GRAY)
                         .append(Objects.requireNonNull(item.getItemMeta().displayName()))));
                 lore.add(Component.empty());
-                lore.addAll(wrapDescription(playerClass, 30));
+                lore.addAll(MiniMessageUtils.wordWrapLore(playerClass.getDescription(), 30).stream()
+                        .map(component -> component.decoration(TextDecoration.ITALIC, false))
+                        .toList());
                 lore.add(Component.empty());
 
                 if (player.loadout().playerClass() == playerClass.getPlayerClass()) {
@@ -88,28 +88,6 @@ public final class ClassSelectGui extends ChestGui {
         }
 
         this.addPane(pane);
-    }
-
-    private static List<Component> wrapDescription(PlayerClasses playerClass, int wordWrapLength) {
-        List<String> description = playerClass.getDescription();
-
-        MiniMessage miniMessage = MiniMessage.builder().preProcessor(string -> {
-            if (string.length() > wordWrapLength) {
-                return AdventureUtils.wrapTextIgnoringTags(string, wordWrapLength);
-            }
-
-            return string;
-        }).build();
-
-
-        List<Component> components = new ArrayList<>();
-
-        description.forEach(string -> {
-            Component component = miniMessage.deserialize(string).decoration(TextDecoration.ITALIC, false);
-            components.addAll(ComponentSplitting.split(component, Pattern.compile("\n")));
-        });
-
-        return components;
     }
 
     private static class ClassInfoGui extends ChestGui {

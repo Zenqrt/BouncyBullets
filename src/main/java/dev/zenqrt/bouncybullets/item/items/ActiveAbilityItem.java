@@ -5,17 +5,16 @@ import dev.zenqrt.bouncybullets.item.GameItem;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 public abstract class ActiveAbilityItem extends GameItem {
 
-    private final int cooldownTime;
-
-    public ActiveAbilityItem(String key, Material material, Component displayName, List<Component> description, int cooldownTime) {
-        super(key, material, displayName, description);
-
-        this.cooldownTime = cooldownTime;
+    public ActiveAbilityItem(String key, Material material, Component displayName, List<Component> description, Consumer<ItemMeta> itemMetaHandler) {
+        super(key, material, displayName, description, itemMetaHandler);
     }
 
     public abstract void onUse(PlayerInteractEvent event);
@@ -28,8 +27,10 @@ public abstract class ActiveAbilityItem extends GameItem {
                 .handler(event -> {
                     event.setCancelled(true);
 
+                    if (event.getPlayer().hasCooldown(Objects.requireNonNull(event.getItem()).getType()))
+                        return;
+
                     this.onUse(event);
-                    event.getPlayer().setCooldown(this.material, this.cooldownTime);
                 })
                 .build());
     }

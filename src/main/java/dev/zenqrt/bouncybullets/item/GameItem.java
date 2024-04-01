@@ -3,6 +3,7 @@ package dev.zenqrt.bouncybullets.item;
 import dev.zenqrt.bouncybullets.BouncyBullets;
 import dev.zenqrt.bouncybullets.game.event.impl.PaperEventNode;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.Event;
@@ -14,20 +15,32 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public abstract class GameItem {
 
     private static final NamespacedKey ITEM_KEY = new NamespacedKey(BouncyBullets.getInstance(), "game_item");
 
     private final String key;
-    protected final Material material;
     private final Component displayName;
+    private final Consumer<ItemMeta> itemMetaHandler;
     private final List<Component> description;
+    protected final Material material;
     protected final PaperEventNode<Event> eventNode = new PaperEventNode<>();
 
     public GameItem(String key, Material material, Component displayName, List<Component> description) {
         this.key = key;
         this.material = material;
+        this.displayName = displayName;
+        this.description = description;
+        this.itemMetaHandler = meta -> {
+        };
+    }
+
+    public GameItem(String key, Material material, Component displayName, List<Component> description, Consumer<ItemMeta> itemMetaHandler) {
+        this.key = key;
+        this.material = material;
+        this.itemMetaHandler = itemMetaHandler;
         this.displayName = displayName;
         this.description = description;
     }
@@ -62,10 +75,13 @@ public abstract class GameItem {
         ItemStack itemStack = new ItemStack(material);
         itemStack.editMeta(meta -> {
             meta.displayName(displayName);
-            meta.lore(description);
+            meta.lore(description.stream()
+                    .map(component -> component.decoration(TextDecoration.ITALIC, false))
+                    .toList());
             meta.getPersistentDataContainer().set(ITEM_KEY, PersistentDataType.STRING, key);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         });
+        itemStack.editMeta(itemMetaHandler);
 
         return itemStack;
     }
