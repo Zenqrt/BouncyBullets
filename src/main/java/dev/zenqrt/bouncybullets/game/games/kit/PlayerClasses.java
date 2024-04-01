@@ -9,9 +9,7 @@ public enum PlayerClasses {
     STEALTH(Material.IRON_SWORD, new StealthPlayerClass(), List.of(
             "<dark_gray>• <gray>SMG",
             "<dark_gray>• <gray>Silenced Pistol",
-            "",
-            "<gold>Invisibility Cloak:",
-            "<gray>Become invisible for <green>5 <gray>seconds.",
+            "<dark_gray>• <light_purple>Invisibility Cloak",
             "",
             "<gold>Passive Ability:",
             "<gray>Upon killing a player, receive a <aqua>Speed II <gray>effect for <green>5 <gray>seconds."

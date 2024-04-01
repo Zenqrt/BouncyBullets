@@ -26,6 +26,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public final class LoadoutGameItem extends GameItem {
@@ -86,6 +87,8 @@ public final class LoadoutGameItem extends GameItem {
 
                 if (player.loadout().playerClass() == playerClass.getPlayerClass()) {
                     icon.editMeta(meta -> {
+                        meta.displayName(Objects.requireNonNull(meta.displayName()).decorate(TextDecoration.BOLD));
+
                         List<Component> lore = new ArrayList<>(wrapDescription(playerClass, 30));
                         lore.add(Component.empty());
                         lore.add(AdventureUtils.withoutItalics("Selected", NamedTextColor.GREEN));
