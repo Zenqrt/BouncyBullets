@@ -9,6 +9,7 @@ import dev.zenqrt.bouncybullets.item.items.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -71,8 +72,17 @@ final class StealthPlayerClass extends EventPlayerClass {
         private static final Sound REFILL_SOUND = Sound.sound(org.bukkit.Sound.BLOCK_BREWING_STAND_BREW, Sound.Source.PLAYER, 1, 1);
 
         InvisibilityAbility() {
-            super("stealth_active_ability", Material.POTION, AdventureUtils.withoutItalics("Invisibility Cloak", NamedTextColor.LIGHT_PURPLE), MiniMessageUtils.wordWrapLore(
-                    List.of("<gray>Upon right click, become invisible for <green>5</green> seconds."), 30
+            super("stealth_active_ability",
+                    Material.POTION,
+                    AdventureUtils.withoutItalics("Invisibility Cloak", NamedTextColor.LIGHT_PURPLE)
+                            .append(Component.text(" (Right Click)", NamedTextColor.GRAY)),
+                    MiniMessageUtils.wordWrapLore(
+                            List.of(
+                                    "<gray>Upon right click, become invisible for <green>5</green> seconds.",
+                                    "",
+                                    "<dark_gray>Cooldown: <green>20s"
+                            ),
+                            30
             ), meta -> {
                 PotionMeta potionMeta = (PotionMeta) meta;
                 potionMeta.setBasePotionType(PotionType.INVISIBILITY);

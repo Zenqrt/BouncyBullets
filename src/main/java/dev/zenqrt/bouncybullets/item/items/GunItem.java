@@ -45,7 +45,7 @@ public abstract class GunItem extends GameItem {
     }
 
     public GunItem(String key, Material material, String displayName, Gun gun) {
-        this(key, material, AdventureUtils.withoutItalics(displayName, NamedTextColor.GRAY), gun);
+        this(key, material, AdventureUtils.withoutItalics(displayName, NamedTextColor.YELLOW), gun);
     }
 
     protected abstract Sound getShootingSound();
