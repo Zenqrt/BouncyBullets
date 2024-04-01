@@ -6,6 +6,7 @@ import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BulletProperties;
 import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.item.GameItem;
+import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -40,6 +41,10 @@ public abstract class GunItem extends GameItem {
         super(key, material, displayName, buildGunPropertyDescription(gun));
 
         this.gun = gun;
+    }
+
+    public GunItem(String key, Material material, String displayName, Gun gun) {
+        this(key, material, AdventureUtils.withoutItalics(displayName, NamedTextColor.GRAY), gun);
     }
 
     protected abstract Sound getShootingSound();

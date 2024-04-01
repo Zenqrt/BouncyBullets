@@ -1,9 +1,10 @@
 package dev.zenqrt.bouncybullets.game.games.kit;
 
-import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.TreeMap;
 
 public interface PlayerClass {
     String getName();
-
-    void giveItems(PlayerInventory inventory);
+    TreeMap<Integer, ItemStack> getItems();
 }

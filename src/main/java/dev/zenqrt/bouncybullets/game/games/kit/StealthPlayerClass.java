@@ -13,11 +13,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.List;
+import java.util.TreeMap;
 
 final class StealthPlayerClass extends EventPlayerClass {
 
@@ -31,10 +32,14 @@ final class StealthPlayerClass extends EventPlayerClass {
     }
 
     @Override
-    public void giveItems(PlayerInventory inventory) {
-        inventory.setItem(0, PRIMARY_GUN.buildItemStack());
-        inventory.setItem(1, SECONDARY_GUN.buildItemStack());
-        inventory.setItem(2, ACTIVE_ABILITY.buildItemStack());
+    public TreeMap<Integer, ItemStack> getItems() {
+        TreeMap<Integer, ItemStack> items = new TreeMap<>();
+
+        items.put(0, PRIMARY_GUN.buildItemStack());
+        items.put(1, SECONDARY_GUN.buildItemStack());
+        items.put(2, ACTIVE_ABILITY.buildItemStack());
+
+        return items;
     }
 
     @Override
@@ -67,6 +72,7 @@ final class StealthPlayerClass extends EventPlayerClass {
             player.playSound(Sound.sound(org.bukkit.Sound.ENTITY_GENERIC_DRINK, Sound.Source.PLAYER, 1, 1));
 
             event.getItem().setType(Material.GLASS_BOTTLE);
+            player.setCooldown(Material.GLASS_BOTTLE, 1200);
         }
     }
 }

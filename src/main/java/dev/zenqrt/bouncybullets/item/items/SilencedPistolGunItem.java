@@ -2,16 +2,14 @@ package dev.zenqrt.bouncybullets.item.items;
 
 import com.destroystokyo.paper.ParticleBuilder;
 import dev.zenqrt.bouncybullets.game.games.Gun;
-import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 
 public final class SilencedPistolGunItem extends GunItem {
 
     public SilencedPistolGunItem(Gun gun) {
-        super("silenced_pistol", Material.IRON_HOE, AdventureUtils.withoutItalics("Silenced Pistol", NamedTextColor.YELLOW), gun);
+        super("silenced_pistol", Material.IRON_HOE, "Silenced Pistol", gun);
     }
 
     @Override

@@ -6,7 +6,7 @@ import org.bukkit.inventory.PlayerInventory;
 public record Loadout(PlayerClass playerClass) {
 
     public void giveItems(PlayerInventory inventory) {
-        playerClass.giveItems(inventory);
+        playerClass.getItems().forEach(inventory::setItem);
     }
 
 }
