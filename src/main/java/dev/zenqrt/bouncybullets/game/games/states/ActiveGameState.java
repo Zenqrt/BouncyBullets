@@ -55,6 +55,7 @@ public final class ActiveGameState extends EventGameState {
         players.forEach((uuid, player) -> {
             if (player.loadout().playerClass() instanceof EventPlayerClass eventPlayerClass) {
                 eventPlayerClass.registerEvents(player);
+                eventPlayerClass.onStartUse(player);
             }
         });
         this.eventNode.registerListener(PaperEventListener.builder(PlayerTeleportEvent.class)
@@ -129,6 +130,13 @@ public final class ActiveGameState extends EventGameState {
         });
 
         new GameTimerTask(game.getGameSettings().gameTime()).runTaskTimer(BouncyBullets.getInstance(), 0, 20);
+    }
+
+    @Override
+    protected void onStateEnd() {
+        super.onStateEnd();
+
+        players.forEach((uuid, player) -> player.loadout().playerClass().onStopUse(player));
     }
 
     private static void setupPlayer(Player player, Loadout loadout) {

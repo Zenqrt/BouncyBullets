@@ -47,7 +47,7 @@ public final class ClassSelectGui extends ChestGui {
             ItemStack icon = ItemUtils.clone(playerClass.getIcon());
 
             icon.editMeta(meta -> {
-                meta.displayName(AdventureUtils.withoutItalics(playerClass.getPlayerClass().getName(), NamedTextColor.YELLOW));
+                meta.displayName(AdventureUtils.withoutItalics(playerClass.getPlayerClass().getName(), NamedTextColor.GREEN));
 
                 List<Component> lore = buildClassInformationLore(playerClass);
 
@@ -59,7 +59,8 @@ public final class ClassSelectGui extends ChestGui {
                     meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                     lore.add(AdventureUtils.withoutItalics("Selected", NamedTextColor.GREEN));
                 } else {
-                    lore.add(AdventureUtils.withoutItalics("Click to select", NamedTextColor.YELLOW));
+                    lore.add(AdventureUtils.withoutItalics("Left-click to select", NamedTextColor.GREEN));
+                    lore.add(AdventureUtils.withoutItalics("Right-click for more info", NamedTextColor.YELLOW));
                 }
 
                 meta.lore(lore);
@@ -139,7 +140,7 @@ public final class ClassSelectGui extends ChestGui {
 
             ItemStack icon = ItemUtils.clone(playerClass.getIcon());
             icon.editMeta(meta -> {
-                meta.displayName(AdventureUtils.withoutItalics(playerClass.getPlayerClass().getName(), NamedTextColor.YELLOW));
+                meta.displayName(AdventureUtils.withoutItalics(playerClass.getPlayerClass().getName(), NamedTextColor.GREEN));
                 meta.lore(buildClassInformationLore(playerClass));
 
                 meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);

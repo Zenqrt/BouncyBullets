@@ -17,6 +17,10 @@ public abstract class ActiveAbilityItem extends GameItem {
         super(key, material, displayName, description, itemMetaHandler);
     }
 
+    public ActiveAbilityItem(String key, Material material, Component displayName, List<Component> description) {
+        super(key, material, displayName, description);
+    }
+
     public abstract void onUse(PlayerInteractEvent event);
 
     @Override

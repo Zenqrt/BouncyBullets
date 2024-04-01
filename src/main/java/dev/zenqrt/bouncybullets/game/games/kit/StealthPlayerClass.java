@@ -80,7 +80,7 @@ final class StealthPlayerClass extends EventPlayerClass {
                             List.of(
                                     "<gray>Upon right click, become invisible for <green>5</green> seconds.",
                                     "",
-                                    "<dark_gray>Cooldown: <green>20s"
+                                    "<dark_gray>Cooldown: <green>" + (COOLDOWN / 20) + "s"
                             ),
                             30
             ), meta -> {
