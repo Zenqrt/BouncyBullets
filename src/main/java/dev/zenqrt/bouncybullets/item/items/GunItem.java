@@ -11,10 +11,8 @@ import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.FluidCollisionMode;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
@@ -206,6 +204,20 @@ public abstract class GunItem extends GameItem {
                     this.bounceLocation = hitLocation;
                     this.lastBulletLocation = hitLocation;
                     this.tickSinceBounce = 0;
+
+                    Block hitBlock = Objects.requireNonNull(result.getHitBlock());
+
+                    Particle.BLOCK_CRACK.builder()
+                            .location(hitLocation)
+                            .allPlayers()
+                            .force(true)
+                            .count(10)
+                            .extra(0.5)
+                            .data(hitBlock.getBlockData())
+                            .spawn();
+
+                    Sound hitSound = Sound.sound(hitBlock.getBlockSoundGroup().getBreakSound().key(), Sound.Source.BLOCK, 1, 1);
+                    hitLocation.getWorld().playSound(hitSound, hitLocation.getX(), hitLocation.getY(), hitLocation.getZ());
 
                     BlockFace blockFace = result.getHitBlockFace();
 
