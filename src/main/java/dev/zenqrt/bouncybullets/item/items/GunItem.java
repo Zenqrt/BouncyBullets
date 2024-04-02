@@ -11,9 +11,9 @@ import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -21,6 +21,7 @@ import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -37,6 +38,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public abstract class GunItem extends GameItem {
 
     private static final long INTERACT_EVENT_TICK_DELAY = 4;
+    private static final AttributeModifier RELOAD_SLOWDOWN_MODIFIER = new AttributeModifier(UUID.randomUUID(), "reload_slowdown", -0.05, AttributeModifier.Operation.ADD_NUMBER);
     private static final Sound HIT_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP.key(), Sound.Source.PLAYER, 1, 2);
     private static final NamespacedKey AMMO_KEY = new NamespacedKey(BouncyBullets.getInstance(), "ammo");
 
@@ -103,54 +105,42 @@ public abstract class GunItem extends GameItem {
                     }
                 })
                 .build());
+
+        this.eventNode.registerListener(PaperEventListener.builder(PlayerItemHeldEvent.class)
+                .filter(event -> event.getPlayer().getGameMode() == GameMode.ADVENTURE)
+                .filter(event -> filterGameItem(event.getPlayer().getInventory().getItem(event.getNewSlot()), this))
+                .handler(event -> {
+                    Player player = event.getPlayer();
+                    Bukkit.getScheduler().runTaskTimer(BouncyBullets.getInstance(), task -> {
+                        if (!(filterGameItem(player.getInventory().getItemInMainHand(), this) && player.getGameMode() == GameMode.ADVENTURE)) {
+                            player.sendActionBar(Component.empty());
+                            task.cancel();
+                            return;
+                        }
+
+                        player.sendActionBar(MiniMessage.miniMessage().deserialize("<gray>Ammo:</gray> <aqua>" + getAmmo(Objects.requireNonNull(player.getInventory().getItem(event.getNewSlot()))) + "<dark_gray>/</dark_gray>" + gun.getGunProperties().magazineSize() + "<gray> | </gray>"));
+                    }, 0, 1);
+                })
+                .build());
         this.eventNode.registerListener(PaperEventListener.builder(PlayerSwapHandItemsEvent.class)
                 .filter(event -> filterGameItem(event.getOffHandItem(), this))
                 .handler(event -> {
                     event.setCancelled(true);
-                    System.out.println("Pressed!");
 
                     Player player = event.getPlayer();
                     ItemStack itemStack = event.getOffHandItem();
-                    int slot = event.getPlayer().getInventory().getHeldItemSlot();
                     int ammo = getAmmo(itemStack);
 
                     if (ammo >= gun.getGunProperties().magazineSize())
                         return;
 
                     int timeToReload = gun.getGunProperties().reloadTicksPerAmmo() * (gun.getGunProperties().magazineSize() - ammo);
+
                     player.setCooldown(itemStack.getType(), timeToReload);
+                    Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).addModifier(RELOAD_SLOWDOWN_MODIFIER);
 
-                    AttributeInstance speedAttribute = Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED));
-                    AttributeModifier reloadSlowdown = new AttributeModifier(UUID.randomUUID(), "reload_slowdown", -0.025, AttributeModifier.Operation.ADD_NUMBER);
-
-                    speedAttribute.addModifier(reloadSlowdown);
-
-                    new BukkitRunnable() {
-
-                        private int ticks;
-
-                        @Override
-                        public void run() {
-                            if (player.getInventory().getHeldItemSlot() != slot || ticks >= timeToReload) {
-                                speedAttribute.removeModifier(reloadSlowdown);
-                                this.cancel();
-                                return;
-                            }
-
-                            itemStack.editMeta(meta -> {
-                                PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
-                                dataContainer.set(AMMO_KEY, PersistentDataType.INTEGER, getAmmo(itemStack) + 1);
-                            });
-
-                            player.getInventory().setItemInMainHand(itemStack);
-
-                            Sound reloadingSound = Sound.sound(org.bukkit.Sound.ITEM_ARMOR_EQUIP_CHAIN.key(), Sound.Source.PLAYER, 1, 1);
-                            player.playSound(reloadingSound, Sound.Emitter.self());
-
-                            ticks += gun.getGunProperties().reloadTicksPerAmmo();
-
-                        }
-                    }.runTaskTimer(BouncyBullets.getInstance(), 0, gun.getGunProperties().reloadTicksPerAmmo());
+                    new ReloadTask(player, timeToReload, itemStack, player.getInventory().getHeldItemSlot())
+                            .runTaskTimer(BouncyBullets.getInstance(), 0, gun.getGunProperties().reloadTicksPerAmmo());
                 })
                 .build());
     }
@@ -328,4 +318,43 @@ public abstract class GunItem extends GameItem {
                 .force(true)
                 .spawn();
     }
+
+    private class ReloadTask extends BukkitRunnable {
+
+        private final Player player;
+        private final int timeToReload;
+        private final ItemStack itemStack;
+        private final int slot;
+        private int ticks;
+
+        ReloadTask(Player player, int timeToReload, ItemStack itemStack, int slot) {
+            this.player = player;
+            this.timeToReload = timeToReload;
+            this.itemStack = itemStack;
+            this.slot = slot;
+        }
+
+        @Override
+        public void run() {
+            if (player.getInventory().getHeldItemSlot() != slot || ticks >= timeToReload) {
+                Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).removeModifier(RELOAD_SLOWDOWN_MODIFIER);
+                this.cancel();
+                return;
+            }
+
+            itemStack.editMeta(meta -> {
+                PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
+                dataContainer.set(AMMO_KEY, PersistentDataType.INTEGER, getAmmo(itemStack) + 1);
+            });
+
+            player.getInventory().setItemInMainHand(itemStack);
+
+            Sound reloadingSound = Sound.sound(org.bukkit.Sound.ITEM_ARMOR_EQUIP_CHAIN.key(), Sound.Source.PLAYER, 1, 1);
+            player.playSound(reloadingSound, Sound.Emitter.self());
+
+            ticks += gun.getGunProperties().reloadTicksPerAmmo();
+
+        }
+    }
+
 }
