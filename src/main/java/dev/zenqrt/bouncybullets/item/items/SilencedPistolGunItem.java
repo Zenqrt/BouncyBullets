@@ -14,7 +14,7 @@ public final class SilencedPistolGunItem extends GunItem {
 
     @Override
     protected Sound getShootingSound() {
-        return Sound.sound(org.bukkit.Sound.ENTITY_FIREWORK_ROCKET_BLAST, Sound.Source.PLAYER, 1, 2);
+        return Sound.sound(org.bukkit.Sound.ENTITY_FIREWORK_ROCKET_BLAST, Sound.Source.PLAYER, 0.5F, 2);
     }
 
     @Override
