@@ -29,7 +29,7 @@ public enum PlayerClasses {
     },
             List.of(
                     Component.text("Pistol", NamedTextColor.GRAY),
-                    Component.text("Full Heal", NamedTextColor.LIGHT_PURPLE)
+                    Component.text("Miracle", NamedTextColor.LIGHT_PURPLE)
             ),
             List.of(
                     "<gold>Passive Ability:",

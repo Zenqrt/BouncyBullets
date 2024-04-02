@@ -12,6 +12,9 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.damage.DamageSource;
@@ -19,6 +22,9 @@ import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -32,6 +38,7 @@ public abstract class GunItem extends GameItem {
 
     private static final long INTERACT_EVENT_TICK_DELAY = 4;
     private static final Sound HIT_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP.key(), Sound.Source.PLAYER, 1, 2);
+    private static final NamespacedKey AMMO_KEY = new NamespacedKey(BouncyBullets.getInstance(), "ammo");
 
     private final Gun gun;
     private final Map<UUID, Long> lastShootTicks = new HashMap<>();
@@ -56,42 +63,29 @@ public abstract class GunItem extends GameItem {
                 .filter(event -> event.getAction().isRightClick())
                 .handler(event -> {
                     Player player = event.getPlayer();
+                    ItemStack itemStack = event.getItem();
 
-                    if (player.getGameMode() != GameMode.ADVENTURE) {
+                    if (player.getGameMode() != GameMode.ADVENTURE)
                         return;
-                    }
 
                     if (gun.getGunProperties().shootDelayTicks() < INTERACT_EVENT_TICK_DELAY) {
                         long shootDivisions = INTERACT_EVENT_TICK_DELAY / gun.getGunProperties().shootDelayTicks();
 
-                        shootBullet(player);
+                        fireGun(player, itemStack);
 
                         for (int i = 1; i < shootDivisions; i++) {
                             new BukkitRunnable() {
                                 @Override
                                 public void run() {
-                                    shootBullet(player);
+                                    fireGun(player, itemStack);
                                 }
                             }.runTaskLater(BouncyBullets.getInstance(), i * gun.getGunProperties().shootDelayTicks());
                         }
 
                         return;
                     }
-                    long currentGameTime = player.getWorld().getGameTime();
 
-                    if (lastShootTicks.containsKey(player.getUniqueId())) {
-                        long lastShootTick = lastShootTicks.get(player.getUniqueId());
-                        long tickInterval = currentGameTime - lastShootTick;
-
-                        if (tickInterval < gun.getGunProperties().shootDelayTicks()) {
-                            return;
-                        }
-                    }
-
-                    lastShootTicks.put(player.getUniqueId(), currentGameTime);
-
-                    player.getWorld().playSound(getShootingSound(), player.getX(), player.getY(), player.getZ());
-                    new ShootBulletTask(player, player.getEyeLocation(), player.hasPotionEffect(PotionEffectType.SLOW)).runTaskTimer(BouncyBullets.getInstance(), 0, 1);
+                    fireGun(player, itemStack);
                 })
                 .build());
         this.eventNode.registerListener(PaperEventListener.builder(PlayerInteractEvent.class)
@@ -113,11 +107,84 @@ public abstract class GunItem extends GameItem {
                 .filter(event -> filterGameItem(event.getOffHandItem(), this))
                 .handler(event -> {
                     event.setCancelled(true);
+                    System.out.println("Pressed!");
 
                     Player player = event.getPlayer();
-                    player.sendMessage(Component.text("I'm supposed to reload but I can't do that yet!", NamedTextColor.GOLD));
+                    ItemStack itemStack = event.getOffHandItem();
+                    int slot = event.getPlayer().getInventory().getHeldItemSlot();
+                    int ammo = getAmmo(itemStack);
+
+                    if (ammo >= gun.getGunProperties().magazineSize())
+                        return;
+
+                    int timeToReload = gun.getGunProperties().reloadTicksPerAmmo() * (gun.getGunProperties().magazineSize() - ammo);
+                    player.setCooldown(itemStack.getType(), timeToReload);
+
+                    AttributeInstance speedAttribute = Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED));
+                    AttributeModifier reloadSlowdown = new AttributeModifier(UUID.randomUUID(), "reload_slowdown", -0.025, AttributeModifier.Operation.ADD_NUMBER);
+
+                    speedAttribute.addModifier(reloadSlowdown);
+
+                    new BukkitRunnable() {
+
+                        private int ticks;
+
+                        @Override
+                        public void run() {
+                            if (player.getInventory().getHeldItemSlot() != slot || ticks >= timeToReload) {
+                                speedAttribute.removeModifier(reloadSlowdown);
+                                this.cancel();
+                                return;
+                            }
+
+                            itemStack.editMeta(meta -> {
+                                PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
+                                dataContainer.set(AMMO_KEY, PersistentDataType.INTEGER, getAmmo(itemStack) + 1);
+                            });
+
+                            player.getInventory().setItemInMainHand(itemStack);
+
+                            Sound reloadingSound = Sound.sound(org.bukkit.Sound.ITEM_ARMOR_EQUIP_CHAIN.key(), Sound.Source.PLAYER, 1, 1);
+                            player.playSound(reloadingSound, Sound.Emitter.self());
+
+                            ticks += gun.getGunProperties().reloadTicksPerAmmo();
+
+                        }
+                    }.runTaskTimer(BouncyBullets.getInstance(), 0, gun.getGunProperties().reloadTicksPerAmmo());
                 })
                 .build());
+    }
+
+    private void fireGun(Player player, ItemStack itemStack) {
+        long currentGameTime = player.getWorld().getGameTime();
+
+        if (getAmmo(itemStack) <= 0)
+            return;
+
+        if (lastShootTicks.containsKey(player.getUniqueId())) {
+            long lastShootTick = lastShootTicks.get(player.getUniqueId());
+            long tickInterval = currentGameTime - lastShootTick;
+
+            if (tickInterval < gun.getGunProperties().shootDelayTicks()) {
+                return;
+            }
+        }
+
+        shootBullet(player);
+        useAmmo(itemStack);
+    }
+
+    private int getAmmo(ItemStack itemStack) {
+        return itemStack.getItemMeta().getPersistentDataContainer().getOrDefault(AMMO_KEY, PersistentDataType.INTEGER, gun.getGunProperties().magazineSize());
+    }
+
+    private void useAmmo(ItemStack itemStack) {
+        itemStack.editMeta(meta -> {
+            PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
+            int ammo = dataContainer.getOrDefault(AMMO_KEY, PersistentDataType.INTEGER, gun.getGunProperties().magazineSize());
+
+            dataContainer.set(AMMO_KEY, PersistentDataType.INTEGER, ammo - 1);
+        });
     }
 
     private void shootBullet(Player player) {
