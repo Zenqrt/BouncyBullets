@@ -19,6 +19,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -29,6 +30,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.Duration;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
@@ -123,7 +125,8 @@ public final class ActiveGameState extends EventGameState {
         super.onStateStart();
 
         players.forEach((uuid, player) -> {
-            setupPlayer(player.player(), player.loadout());
+            setupPlayerInventory(player.player(), player.loadout());
+            Objects.requireNonNull(player.player().getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE)).setBaseValue(0.5);
 
             Location randomSpawn = gameMap.spawnLocations().get(ThreadLocalRandom.current().nextInt(gameMap.spawnLocations().size())).toLocation(gameMap.world());
             player.player().teleport(randomSpawn);
@@ -139,7 +142,7 @@ public final class ActiveGameState extends EventGameState {
         players.forEach((uuid, player) -> player.loadout().playerClass().onStopUse(player));
     }
 
-    private static void setupPlayer(Player player, Loadout loadout) {
+    private static void setupPlayerInventory(Player player, Loadout loadout) {
         PlayerInventory inventory = player.getInventory();
         inventory.clear();
 
@@ -180,7 +183,7 @@ public final class ActiveGameState extends EventGameState {
             if (--timeLeft == 0) {
                 this.cancel();
 
-                setupPlayer(bukkitPlayer, player.loadout());
+                setupPlayerInventory(bukkitPlayer, player.loadout());
                 bukkitPlayer.setGameMode(GameMode.ADVENTURE);
                 bukkitPlayer.teleport(chooseBestSpawnLocation());
                 bukkitPlayer.clearTitle();
