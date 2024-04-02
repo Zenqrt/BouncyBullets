@@ -55,7 +55,7 @@ final class HealerPlayerClass extends EventPlayerClass {
                     playerEntity.setHealth(playerEntity.getHealth() + 1);
                 }
             }
-        }.runTaskTimer(BouncyBullets.getInstance(), 0, 20));
+        }.runTaskTimer(BouncyBullets.getInstance(), 0, 40));
     }
 
     @Override

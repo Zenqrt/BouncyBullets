@@ -33,7 +33,7 @@ public enum PlayerClasses {
             ),
             List.of(
                     "<gold>Passive Ability:",
-                    "<gray>Regenerate <red>1❤</red> every second."
+                    "<gray>Regenerate <red>1❤</red> every <green>2</green> seconds."
             ));
 
     private final PlayerClass playerClass;

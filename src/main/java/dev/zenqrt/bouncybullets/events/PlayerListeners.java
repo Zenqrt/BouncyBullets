@@ -6,6 +6,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 
 public final class PlayerListeners implements Listener {
 
@@ -19,6 +20,11 @@ public final class PlayerListeners implements Listener {
         if (event.getDamageSource().getDamageType() != DamageType.MOB_PROJECTILE) {
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerHandSwapItems(PlayerSwapHandItemsEvent event) {
+        event.setCancelled(true);
     }
 
 }

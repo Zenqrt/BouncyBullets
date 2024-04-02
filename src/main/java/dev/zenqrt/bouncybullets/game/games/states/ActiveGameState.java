@@ -17,6 +17,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
@@ -24,9 +25,12 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import java.time.Duration;
 import java.util.Comparator;
@@ -104,6 +108,10 @@ public final class ActiveGameState extends EventGameState {
                             .runTaskTimer(BouncyBullets.getInstance(), 0, 20);
                 })
                 .build());
+        this.eventNode.registerListener(PaperEventListener.builder(InventoryClickEvent.class)
+                .filter(event -> players.containsKey(event.getWhoClicked().getUniqueId()))
+                .handler(event -> event.setCancelled(true))
+                .build());
     }
 
     private Location chooseBestSpawnLocation() {
@@ -124,7 +132,17 @@ public final class ActiveGameState extends EventGameState {
     protected void onStateStart() {
         super.onStateStart();
 
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+
+        scoreboard.getTeams().forEach(Team::unregister);
+
+        Team team = scoreboard.registerNewTeam("players");
+        team.setCanSeeFriendlyInvisibles(false);
+
+        team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+
         players.forEach((uuid, player) -> {
+            team.addPlayer(player.player());
             setupPlayerInventory(player.player(), player.loadout());
             Objects.requireNonNull(player.player().getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE)).setBaseValue(0.5);
 
