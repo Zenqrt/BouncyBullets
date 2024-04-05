@@ -39,7 +39,8 @@ public final class BouncyBulletGame extends Game {
     }
 
     public boolean canJoinGame() {
-        return this.gameState instanceof PregameGameState && players.size() < gameSettings.maxPlayers();
+        return true;
+//        return this.gameState instanceof PregameGameState && players.size() < gameSettings.maxPlayers();
     }
 
     public GameSettings getGameSettings() {

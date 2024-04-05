@@ -11,4 +11,6 @@ commands:
     description: Creates a backup of the current world.
   tpgameworld:
     description: Teleports to the game world.
+  glow:
+    description: Gives the player a glowing effect.
 

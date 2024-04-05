@@ -33,7 +33,15 @@ public enum PlayerClasses {
             ),
             List.of(
                     "<gold>Passive Ability:",
-                    "<gray>Regenerate <red>1❤</red> every <green>2</green> seconds."
+                    "<gray>Regenerate <red>1❤</red> every <green>2 <gray>seconds."
+            )),
+    SNIPER(new SniperPlayerClass(), Material.ENDER_EYE, List.of(
+            Component.text("Sniper Rifle", NamedTextColor.GRAY),
+            Component.text("Pistol", NamedTextColor.GRAY)
+    ),
+            List.of(
+                    "<gold>Passive Ability:",
+                    "<gray>For each second of standing still, accumulate <red>1% <gray>damage increase, up to <red>50% <gray>maximum. This is shown in the experience bar."
             ));
 
     private final PlayerClass playerClass;

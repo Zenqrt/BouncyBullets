@@ -1,13 +1,22 @@
 package dev.zenqrt.bouncybullets;
 
+import dev.zenqrt.bouncybullets.events.GlowListeners;
 import dev.zenqrt.bouncybullets.events.PlayerJoinListeners;
 import dev.zenqrt.bouncybullets.events.PlayerListeners;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.GameSettings;
+import dev.zenqrt.bouncybullets.glow.GlowManager;
 import dev.zenqrt.bouncybullets.map.GameMapRegistry;
+import dev.zenqrt.bouncybullets.utils.GlowUtils;
+import dev.zenqrt.bouncybullets.utils.NMSConverter;
+import dev.zenqrt.bouncybullets.utils.ReflectionUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.Entity;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -17,7 +26,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 public final class BouncyBullets extends JavaPlugin {
@@ -38,6 +50,7 @@ public final class BouncyBullets extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListeners(), this);
+        Bukkit.getPluginManager().registerEvents(new GlowListeners(), this);
 
         registerCommand("tpgameworld", (player, args) -> {
             player.sendMessage(Component.text("Teleporting...", NamedTextColor.GRAY).decorate(TextDecoration.ITALIC));
@@ -70,6 +83,20 @@ public final class BouncyBullets extends JavaPlugin {
             }
 
             Bukkit.broadcast(Component.text("Successfully saved a backup of the world.", NamedTextColor.GREEN));
+        });
+
+        registerCommand("glow", (player, args) -> {
+            Player target = Bukkit.getPlayer(args[0]);
+
+            if (target == null) {
+                player.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
+                return;
+            }
+
+            GlowManager.addGlowing(player.getUniqueId(), target.getEntityId());
+            GlowUtils.showGlow(player, target);
+
+            player.sendMessage(Component.text("Glow added to " + target.getName(), NamedTextColor.GREEN));
         });
     }
 

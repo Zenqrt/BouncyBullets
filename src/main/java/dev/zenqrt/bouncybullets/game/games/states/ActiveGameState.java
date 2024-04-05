@@ -108,10 +108,10 @@ public final class ActiveGameState extends EventGameState {
                             .runTaskTimer(BouncyBullets.getInstance(), 0, 20);
                 })
                 .build());
-        this.eventNode.registerListener(PaperEventListener.builder(InventoryClickEvent.class)
-                .filter(event -> players.containsKey(event.getWhoClicked().getUniqueId()))
-                .handler(event -> event.setCancelled(true))
-                .build());
+//        this.eventNode.registerListener(PaperEventListener.builder(InventoryClickEvent.class)
+//                .filter(event -> players.containsKey(event.getWhoClicked().getUniqueId()))
+//                .handler(event -> event.setCancelled(true))
+//                .build());
     }
 
     private Location chooseBestSpawnLocation() {

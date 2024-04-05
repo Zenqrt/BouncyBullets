@@ -61,6 +61,7 @@ final class HealerPlayerClass extends EventPlayerClass {
     @Override
     public void onStopUse(BouncyBulletPlayer player) {
         healTasks.forEach(BukkitTask::cancel);
+        healTasks.clear();
     }
 
     @Override

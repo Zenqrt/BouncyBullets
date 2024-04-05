@@ -2,6 +2,7 @@ package dev.zenqrt.bouncybullets.item.items;
 
 import com.destroystokyo.paper.ParticleBuilder;
 import dev.zenqrt.bouncybullets.BouncyBullets;
+import dev.zenqrt.bouncybullets.event.GunShootEvent;
 import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BulletProperties;
 import dev.zenqrt.bouncybullets.game.games.Gun;
@@ -101,7 +102,7 @@ public abstract class GunItem extends GameItem {
                     if (player.hasPotionEffect(PotionEffectType.SLOW)) {
                         player.removePotionEffect(PotionEffectType.SLOW);
                     } else {
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, 2, false, false, false));
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, gun.getGunProperties().scopeMagnifyMultiplier(), false, false, false));
                     }
                 })
                 .build());
@@ -180,8 +181,11 @@ public abstract class GunItem extends GameItem {
     private void shootBullet(Player player) {
         lastShootTicks.put(player.getUniqueId(), player.getWorld().getGameTime());
 
+        GunShootEvent event = new GunShootEvent(gun, player, gun.getBulletProperties());
+        Bukkit.getPluginManager().callEvent(event);
+
         player.getWorld().playSound(getShootingSound(), player.getX(), player.getY(), player.getZ());
-        new ShootBulletTask(player, player.getEyeLocation(), player.hasPotionEffect(PotionEffectType.SLOW)).runTaskTimer(BouncyBullets.getInstance(), 0, 1);
+        new ShootBulletTask(player, player.getEyeLocation(), event.getBulletProperties(), player.hasPotionEffect(PotionEffectType.SLOW)).runTaskTimer(BouncyBullets.getInstance(), 0, 1);
     }
 
     private static List<Component> buildGunPropertyDescription(Gun gun) {
@@ -196,6 +200,7 @@ public abstract class GunItem extends GameItem {
     private class ShootBulletTask extends BukkitRunnable {
 
         private final Player shooter;
+        private final BulletProperties bulletProperties;
         private Location bounceLocation;
         private Location lastBulletLocation;
         private Vector currentDirection;
@@ -203,8 +208,9 @@ public abstract class GunItem extends GameItem {
         private int tickSinceBounce = 0;
         private int currentTick = 0;
 
-        private ShootBulletTask(Player shooter, Location startLocation, boolean focused) {
+        private ShootBulletTask(Player shooter, Location startLocation, BulletProperties bulletProperties, boolean focused) {
             this.shooter = shooter;
+            this.bulletProperties = bulletProperties;
 
             this.bounceLocation = startLocation;
             this.lastBulletLocation = startLocation;
@@ -225,8 +231,6 @@ public abstract class GunItem extends GameItem {
                 this.cancel();
                 return;
             }
-
-            BulletProperties bulletProperties = gun.getBulletProperties();
 
             double segmentLength = (bulletProperties.speed() + (bulletProperties.speed() * (bulletProperties.speedChange() * bounces))) / 20;
             double distance = segmentLength * tickSinceBounce++;
