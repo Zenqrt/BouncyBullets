@@ -7,6 +7,7 @@ import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.items.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
+import dev.zenqrt.bouncybullets.utils.SoundUtils;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -91,7 +92,7 @@ final class HealerPlayerClass extends EventPlayerClass {
                     AdventureUtils.withoutItalics("Miracle", NamedTextColor.LIGHT_PURPLE)
                             .append(Component.text(" (Right Click)", NamedTextColor.GRAY)),
                     MiniMessageUtils.wordWrapLore(List.of(
-                            "<gray>Upon right-click, fully heal yourself and gain <gold>5❤ <gray>of absorption health.",
+                            "<gray>Upon right-click, fully heal yourself and gain <gold>4❤ <gray>of absorption health.",
                             "",
                             "<dark_gray>Cooldown: <green>" + (COOLDOWN / 20) + "s"
                     ), 30)
@@ -111,9 +112,9 @@ final class HealerPlayerClass extends EventPlayerClass {
             }
 
             player.setHealth(maxHealth);
-            player.setAbsorptionAmount(5);
+            player.setAbsorptionAmount(4);
 
-            player.playSound(HEAL_SOUND, Sound.Emitter.self());
+            SoundUtils.playSoundFromPlayer(player, HEAL_SOUND);
 
             Particle.HEART.builder()
                     .allPlayers()

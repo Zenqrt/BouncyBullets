@@ -20,7 +20,7 @@ public final class CountdownGameState extends EventGameState {
         this.pregameState = pregameState;
         this.players = players;
         this.minPlayerCount = minPlayerCount;
-        this.countdownTask = new CountdownTask(15);
+        this.countdownTask = new CountdownTask(30);
     }
 
     @Override

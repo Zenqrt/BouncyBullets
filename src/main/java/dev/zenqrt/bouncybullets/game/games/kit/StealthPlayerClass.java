@@ -94,7 +94,7 @@ final class StealthPlayerClass extends EventPlayerClass {
         public void onUse(PlayerInteractEvent event) {
             Player player = event.getPlayer();
 
-            player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 20 * 5, 1, false, true, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 100, 1, false, false, true));
             player.playSound(Sound.sound(org.bukkit.Sound.ENTITY_GENERIC_DRINK, Sound.Source.PLAYER, 1, 1));
 
             ItemStack originalItem = Objects.requireNonNull(event.getItem());

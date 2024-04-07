@@ -1,6 +1,5 @@
 package dev.zenqrt.bouncybullets.item.items;
 
-import com.destroystokyo.paper.ParticleBuilder;
 import dev.zenqrt.bouncybullets.BouncyBullets;
 import dev.zenqrt.bouncybullets.event.GunShootEvent;
 import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
@@ -13,13 +12,12 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.damage.DamageSource;
-import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
@@ -30,21 +28,17 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.RayTraceResult;
-import org.bukkit.util.Vector;
 
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class GunItem extends GameItem {
 
     private static final long INTERACT_EVENT_TICK_DELAY = 4;
     private static final AttributeModifier RELOAD_SLOWDOWN_MODIFIER = new AttributeModifier(UUID.randomUUID(), "reload_slowdown", -0.05, AttributeModifier.Operation.ADD_NUMBER);
-    private static final Sound HIT_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP.key(), Sound.Source.PLAYER, 1, 2);
     private static final NamespacedKey AMMO_KEY = new NamespacedKey(BouncyBullets.getInstance(), "ammo");
 
-    private final Gun gun;
     private final Map<UUID, Long> lastShootTicks = new HashMap<>();
+    protected final Gun gun;
 
     public GunItem(String key, Material material, Component displayName, Gun gun) {
         super(key, material, displayName, buildGunPropertyDescription(gun));
@@ -56,8 +50,12 @@ public abstract class GunItem extends GameItem {
         this(key, material, AdventureUtils.withoutItalics(displayName, NamedTextColor.YELLOW), gun);
     }
 
+    protected abstract void shootProjectile(Player player, BulletProperties bulletProperties);
     protected abstract Sound getShootingSound();
-    protected abstract ParticleBuilder getBulletParticleBuilder();
+
+    protected Sound getReloadSound() {
+        return Sound.sound(org.bukkit.Sound.ITEM_ARMOR_EQUIP_CHAIN.key(), Sound.Source.PLAYER, 1, 1);
+    }
 
     @Override
     public void registerEvents() {
@@ -74,13 +72,13 @@ public abstract class GunItem extends GameItem {
                     if (gun.getGunProperties().shootDelayTicks() < INTERACT_EVENT_TICK_DELAY) {
                         long shootDivisions = INTERACT_EVENT_TICK_DELAY / gun.getGunProperties().shootDelayTicks();
 
-                        fireGun(player, itemStack);
+                        useGun(player, itemStack);
 
                         for (int i = 1; i < shootDivisions; i++) {
                             new BukkitRunnable() {
                                 @Override
                                 public void run() {
-                                    fireGun(player, itemStack);
+                                    useGun(player, itemStack);
                                 }
                             }.runTaskLater(BouncyBullets.getInstance(), i * gun.getGunProperties().shootDelayTicks());
                         }
@@ -88,7 +86,7 @@ public abstract class GunItem extends GameItem {
                         return;
                     }
 
-                    fireGun(player, itemStack);
+                    useGun(player, itemStack);
                 })
                 .build());
         this.eventNode.registerListener(PaperEventListener.builder(PlayerInteractEvent.class)
@@ -146,7 +144,7 @@ public abstract class GunItem extends GameItem {
                 .build());
     }
 
-    private void fireGun(Player player, ItemStack itemStack) {
+    private void useGun(Player player, ItemStack itemStack) {
         long currentGameTime = player.getWorld().getGameTime();
 
         if (getAmmo(itemStack) <= 0)
@@ -161,8 +159,15 @@ public abstract class GunItem extends GameItem {
             }
         }
 
-        shootBullet(player);
+        GunShootEvent event = new GunShootEvent(gun, player, gun.getBulletProperties());
+        Bukkit.getPluginManager().callEvent(event);
+
+        player.getWorld().playSound(getShootingSound(), player.getX(), player.getY(), player.getZ());
+
+        shootProjectile(player, event.getBulletProperties());
         useAmmo(itemStack);
+
+        lastShootTicks.put(player.getUniqueId(), player.getWorld().getGameTime());
     }
 
     private int getAmmo(ItemStack itemStack) {
@@ -178,16 +183,6 @@ public abstract class GunItem extends GameItem {
         });
     }
 
-    private void shootBullet(Player player) {
-        lastShootTicks.put(player.getUniqueId(), player.getWorld().getGameTime());
-
-        GunShootEvent event = new GunShootEvent(gun, player, gun.getBulletProperties());
-        Bukkit.getPluginManager().callEvent(event);
-
-        player.getWorld().playSound(getShootingSound(), player.getX(), player.getY(), player.getZ());
-        new ShootBulletTask(player, player.getEyeLocation(), event.getBulletProperties(), player.hasPotionEffect(PotionEffectType.SLOW)).runTaskTimer(BouncyBullets.getInstance(), 0, 1);
-    }
-
     private static List<Component> buildGunPropertyDescription(Gun gun) {
         return MiniMessageUtils.wordWrapLore(List.of(
                 "<gray>Damage: <red>" + gun.getBulletProperties().damage() + "❤",
@@ -195,132 +190,6 @@ public abstract class GunItem extends GameItem {
                 "<gray>Bounces: <yellow>" + gun.getBulletProperties().numberOfBounces()
 
         ), 30);
-    }
-
-    private class ShootBulletTask extends BukkitRunnable {
-
-        private final Player shooter;
-        private final BulletProperties bulletProperties;
-        private Location bounceLocation;
-        private Location lastBulletLocation;
-        private Vector currentDirection;
-        private int bounces = 0;
-        private int tickSinceBounce = 0;
-        private int currentTick = 0;
-
-        private ShootBulletTask(Player shooter, Location startLocation, BulletProperties bulletProperties, boolean focused) {
-            this.shooter = shooter;
-            this.bulletProperties = bulletProperties;
-
-            this.bounceLocation = startLocation;
-            this.lastBulletLocation = startLocation;
-
-            double recoilRange = focused ? gun.getGunProperties().recoilRangeFocused() : gun.getGunProperties().recoilRange();
-            this.currentDirection = startLocation.getDirection().normalize()
-                    .add(new Vector(randomRecoil(recoilRange), randomRecoil(recoilRange), randomRecoil(recoilRange)))
-                    .normalize();
-        }
-
-        private static double randomRecoil(double range) {
-            return ThreadLocalRandom.current().nextDouble(-range, range);
-        }
-
-        @Override
-        public void run() {
-            if (currentTick++ >= 200) {
-                this.cancel();
-                return;
-            }
-
-            double segmentLength = (bulletProperties.speed() + (bulletProperties.speed() * (bulletProperties.speedChange() * bounces))) / 20;
-            double distance = segmentLength * tickSinceBounce++;
-            Vector increment = currentDirection.clone().multiply(distance);
-            Location location = bounceLocation.clone().add(increment);
-
-            spawnBulletParticle(location);
-
-            RayTraceResult result = location.getWorld().rayTrace(location, currentDirection, segmentLength, FluidCollisionMode.NEVER, true, 0.1, entity -> entity instanceof Player player && player.getGameMode() == GameMode.ADVENTURE && player != shooter);
-
-            if (result != null) {
-                Location hitLocation = result.getHitPosition().toLocation(location.getWorld());
-
-                spawnCenterParticle(lastBulletLocation, hitLocation);
-
-                if (result.getHitEntity() instanceof Player hitPlayer) {
-                    double damage = bulletProperties.damage() + (bulletProperties.damage() * (bulletProperties.damageChange() * bounces));
-
-                    hitPlayer.damage(damage, DamageSource.builder(DamageType.MOB_PROJECTILE).withCausingEntity(shooter).build());
-                    hitPlayer.setNoDamageTicks(0);
-
-                    shooter.playSound(HIT_SOUND, Sound.Emitter.self());
-                    this.cancel();
-
-                    return;
-                } else {
-                    if (++bounces > bulletProperties.numberOfBounces()) {
-                        this.cancel();
-                        return;
-                    }
-
-                    this.bounceLocation = hitLocation;
-                    this.lastBulletLocation = hitLocation;
-                    this.tickSinceBounce = 0;
-
-                    Block hitBlock = Objects.requireNonNull(result.getHitBlock());
-
-                    Particle.BLOCK_CRACK.builder()
-                            .location(hitLocation)
-                            .allPlayers()
-                            .force(true)
-                            .count(10)
-                            .extra(0.5)
-                            .data(hitBlock.getBlockData())
-                            .spawn();
-
-                    Sound hitSound = Sound.sound(hitBlock.getBlockSoundGroup().getBreakSound().key(), Sound.Source.BLOCK, 1, 1);
-                    hitLocation.getWorld().playSound(hitSound, hitLocation.getX(), hitLocation.getY(), hitLocation.getZ());
-
-                    BlockFace blockFace = result.getHitBlockFace();
-
-                    if (blockFace == null) {
-                        return;
-                    }
-
-                    switch (blockFace) {
-                        case UP, DOWN -> this.currentDirection = currentDirection.setY(-currentDirection.getY());
-                        case EAST, WEST -> this.currentDirection = currentDirection.setX(-currentDirection.getX());
-                        case NORTH, SOUTH -> this.currentDirection = currentDirection.setZ(-currentDirection.getZ());
-                    }
-                }
-
-                return;
-            }
-
-            spawnCenterParticle(lastBulletLocation, location);
-            this.lastBulletLocation = location;
-        }
-    }
-
-    private void spawnCenterParticle(Location firstLocation, Location secondLocation) {
-        double distance = firstLocation.distance(secondLocation);
-        Location centerLocation = firstLocation.clone().add(secondLocation).multiply(0.5);
-
-        spawnBulletParticle(centerLocation);
-
-        if (distance < 1.5) {
-            return;
-        }
-
-        spawnCenterParticle(firstLocation, centerLocation);
-        spawnCenterParticle(centerLocation, secondLocation);
-    }
-
-    private void spawnBulletParticle(Location location) {
-        getBulletParticleBuilder()
-                .location(location)
-                .allPlayers()
-                .force(true)
-                .spawn();
     }
 
     private class ReloadTask extends BukkitRunnable {
@@ -353,12 +222,9 @@ public abstract class GunItem extends GameItem {
 
             player.getInventory().setItemInMainHand(itemStack);
 
-            Sound reloadingSound = Sound.sound(org.bukkit.Sound.ITEM_ARMOR_EQUIP_CHAIN.key(), Sound.Source.PLAYER, 1, 1);
-            player.playSound(reloadingSound, Sound.Emitter.self());
+            player.playSound(getReloadSound(), Sound.Emitter.self());
 
             ticks += gun.getGunProperties().reloadTicksPerAmmo();
-
         }
     }
-
 }
