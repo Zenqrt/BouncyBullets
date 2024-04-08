@@ -66,6 +66,7 @@ public final class GrenadeLauncherGunItem extends GunItem {
 
             if (currentBounces >= maxBounces) {
                 ExplosionUtils.createExplosion(tnt.getLocation(), 4, gun.getBulletProperties().damage(), DamageSource.builder(DamageType.MOB_PROJECTILE).build());
+                tnt.remove();
                 this.cancel();
                 return;
             }
