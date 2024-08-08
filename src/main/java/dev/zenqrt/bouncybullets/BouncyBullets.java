@@ -8,15 +8,9 @@ import dev.zenqrt.bouncybullets.game.games.GameSettings;
 import dev.zenqrt.bouncybullets.glow.GlowManager;
 import dev.zenqrt.bouncybullets.map.GameMapRegistry;
 import dev.zenqrt.bouncybullets.utils.GlowUtils;
-import dev.zenqrt.bouncybullets.utils.NMSConverter;
-import dev.zenqrt.bouncybullets.utils.ReflectionUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.entity.Entity;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -26,10 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 
 public final class BouncyBullets extends JavaPlugin {
@@ -45,7 +36,6 @@ public final class BouncyBullets extends JavaPlugin {
         Bukkit.getWorlds().forEach(world -> world.setAutoSave(false));
 
         game = new BouncyBulletGame(1, new GameSettings(2, 8, 300));
-
         game.start();
 
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(), this);
@@ -97,6 +87,9 @@ public final class BouncyBullets extends JavaPlugin {
             GlowUtils.showGlow(player, target);
 
             player.sendMessage(Component.text("Glow added to " + target.getName(), NamedTextColor.GREEN));
+        });
+
+        registerCommand("forcerc", (player, args) -> {
         });
     }
 

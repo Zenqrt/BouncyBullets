@@ -13,6 +13,8 @@ public abstract class GameStateSequence extends GameState {
         this.currentStateIndex = 0;
     }
 
+    protected void onLastStateFinished() {}
+
     @Override
     protected void onStateStart() {
         if (states.isEmpty()) {
@@ -33,7 +35,7 @@ public abstract class GameStateSequence extends GameState {
 
     public void switchNextState() {
         if (currentStateIndex >= states.size() - 1) {
-            end();
+            onLastStateFinished();
             return;
         }
 

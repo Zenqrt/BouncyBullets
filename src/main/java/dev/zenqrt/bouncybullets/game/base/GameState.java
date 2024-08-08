@@ -23,9 +23,12 @@ public abstract class GameState {
     }
 
     public final boolean end() {
-        if (!(canMoveOn && active))
+        if (!(canMoveOn && active)) {
+            System.out.println("cant move on");
             return false;
+        }
 
+        System.out.println("ok cool");
         active = false;
 
         onStateEnd();

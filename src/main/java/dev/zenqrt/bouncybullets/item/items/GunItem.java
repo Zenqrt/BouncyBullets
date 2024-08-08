@@ -186,7 +186,7 @@ public abstract class GunItem extends GameItem {
     private static List<Component> buildGunPropertyDescription(Gun gun) {
         return MiniMessageUtils.wordWrapLore(List.of(
                 "<gray>Damage: <red>" + gun.getBulletProperties().damage() + "❤",
-                "<gray>Speed: <yellow>" + gun.getBulletProperties().speed() + " b/s",
+                "<gray>Speed: <yellow>" + gun.getBulletProperties().speed() + " blocks/sec",
                 "<gray>Bounces: <yellow>" + gun.getBulletProperties().numberOfBounces()
 
         ), 30);
@@ -221,7 +221,6 @@ public abstract class GunItem extends GameItem {
             });
 
             player.getInventory().setItemInMainHand(itemStack);
-
             player.playSound(getReloadSound(), Sound.Emitter.self());
 
             ticks += gun.getGunProperties().reloadTicksPerAmmo();

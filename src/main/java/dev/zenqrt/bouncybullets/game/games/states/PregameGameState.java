@@ -100,14 +100,17 @@ public final class PregameGameState extends GameStateSequence {
     }
 
     @Override
-    protected void onStateEnd() {
-        super.onStateEnd();
-        eventNode.unregisterAllListeners();
-
+    protected void onLastStateFinished() {
         GameMap gameMap = getVotedMap();
         FreeForAllActiveGameMap activeGameMap = loadGameMap(gameMap);
 
         game.switchGameState(new ActiveGameState(game, players, activeGameMap));
+    }
+
+    @Override
+    protected void onStateEnd() {
+        super.onStateEnd();
+        eventNode.unregisterAllListeners();
     }
 
     private FreeForAllActiveGameMap loadGameMap(GameMap gameMap) {

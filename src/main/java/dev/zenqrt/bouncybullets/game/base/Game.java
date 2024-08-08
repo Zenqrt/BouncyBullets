@@ -29,9 +29,10 @@ public class Game extends GameState {
     }
 
     public void switchGameState(GameState gameState) {
-        this.gameState.end();
-        this.gameState = gameState;
+        if (this.gameState.end()) {
+            this.gameState = gameState;
 
-        gameState.start();
+            gameState.start();
+        }
     }
 }

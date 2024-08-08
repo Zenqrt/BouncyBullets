@@ -5,11 +5,9 @@ import dev.zenqrt.bouncybullets.event.GunShootEvent;
 import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
 import dev.zenqrt.bouncybullets.game.games.Gun;
-import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.items.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -21,6 +19,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 
+// TODO: Change active ability to marking player and dealing more damage to them for a short period of time
 final class SniperPlayerClass extends EventPlayerClass {
 
     private static final TargetAbility ACTIVE_ABILITY = new TargetAbility();
@@ -58,7 +57,7 @@ final class SniperPlayerClass extends EventPlayerClass {
 
         tasks.add(Bukkit.getScheduler().runTaskTimer(BouncyBullets.getInstance(), () -> {
             long interval = System.currentTimeMillis() - lastMoved.getOrDefault(playerEntity.getUniqueId(), System.currentTimeMillis());
-            float progress = interval / 50000f;
+            float progress = interval / 5000f;
 
             if (progress > 1) {
                 if (playerEntity.getExp() == 1) {
@@ -70,7 +69,7 @@ final class SniperPlayerClass extends EventPlayerClass {
 
             playerEntity.setExp(progress);
 
-            int damage = (int) (interval / 1000);
+            int damage = (int) (50 * progress);
             playerEntity.setLevel(damage);
         }, 0, 1));
     }
@@ -98,11 +97,12 @@ final class SniperPlayerClass extends EventPlayerClass {
     private static class TargetAbility extends ActiveAbilityItem {
 
         private static final int TIME_SECONDS = 10;
+        private static final float DAMAGE_INCREASE = 1;
 
         TargetAbility() {
             super("sniper_active_ability", Material.SPECTRAL_ARROW, AdventureUtils.withoutItalics("Target", NamedTextColor.LIGHT_PURPLE),
                     MiniMessageUtils.wordWrapLore(List.of(
-                            "<gray>Upon right-click, mark a player for <red>" + TIME_SECONDS + " <gray>seconds."
+                            "<gray>Upon right-click, mark a player for <green>" + TIME_SECONDS + " <gray>seconds, causing damage to that player to be increased by <red>100%<gray>."
                     ), 30));
         }
 
@@ -110,7 +110,7 @@ final class SniperPlayerClass extends EventPlayerClass {
         public void onUse(PlayerInteractEvent event) {
             Player player = event.getPlayer();
 
-            player.sendMessage(Component.text("This ability is not implemented yet. (Unsure if this ability should be implemented)", NamedTextColor.RED));
+
         }
     }
 
