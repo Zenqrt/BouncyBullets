@@ -46,6 +46,8 @@ public final class GrenadeLauncherGunItem extends GunItem {
 
     private class TNTBounceTask extends BukkitRunnable {
 
+        private static final Sound BOUNCE_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_SLIME_JUMP_SMALL.key(), Sound.Source.MASTER, 0.5F, 1);
+
         private final TNTPrimed tnt;
         private final int maxBounces;
         private int currentBounces;
@@ -74,6 +76,7 @@ public final class GrenadeLauncherGunItem extends GunItem {
             if (tnt.isOnGround() && tnt.getVelocity().getY() <= 0) {
                 currentBounces++;
                 tnt.setVelocity(previousVelocity.multiply(new Vector(1, -1, 1)));
+                tnt.getWorld().playSound(BOUNCE_SOUND, tnt);
             }
 
             previousVelocity = tnt.getVelocity();

@@ -89,8 +89,8 @@ public final class BouncyBullets extends JavaPlugin {
             player.sendMessage(Component.text("Glow added to " + target.getName(), NamedTextColor.GREEN));
         });
 
-        registerCommand("forcerc", (player, args) -> {
-        });
+//        registerCommand("forcerc", (player, args) -> {
+//        });
     }
 
     @Override

@@ -7,6 +7,7 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
 import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.item.items.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
+import dev.zenqrt.bouncybullets.utils.GlowUtils;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -16,6 +17,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.RayTraceResult;
 
 import java.util.*;
 
@@ -110,7 +112,15 @@ final class SniperPlayerClass extends EventPlayerClass {
         public void onUse(PlayerInteractEvent event) {
             Player player = event.getPlayer();
 
+            RayTraceResult result = player.getWorld().rayTraceEntities(player.getEyeLocation(), player.getEyeLocation().getDirection(), 100, 2);
 
+            if (result == null)
+                return;
+
+            if (!(result.getHitEntity() instanceof Player hitPlayer))
+                return;
+
+            GlowUtils.showGlow(player, hitPlayer);
         }
     }
 
