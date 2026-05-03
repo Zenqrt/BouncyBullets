@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/BouncyBullets.iml" filepath="$PROJECT_DIR$/BouncyBullets.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/BouncyBullets.iml" filepath="$PROJECT_DIR$/.idea/BouncyBullets.iml" />
     </modules>
   </component>
 </project>

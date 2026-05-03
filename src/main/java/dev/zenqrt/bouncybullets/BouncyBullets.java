@@ -5,9 +5,7 @@ import dev.zenqrt.bouncybullets.events.PlayerJoinListeners;
 import dev.zenqrt.bouncybullets.events.PlayerListeners;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.GameSettings;
-import dev.zenqrt.bouncybullets.glow.GlowManager;
 import dev.zenqrt.bouncybullets.map.GameMapRegistry;
-import dev.zenqrt.bouncybullets.utils.GlowUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -75,19 +73,19 @@ public final class BouncyBullets extends JavaPlugin {
             Bukkit.broadcast(Component.text("Successfully saved a backup of the world.", NamedTextColor.GREEN));
         });
 
-        registerCommand("glow", (player, args) -> {
-            Player target = Bukkit.getPlayer(args[0]);
-
-            if (target == null) {
-                player.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
-                return;
-            }
-
-            GlowManager.addGlowing(player.getUniqueId(), target.getEntityId());
-            GlowUtils.showGlow(player, target);
-
-            player.sendMessage(Component.text("Glow added to " + target.getName(), NamedTextColor.GREEN));
-        });
+//        registerCommand("glow", (player, args) -> {
+//            Player target = Bukkit.getPlayer(args[0]);
+//
+//            if (target == null) {
+//                player.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
+//                return;
+//            }
+//
+//            GlowManager.addGlowing(player.getUniqueId(), target.getEntityId());
+//            GlowUtils.showGlow(player, target);
+//
+//            player.sendMessage(Component.text("Glow added to " + target.getName(), NamedTextColor.GREEN));
+//        });
 
 //        registerCommand("forcerc", (player, args) -> {
 //        });

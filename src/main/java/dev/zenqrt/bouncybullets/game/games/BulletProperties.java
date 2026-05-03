@@ -1,9 +1,9 @@
 package dev.zenqrt.bouncybullets.game.games;
 
-public record BulletProperties(int numberOfBounces, double speed, float speedChange, double damage, float damageChange) {
+public record BulletProperties(int numberOfBounces, double speed, float speedChange, double minDamage, double maxDamage, float damageChange, double effectiveDamageDist, double damageDropOffPerBlock) {
 
-    public BulletProperties withDamage(double damage) {
-        return new BulletProperties(numberOfBounces, speed, speedChange, damage, damageChange);
+    public BulletProperties withMaxDamage(double maxDamage) {
+        return new BulletProperties(numberOfBounces, speed, speedChange, minDamage, maxDamage, damageChange, effectiveDamageDist, damageDropOffPerBlock);
     }
 
 }

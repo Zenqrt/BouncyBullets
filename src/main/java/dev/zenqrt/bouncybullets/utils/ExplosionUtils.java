@@ -17,7 +17,7 @@ public final class ExplosionUtils {
                 .location(location)
                 .spawn();
 
-        location.getWorld().playSound(Sound.sound(org.bukkit.Sound.ENTITY_GENERIC_EXPLODE, Sound.Source.PLAYER, 1, 0.75F));
+        location.getWorld().playSound(Sound.sound(org.bukkit.Sound.ENTITY_GENERIC_EXPLODE, Sound.Source.PLAYER, 1, 0.75F), location.getX(), location.getY(), location.getZ());
         location.getNearbyPlayers(radius).forEach(player -> player.damage(calculateDamage(damage, player.getLocation(), location), damageSource));
     }
 

@@ -185,7 +185,7 @@ public abstract class GunItem extends GameItem {
 
     private static List<Component> buildGunPropertyDescription(Gun gun) {
         return MiniMessageUtils.wordWrapLore(List.of(
-                "<gray>Damage: <red>" + gun.getBulletProperties().damage() + "❤",
+                "<gray>Damage: <red>" + gun.getBulletProperties().maxDamage() + "❤",
                 "<gray>Speed: <yellow>" + gun.getBulletProperties().speed() + " blocks/sec",
                 "<gray>Bounces: <yellow>" + gun.getBulletProperties().numberOfBounces()
 

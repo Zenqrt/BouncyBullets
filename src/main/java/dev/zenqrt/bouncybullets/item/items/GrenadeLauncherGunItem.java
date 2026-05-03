@@ -17,6 +17,7 @@ import org.bukkit.util.Vector;
 public final class GrenadeLauncherGunItem extends GunItem {
 
     private static final int BOUNCES = 2;
+    private static final int EXPLOSION_RADIUS = 6;
 
     public GrenadeLauncherGunItem(Gun gun) {
         super("grenade_launcher", Material.GOLDEN_HORSE_ARMOR, "Rocket Launcher", gun);
@@ -25,6 +26,8 @@ public final class GrenadeLauncherGunItem extends GunItem {
     @Override
     protected void shootProjectile(Player player, BulletProperties bulletProperties) {
         Location eyeLocation = player.getEyeLocation();
+
+        player.setVelocity(eyeLocation.getDirection().normalize().multiply(-1));
 
         TNTPrimed tnt = player.getWorld().spawn(eyeLocation, TNTPrimed.class);
         tnt.setSource(player);
@@ -67,7 +70,7 @@ public final class GrenadeLauncherGunItem extends GunItem {
             }
 
             if (currentBounces >= maxBounces) {
-                ExplosionUtils.createExplosion(tnt.getLocation(), 4, gun.getBulletProperties().damage(), DamageSource.builder(DamageType.MOB_PROJECTILE).build());
+                ExplosionUtils.createExplosion(tnt.getLocation(), EXPLOSION_RADIUS, gun.getBulletProperties().maxDamage(), DamageSource.builder(DamageType.MOB_PROJECTILE).withCausingEntity(tnt.getSource()).build());
                 tnt.remove();
                 this.cancel();
                 return;
@@ -75,7 +78,7 @@ public final class GrenadeLauncherGunItem extends GunItem {
 
             if (tnt.isOnGround() && tnt.getVelocity().getY() <= 0) {
                 currentBounces++;
-                tnt.setVelocity(previousVelocity.multiply(new Vector(1, -1, 1)));
+                tnt.setVelocity(previousVelocity.multiply(new Vector(1, -1, 1)).multiply(0.5));
                 tnt.getWorld().playSound(BOUNCE_SOUND, tnt);
             }
 

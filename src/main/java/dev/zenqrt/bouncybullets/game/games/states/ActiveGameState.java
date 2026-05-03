@@ -141,6 +141,7 @@ public final class ActiveGameState extends EventGameState {
         team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
 
         players.forEach((uuid, player) -> {
+            player.player().getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE).setBaseValue(100);
             team.addPlayer(player.player());
             setupPlayerInventory(player.player(), player.loadout());
             Objects.requireNonNull(player.player().getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE)).setBaseValue(0.5);

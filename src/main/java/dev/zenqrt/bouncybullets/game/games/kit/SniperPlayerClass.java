@@ -44,10 +44,10 @@ final class SniperPlayerClass extends EventPlayerClass {
                 .handler(event -> {
                     Player playerEntity = player.player();
 
-                    double originalDamage = Gun.SNIPER_RIFLE.getBulletProperties().damage();
+                    double originalDamage = Gun.SNIPER_RIFLE.getBulletProperties().maxDamage();
                     double finalDamage = originalDamage + (originalDamage * (playerEntity.getLevel() / 100D));
 
-                    event.setBulletProperties(event.getBulletProperties().withDamage(finalDamage));
+                    event.setBulletProperties(event.getBulletProperties().withMaxDamage(finalDamage));
                     lastMoved.put(playerEntity.getUniqueId(), System.currentTimeMillis());
                 })
                 .build());
@@ -112,6 +112,7 @@ final class SniperPlayerClass extends EventPlayerClass {
         public void onUse(PlayerInteractEvent event) {
             Player player = event.getPlayer();
 
+//            MapPalette.resizeImage()
             RayTraceResult result = player.getWorld().rayTraceEntities(player.getEyeLocation(), player.getEyeLocation().getDirection(), 100, 2);
 
             if (result == null)
