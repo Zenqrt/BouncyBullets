@@ -10,7 +10,7 @@ public enum Gun {
     SILENCED_PISTOL(new GunProperties(5, 0.05, 0.02, 8, 5, 2), new BulletProperties(3, 200, -0.10F, 1, 5, 0.1F, 25, 5), SilencedPistolGunItem::new),
     SMG(new GunProperties(1, 0.05, 0.02, 32, 2, 2), new BulletProperties(2, 350, -0.2F, 0.25, 1, 0.2F, 15, 2.5), SMGGunItem::new),
     SNIPER_RIFLE(new GunProperties(20, 0.1, 0.005, 3, 20, 5), new BulletProperties(2, 1000, -0.5F, 8, 8, -0.5F, 100, 0), SniperRifleGunItem::new),
-    GRENADE_LAUNCHER(new GunProperties(40, 0.1, 0.02, 6, 20, 2), new BulletProperties(2, 1.25, 0, 10, 10, 0, 100, 0), GrenadeLauncherGunItem::new),
+    GRENADE_LAUNCHER(new GunProperties(40, 0.1, 0.02, 6, 20, 2), new BulletProperties(2, 1.25, 0, 8, 8, 0, 100, 0), GrenadeLauncherGunItem::new),
     DESERT_EAGLE(new GunProperties(10, 0.05, 0.02, 6, 10, 2), new BulletProperties(3, 500, -0.1F, 1, 7, 0.1F, 25, 4), DesertEagleGunItem::new);
 
     private final GunProperties gunProperties;

@@ -34,7 +34,7 @@ public final class ExplosionUtils {
         }
 
         if (isBehindBlock == 2) {
-            return originalDamage * 0.15;
+            return 0;
         } else if (isBehindBlock == 1) {
             return originalDamage * 0.5;
         }
