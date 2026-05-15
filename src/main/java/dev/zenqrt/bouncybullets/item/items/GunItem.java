@@ -12,6 +12,7 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -29,6 +30,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.time.Duration;
 import java.util.*;
 
 public abstract class GunItem extends GameItem {
@@ -36,6 +38,10 @@ public abstract class GunItem extends GameItem {
     private static final long INTERACT_EVENT_TICK_DELAY = 4;
     private static final AttributeModifier RELOAD_SLOWDOWN_MODIFIER = new AttributeModifier(UUID.randomUUID(), "reload_slowdown", -0.05, AttributeModifier.Operation.ADD_NUMBER);
     private static final NamespacedKey AMMO_KEY = new NamespacedKey(BouncyBullets.getInstance(), "ammo");
+    private static final Title AIM_CROSSHAIR_TITLE = Title.title(
+            Component.text("<  >", NamedTextColor.GOLD),
+            Component.empty(),
+            Title.Times.times(Duration.ZERO, Duration.ofDays(1), Duration.ZERO));
 
     private final Map<UUID, Long> lastShootTicks = new HashMap<>();
     protected final Gun gun;
@@ -98,8 +104,10 @@ public abstract class GunItem extends GameItem {
                     Player player = event.getPlayer();
 
                     if (player.hasPotionEffect(PotionEffectType.SLOW)) {
+                        player.clearTitle();
                         player.removePotionEffect(PotionEffectType.SLOW);
                     } else {
+                        player.showTitle(AIM_CROSSHAIR_TITLE);
                         player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, gun.getGunProperties().scopeMagnifyMultiplier(), false, false, false));
                     }
                 })
