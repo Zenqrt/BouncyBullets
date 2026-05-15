@@ -1,17 +1,11 @@
 package dev.zenqrt.bouncybullets.game.base;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class GameStateSequence extends GameState {
 
-    private final List<GameState> states;
-    private int currentStateIndex;
-
-    public GameStateSequence() {
-        this.states = new ArrayList<>();
-        this.currentStateIndex = 0;
-    }
+    protected List<GameState> states;
+    private int currentStateIndex = 0;
 
     protected void onLastStateFinished() {}
 
@@ -55,9 +49,4 @@ public abstract class GameStateSequence extends GameState {
 
         states.get(--currentStateIndex).start();
     }
-
-    protected void addState(GameState state) {
-        states.add(state);
-    }
-
 }

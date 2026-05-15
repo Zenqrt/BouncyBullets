@@ -1,14 +1,19 @@
 package dev.zenqrt.bouncybullets.game.games.states;
 
 import dev.zenqrt.bouncybullets.event.PlayerJoinGameEvent;
-import dev.zenqrt.bouncybullets.game.EventGameState;
-import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
+import dev.zenqrt.bouncybullets.game.base.GameState;
+import dev.zenqrt.bouncybullets.game.event.EventNode;
+import dev.zenqrt.bouncybullets.game.event.GameEventNodes;
+import dev.zenqrt.bouncybullets.game.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
+import org.bukkit.event.player.PlayerEvent;
 
 import java.util.Map;
 import java.util.UUID;
 
-public final class WaitingGameState extends EventGameState {
+public final class WaitingGameState extends GameState {
+
+    private final EventNode<PlayerEvent> playerEventNode;
 
     private final PregameGameState pregameState;
     private final Map<UUID, BouncyBulletPlayer> players;
@@ -18,11 +23,12 @@ public final class WaitingGameState extends EventGameState {
         this.pregameState = pregameState;
         this.players = players;
         this.minPlayerCount = minPlayerCount;
+
+        this.playerEventNode = GameEventNodes.filteredPlayerEvents(pregameState.game);
     }
 
-    @Override
-    public void registerEvents() {
-        this.eventNode.registerListener(PaperEventListener.builder(PlayerJoinGameEvent.class)
+    private void registerEvents() {
+        this.playerEventNode.registerListener(PaperEventListener.builder(PlayerJoinGameEvent.class)
                 .filter(event -> event.getGame().getId() == pregameState.game.getId())
                 .handler(event -> {
                     if (this.players.size() >= minPlayerCount) {
@@ -31,4 +37,8 @@ public final class WaitingGameState extends EventGameState {
                 }).build());
     }
 
+    @Override
+    protected void onStateStart() {
+        registerEvents();
+    }
 }

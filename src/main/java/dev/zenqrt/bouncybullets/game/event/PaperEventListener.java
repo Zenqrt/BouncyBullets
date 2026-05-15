@@ -1,6 +1,5 @@
-package dev.zenqrt.bouncybullets.game.event.impl;
+package dev.zenqrt.bouncybullets.game.event;
 
-import dev.zenqrt.bouncybullets.game.event.EventListener;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,7 +8,11 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public interface PaperEventListener<T extends Event> extends EventListener<T> {
+public interface PaperEventListener<T extends Event> {
+
+    Class<T> getEventClass();
+    void run(@NotNull T event);
+
 
     static <E extends Event> Builder<E> builder(Class<E> eventClass) {
         return new Builder<>(eventClass);
@@ -57,5 +60,4 @@ public interface PaperEventListener<T extends Event> extends EventListener<T> {
         }
 
     }
-
 }

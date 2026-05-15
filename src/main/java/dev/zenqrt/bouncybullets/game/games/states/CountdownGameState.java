@@ -2,14 +2,19 @@ package dev.zenqrt.bouncybullets.game.games.states;
 
 import dev.zenqrt.bouncybullets.BouncyBullets;
 import dev.zenqrt.bouncybullets.event.PlayerQuitGameEvent;
-import dev.zenqrt.bouncybullets.game.EventGameState;
-import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
+import dev.zenqrt.bouncybullets.game.base.GameState;
+import dev.zenqrt.bouncybullets.game.event.EventNode;
+import dev.zenqrt.bouncybullets.game.event.GameEventNodes;
+import dev.zenqrt.bouncybullets.game.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public final class CountdownGameState extends EventGameState {
+public final class CountdownGameState extends GameState {
+
+    private final EventNode<PlayerEvent> playerEventNode;
 
     private final PregameGameState pregameState;
     private final GamePlayerList players;
@@ -21,21 +26,24 @@ public final class CountdownGameState extends EventGameState {
         this.players = players;
         this.minPlayerCount = minPlayerCount;
         this.countdownTask = new CountdownTask(15);
-    }
 
-    @Override
-    public void registerEvents() {
-        this.eventNode.registerListener(PaperEventListener.builder(PlayerQuitGameEvent.class)
-                .filter(event -> event.getGame().getId() == pregameState.game.getId())
-                .filter(event -> players.size() < minPlayerCount)
-                .handler(event -> pregameState.switchPreviousState())
-                .build());
+        this.playerEventNode = GameEventNodes.filteredPlayerEvents(pregameState.game);
     }
 
     @Override
     protected void onStateStart() {
         super.onStateStart();
+
+        registerEvents();
         countdownTask.runTaskTimer(BouncyBullets.getInstance(), 0, 20);
+    }
+
+    private void registerEvents() {
+        this.playerEventNode.registerListener(PaperEventListener.builder(PlayerQuitGameEvent.class)
+                .filter(event -> event.getGame().getId() == pregameState.game.getId())
+                .filter(event -> players.size() < minPlayerCount)
+                .handler(event -> pregameState.switchPreviousState())
+                .build());
     }
 
     @Override

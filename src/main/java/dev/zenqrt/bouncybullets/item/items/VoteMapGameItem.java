@@ -3,7 +3,7 @@ package dev.zenqrt.bouncybullets.item.items;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
-import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
+import dev.zenqrt.bouncybullets.game.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.map.GameMap;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;

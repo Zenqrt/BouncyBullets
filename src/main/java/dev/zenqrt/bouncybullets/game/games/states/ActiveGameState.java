@@ -2,8 +2,10 @@ package dev.zenqrt.bouncybullets.game.games.states;
 
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent;
 import dev.zenqrt.bouncybullets.BouncyBullets;
-import dev.zenqrt.bouncybullets.game.EventGameState;
-import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
+import dev.zenqrt.bouncybullets.game.base.GameState;
+import dev.zenqrt.bouncybullets.game.event.EventNode;
+import dev.zenqrt.bouncybullets.game.event.GameEventNodes;
+import dev.zenqrt.bouncybullets.game.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
 import dev.zenqrt.bouncybullets.game.games.Gun;
@@ -24,7 +26,9 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -37,9 +41,12 @@ import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
-public final class ActiveGameState extends EventGameState {
+public final class ActiveGameState extends GameState {
 
     private static final Sound KILL_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.MASTER, 1, 1);
+
+    private final EventNode<PlayerEvent> playerEventNode;
+    private final EventNode<EntityEvent> playerEntityEventNode;
 
     private final BouncyBulletGame game;
     private final GamePlayerList players;
@@ -49,10 +56,12 @@ public final class ActiveGameState extends EventGameState {
         this.game = game;
         this.players = players;
         this.gameMap = gameMap;
+
+        this.playerEventNode = GameEventNodes.filteredPlayerEvents(game);
+        this.playerEntityEventNode = GameEventNodes.filteredEntityEvents(game);
     }
 
-    @Override
-    public void registerEvents() {
+    private void registerEvents() {
         GameItem.registerGameItemEvents(Stream.of(Gun.values())
                 .map(gun -> (GameItem) gun.getItem())
                 .toList()
@@ -63,7 +72,7 @@ public final class ActiveGameState extends EventGameState {
                 eventPlayerClass.onStartUse(player);
             }
         });
-        this.eventNode.registerListener(PaperEventListener.builder(PlayerTeleportEvent.class)
+        this.playerEventNode.registerListener(PaperEventListener.builder(PlayerTeleportEvent.class)
                 .filter(event -> event.getCause() == PlayerTeleportEvent.TeleportCause.SPECTATE)
                 .handler(event ->  {
                     event.setCancelled(true);
@@ -74,11 +83,11 @@ public final class ActiveGameState extends EventGameState {
                     }
                 })
                 .build());
-        this.eventNode.registerListener(PaperEventListener.builder(PlayerStopSpectatingEntityEvent.class)
+        this.playerEventNode.registerListener(PaperEventListener.builder(PlayerStopSpectatingEntityEvent.class)
                 .filter(event -> event.getPlayer().getGameMode() == GameMode.SPECTATOR)
                 .handler(event -> event.setCancelled(true))
                 .build());
-        this.eventNode.registerListener(PaperEventListener.builder(PlayerDeathEvent.class)
+        this.playerEntityEventNode.registerListener(PaperEventListener.builder(PlayerDeathEvent.class)
                 .filter(event -> players.containsKey(event.getPlayer().getUniqueId()))
                 .handler(event -> {
                     event.setCancelled(true);
@@ -130,6 +139,8 @@ public final class ActiveGameState extends EventGameState {
     @Override
     protected void onStateStart() {
         super.onStateStart();
+
+        registerEvents();
 
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
 

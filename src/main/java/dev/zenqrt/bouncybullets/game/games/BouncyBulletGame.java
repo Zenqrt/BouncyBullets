@@ -38,6 +38,10 @@ public final class BouncyBulletGame extends Game {
         Bukkit.getPluginManager().callEvent(new PlayerQuitGameEvent(player.player(), this));
     }
 
+    public boolean hasPlayer(UUID uuid) {
+        return this.players.containsKey(uuid);
+    }
+
     public boolean canJoinGame() {
         return true;
 //        return this.gameState instanceof PregameGameState && players.size() < gameSettings.maxPlayers();

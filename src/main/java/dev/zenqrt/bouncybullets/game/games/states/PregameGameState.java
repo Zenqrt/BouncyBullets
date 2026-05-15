@@ -2,8 +2,9 @@ package dev.zenqrt.bouncybullets.game.games.states;
 
 import dev.zenqrt.bouncybullets.event.PlayerJoinGameEvent;
 import dev.zenqrt.bouncybullets.game.base.GameStateSequence;
-import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
-import dev.zenqrt.bouncybullets.game.event.impl.PaperEventNode;
+import dev.zenqrt.bouncybullets.game.event.EventNode;
+import dev.zenqrt.bouncybullets.game.event.GameEventNodes;
+import dev.zenqrt.bouncybullets.game.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.generator.VoidGenerator;
 import dev.zenqrt.bouncybullets.item.GameItem;
@@ -17,8 +18,8 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.inventory.Inventory;
 
 import java.io.File;
@@ -31,7 +32,8 @@ public final class PregameGameState extends GameStateSequence {
 
     private static final Location SPAWN_LOCATION = new Location(Bukkit.getWorld("world"), 213.5, 66, 84.5);
 
-    private final PaperEventNode<Event> eventNode = new PaperEventNode<>();
+    private final EventNode<PlayerEvent> playerEventNode;
+
     private final Map<GameMap, Integer> mapVotes = new HashMap<>();
     private final VoteMapGameItem voteMapItem;
     private final LoadoutGameItem loadoutItem;
@@ -42,22 +44,26 @@ public final class PregameGameState extends GameStateSequence {
         this.game = game;
         this.players = players;
 
+        this.playerEventNode = GameEventNodes.filteredPlayerEvents(game);
+
         this.voteMapItem = new VoteMapGameItem(mapVotes);
         this.loadoutItem = new LoadoutGameItem(players);
 
         GameMapRegistry.getGameMaps().forEach((key, value) -> mapVotes.put(value, 0));
 
-        this.addState(new WaitingGameState(this, players, game.getGameSettings().minPlayers()));
-        this.addState(new CountdownGameState(this, players, game.getGameSettings().minPlayers()));
+        this.states = List.of(
+                new WaitingGameState(this, players, game.getGameSettings().minPlayers()),
+                new CountdownGameState(this, players, game.getGameSettings().minPlayers())
+        );
     }
 
     public void registerEvents() {
         GameItem.registerGameItemEvents(List.of(loadoutItem, new VoteMapGameItem(mapVotes)));
 
-        this.eventNode.registerListener(PaperEventListener.builder(PlayerDropItemEvent.class)
+        this.playerEventNode.registerListener(PaperEventListener.builder(PlayerDropItemEvent.class)
                 .handler(event -> event.setCancelled(true))
                 .build());
-        this.eventNode.registerListener(PaperEventListener.builder(PlayerJoinGameEvent.class)
+        this.playerEventNode.registerListener(PaperEventListener.builder(PlayerJoinGameEvent.class)
                 .filter(event -> event.getGame().getId() == game.getId())
                 .handler(event -> {
                     players.sendMessage(MiniMessage.miniMessage().deserialize("<green>{player} joined the game! ({playerCount}/{maxPlayers})")
@@ -110,7 +116,7 @@ public final class PregameGameState extends GameStateSequence {
     @Override
     protected void onStateEnd() {
         super.onStateEnd();
-        eventNode.unregisterAllListeners();
+        playerEventNode.unregisterAllListeners();
     }
 
     private FreeForAllActiveGameMap loadGameMap(GameMap gameMap) {

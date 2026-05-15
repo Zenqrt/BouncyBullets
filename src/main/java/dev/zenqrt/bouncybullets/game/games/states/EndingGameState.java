@@ -1,16 +1,15 @@
 package dev.zenqrt.bouncybullets.game.games.states;
 
-import dev.zenqrt.bouncybullets.game.EventGameState;
+import dev.zenqrt.bouncybullets.game.base.GameState;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
-import org.bukkit.entity.Player;
 
 import java.util.Comparator;
 
-public final class EndingGameState extends EventGameState {
+public final class EndingGameState extends GameState {
 
     private final GamePlayerList players;
 
@@ -19,7 +18,7 @@ public final class EndingGameState extends EventGameState {
     }
 
     @Override
-    public void registerEvents() {
+    protected void onStateStart() {
         players.showTitle(Title.title(
                 Component.text("The winner is...", NamedTextColor.AQUA),
                 Component.text(getWinner().player().getName(), NamedTextColor.YELLOW)));

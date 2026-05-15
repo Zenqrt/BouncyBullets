@@ -1,6 +1,6 @@
 package dev.zenqrt.bouncybullets.item.items;
 
-import dev.zenqrt.bouncybullets.game.event.impl.PaperEventListener;
+import dev.zenqrt.bouncybullets.game.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
