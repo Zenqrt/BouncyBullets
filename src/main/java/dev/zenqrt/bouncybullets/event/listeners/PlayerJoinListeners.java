@@ -1,4 +1,4 @@
-package dev.zenqrt.bouncybullets.events;
+package dev.zenqrt.bouncybullets.event.listeners;
 
 import dev.zenqrt.bouncybullets.BouncyBullets;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;

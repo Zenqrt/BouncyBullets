@@ -1,7 +1,7 @@
 package dev.zenqrt.bouncybullets.item;
 
 import dev.zenqrt.bouncybullets.BouncyBullets;
-import dev.zenqrt.bouncybullets.game.event.impl.PaperEventNode;
+import dev.zenqrt.bouncybullets.event.impl.PaperEventNode;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;

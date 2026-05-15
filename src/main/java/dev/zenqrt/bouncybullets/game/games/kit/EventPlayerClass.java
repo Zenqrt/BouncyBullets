@@ -1,6 +1,6 @@
 package dev.zenqrt.bouncybullets.game.games.kit;
 
-import dev.zenqrt.bouncybullets.game.event.impl.PaperEventNode;
+import dev.zenqrt.bouncybullets.event.impl.PaperEventNode;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
 import org.bukkit.event.Event;
 

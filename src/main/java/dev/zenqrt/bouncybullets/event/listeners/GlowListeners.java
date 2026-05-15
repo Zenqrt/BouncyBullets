@@ -1,4 +1,4 @@
-package dev.zenqrt.bouncybullets.events;
+package dev.zenqrt.bouncybullets.event.listeners;
 
 import dev.zenqrt.bouncybullets.glow.GlowManager;
 import dev.zenqrt.bouncybullets.utils.GlowUtils;

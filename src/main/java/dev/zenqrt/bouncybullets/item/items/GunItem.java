@@ -1,8 +1,8 @@
 package dev.zenqrt.bouncybullets.item.items;
 
 import dev.zenqrt.bouncybullets.BouncyBullets;
-import dev.zenqrt.bouncybullets.event.GunShootEvent;
-import dev.zenqrt.bouncybullets.game.event.PaperEventListener;
+import dev.zenqrt.bouncybullets.event.events.GunShootEvent;
+import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BulletProperties;
 import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.item.GameItem;

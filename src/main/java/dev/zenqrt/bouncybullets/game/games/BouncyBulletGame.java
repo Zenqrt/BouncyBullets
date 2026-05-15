@@ -1,7 +1,7 @@
 package dev.zenqrt.bouncybullets.game.games;
 
-import dev.zenqrt.bouncybullets.event.PlayerJoinGameEvent;
-import dev.zenqrt.bouncybullets.event.PlayerQuitGameEvent;
+import dev.zenqrt.bouncybullets.event.events.PlayerJoinGameEvent;
+import dev.zenqrt.bouncybullets.event.events.PlayerQuitGameEvent;
 import dev.zenqrt.bouncybullets.game.base.Game;
 import dev.zenqrt.bouncybullets.game.base.GameState;
 import dev.zenqrt.bouncybullets.game.games.states.PregameGameState;

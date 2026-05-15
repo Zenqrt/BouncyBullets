@@ -1,6 +1,6 @@
 package dev.zenqrt.bouncybullets.item.items;
 
-import dev.zenqrt.bouncybullets.game.event.PaperEventListener;
+import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.gui.ClassSelectGui;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;

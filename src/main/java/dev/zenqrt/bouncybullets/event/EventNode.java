@@ -1,4 +1,4 @@
-package dev.zenqrt.bouncybullets.game.event;
+package dev.zenqrt.bouncybullets.event;
 
 import org.bukkit.event.Event;
 

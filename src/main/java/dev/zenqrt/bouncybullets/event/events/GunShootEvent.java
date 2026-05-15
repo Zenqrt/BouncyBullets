@@ -1,8 +1,7 @@
-package dev.zenqrt.bouncybullets.event;
+package dev.zenqrt.bouncybullets.event.events;
 
 import dev.zenqrt.bouncybullets.game.games.BulletProperties;
 import dev.zenqrt.bouncybullets.game.games.Gun;
-import dev.zenqrt.bouncybullets.game.games.GunProperties;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

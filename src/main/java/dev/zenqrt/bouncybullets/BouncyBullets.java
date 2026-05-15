@@ -1,8 +1,8 @@
 package dev.zenqrt.bouncybullets;
 
-import dev.zenqrt.bouncybullets.events.GlowListeners;
-import dev.zenqrt.bouncybullets.events.PlayerJoinListeners;
-import dev.zenqrt.bouncybullets.events.PlayerListeners;
+import dev.zenqrt.bouncybullets.event.listeners.GlowListeners;
+import dev.zenqrt.bouncybullets.event.listeners.PlayerJoinListeners;
+import dev.zenqrt.bouncybullets.event.listeners.PlayerListeners;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.GameSettings;
 import dev.zenqrt.bouncybullets.map.GameMapRegistry;

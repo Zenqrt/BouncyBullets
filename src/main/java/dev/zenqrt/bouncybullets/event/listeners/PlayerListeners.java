@@ -1,4 +1,4 @@
-package dev.zenqrt.bouncybullets.events;
+package dev.zenqrt.bouncybullets.event.listeners;
 
 import org.bukkit.damage.DamageType;
 import org.bukkit.event.EventHandler;

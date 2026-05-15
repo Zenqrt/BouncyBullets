@@ -20,7 +20,7 @@ public final class GrenadeLauncherGunItem extends GunItem {
     private static final int EXPLOSION_RADIUS = 6;
 
     public GrenadeLauncherGunItem(Gun gun) {
-        super("grenade_launcher", Material.GOLDEN_HORSE_ARMOR, "Rocket Launcher", gun);
+        super("grenade_launcher", Material.GOLDEN_HORSE_ARMOR, "Grenade Launcher", gun);
     }
 
     @Override

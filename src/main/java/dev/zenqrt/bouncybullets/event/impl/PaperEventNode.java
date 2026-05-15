@@ -1,8 +1,8 @@
-package dev.zenqrt.bouncybullets.game.event.impl;
+package dev.zenqrt.bouncybullets.event.impl;
 
 import dev.zenqrt.bouncybullets.BouncyBullets;
-import dev.zenqrt.bouncybullets.game.event.PaperEventListener;
-import dev.zenqrt.bouncybullets.game.event.EventNode;
+import dev.zenqrt.bouncybullets.event.PaperEventListener;
+import dev.zenqrt.bouncybullets.event.EventNode;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;

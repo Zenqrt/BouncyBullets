@@ -1,10 +1,10 @@
 package dev.zenqrt.bouncybullets.game.games.states;
 
-import dev.zenqrt.bouncybullets.event.PlayerJoinGameEvent;
+import dev.zenqrt.bouncybullets.event.events.PlayerJoinGameEvent;
 import dev.zenqrt.bouncybullets.game.base.GameState;
-import dev.zenqrt.bouncybullets.game.event.EventNode;
-import dev.zenqrt.bouncybullets.game.event.GameEventNodes;
-import dev.zenqrt.bouncybullets.game.event.PaperEventListener;
+import dev.zenqrt.bouncybullets.event.EventNode;
+import dev.zenqrt.bouncybullets.event.GameEventNodes;
+import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
 import org.bukkit.event.player.PlayerEvent;
 
