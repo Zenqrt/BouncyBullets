@@ -1,7 +1,7 @@
 package dev.zenqrt.bouncybullets.game.games.states;
 
 import dev.zenqrt.bouncybullets.game.base.GameState;
-import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -26,9 +26,9 @@ public final class EndingGameState extends GameState {
                 .append(Component.text(getWinner().player().getName(), NamedTextColor.YELLOW)));
     }
 
-    private BouncyBulletPlayer getWinner() {
+    private BouncyBulletGamePlayer getWinner() {
         return players.values().stream()
-                .max(Comparator.comparing(BouncyBulletPlayer::kills))
+                .max(Comparator.comparing(BouncyBulletGamePlayer::kills))
                 .orElse(null);
     }
 }

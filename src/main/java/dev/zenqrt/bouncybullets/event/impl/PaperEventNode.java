@@ -1,6 +1,6 @@
 package dev.zenqrt.bouncybullets.event.impl;
 
-import dev.zenqrt.bouncybullets.BouncyBullets;
+import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.event.EventNode;
 import org.bukkit.Bukkit;
@@ -37,7 +37,7 @@ public final class PaperEventNode<E extends Event> implements EventNode<E> {
 
                 eventListener.run(eventCasted);
             }
-        }, BouncyBullets.getInstance());
+        }, BouncyBulletsPlugin.getInstance());
     }
 
     @Override

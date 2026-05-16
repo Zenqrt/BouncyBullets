@@ -1,7 +1,7 @@
 package dev.zenqrt.bouncybullets.item.items;
 
 import com.destroystokyo.paper.ParticleBuilder;
-import dev.zenqrt.bouncybullets.BouncyBullets;
+import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.game.games.BulletProperties;
 import dev.zenqrt.bouncybullets.game.games.Gun;
 import net.kyori.adventure.sound.Sound;
@@ -36,7 +36,7 @@ public abstract class BulletProjectileGunItem extends GunItem {
 
     @Override
     protected void shootProjectile(Player player, BulletProperties bulletProperties) {
-        new ShootBulletTask(player, player.getEyeLocation(), bulletProperties, player.hasPotionEffect(PotionEffectType.SLOW)).runTaskTimer(BouncyBullets.getInstance(), 0, 1);
+        new ShootBulletTask(player, player.getEyeLocation(), bulletProperties, player.hasPotionEffect(PotionEffectType.SLOW)).runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 1);
     }
 
     private class ShootBulletTask extends BukkitRunnable {

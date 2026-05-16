@@ -1,6 +1,6 @@
 package dev.zenqrt.bouncybullets.item;
 
-import dev.zenqrt.bouncybullets.BouncyBullets;
+import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.event.impl.PaperEventNode;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 
 public abstract class GameItem {
 
-    private static final NamespacedKey ITEM_KEY = new NamespacedKey(BouncyBullets.getInstance(), "game_item");
+    private static final NamespacedKey ITEM_KEY = new NamespacedKey(BouncyBulletsPlugin.getInstance(), "game_item");
 
     private final String key;
     private final Component displayName;

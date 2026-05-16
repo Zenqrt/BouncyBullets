@@ -1,9 +1,9 @@
 package dev.zenqrt.bouncybullets.game.games.kit;
 
-import dev.zenqrt.bouncybullets.BouncyBullets;
+import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.event.events.GunShootEvent;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
-import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.item.items.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
@@ -30,7 +30,7 @@ final class SniperPlayerClass extends EventPlayerClass {
     private final List<BukkitTask> tasks = new ArrayList<>();
 
     @Override
-    public void registerEvents(BouncyBulletPlayer player) {
+    public void registerEvents(BouncyBulletGamePlayer player) {
         ACTIVE_ABILITY.registerEvents();
 
         this.eventNode.registerListener(PaperEventListener.builder(PlayerMoveEvent.class)
@@ -54,10 +54,10 @@ final class SniperPlayerClass extends EventPlayerClass {
     }
 
     @Override
-    public void onStartUse(BouncyBulletPlayer player) {
+    public void onStartUse(BouncyBulletGamePlayer player) {
         Player playerEntity = player.player();
 
-        tasks.add(Bukkit.getScheduler().runTaskTimer(BouncyBullets.getInstance(), () -> {
+        tasks.add(Bukkit.getScheduler().runTaskTimer(BouncyBulletsPlugin.getInstance(), () -> {
             long interval = System.currentTimeMillis() - lastMoved.getOrDefault(playerEntity.getUniqueId(), System.currentTimeMillis());
             float progress = interval / 5000f;
 
@@ -77,7 +77,7 @@ final class SniperPlayerClass extends EventPlayerClass {
     }
 
     @Override
-    public void onStopUse(BouncyBulletPlayer player) {
+    public void onStopUse(BouncyBulletGamePlayer player) {
         tasks.forEach(BukkitTask::cancel);
         tasks.clear();
     }

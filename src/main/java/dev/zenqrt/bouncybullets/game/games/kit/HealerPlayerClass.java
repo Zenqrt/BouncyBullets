@@ -1,7 +1,7 @@
 package dev.zenqrt.bouncybullets.game.games.kit;
 
-import dev.zenqrt.bouncybullets.BouncyBullets;
-import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
+import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.items.ActiveAbilityItem;
@@ -34,12 +34,12 @@ final class HealerPlayerClass extends EventPlayerClass {
     private final List<BukkitTask> healTasks = new ArrayList<>();
 
     @Override
-    public void registerEvents(BouncyBulletPlayer player) {
+    public void registerEvents(BouncyBulletGamePlayer player) {
         GameItem.registerGameItemEvents(List.of(ACTIVE_ABILITY));
     }
 
     @Override
-    public void onStartUse(BouncyBulletPlayer player) {
+    public void onStartUse(BouncyBulletGamePlayer player) {
         Player playerEntity = player.player();
         Objects.requireNonNull(playerEntity.getAttribute(Attribute.GENERIC_MAX_ABSORPTION)).setBaseValue(5);
 
@@ -56,11 +56,11 @@ final class HealerPlayerClass extends EventPlayerClass {
                     playerEntity.setHealth(playerEntity.getHealth() + 1);
                 }
             }
-        }.runTaskTimer(BouncyBullets.getInstance(), 0, 40));
+        }.runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 40));
     }
 
     @Override
-    public void onStopUse(BouncyBulletPlayer player) {
+    public void onStopUse(BouncyBulletGamePlayer player) {
         healTasks.forEach(BukkitTask::cancel);
         healTasks.clear();
     }

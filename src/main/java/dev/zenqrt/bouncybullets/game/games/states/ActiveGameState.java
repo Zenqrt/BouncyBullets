@@ -1,13 +1,13 @@
 package dev.zenqrt.bouncybullets.game.games.states;
 
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent;
-import dev.zenqrt.bouncybullets.BouncyBullets;
+import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.game.base.GameState;
 import dev.zenqrt.bouncybullets.event.EventNode;
 import dev.zenqrt.bouncybullets.event.GameEventNodes;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
-import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.game.games.Loadout;
 import dev.zenqrt.bouncybullets.game.games.kit.EventPlayerClass;
@@ -102,7 +102,7 @@ public final class ActiveGameState extends GameState {
 
                     if (lastDamageEvent != null) {
                         if (lastDamageEvent.getDamageSource().getCausingEntity() instanceof Player killer && players.containsKey(killer.getUniqueId())) {
-                            players.updatePlayer(killer.getUniqueId(), BouncyBulletPlayer::addKill);
+                            players.updatePlayer(killer.getUniqueId(), BouncyBulletGamePlayer::addKill);
                             player.setSpectatorTarget(killer);
 
                             killer.playSound(KILL_SOUND, Sound.Emitter.self());
@@ -110,10 +110,10 @@ public final class ActiveGameState extends GameState {
                         }
                     }
 
-                    BouncyBulletPlayer updatedPlayer = players.updatePlayer(player.getUniqueId(), BouncyBulletPlayer::addDeath);
+                    BouncyBulletGamePlayer updatedPlayer = players.updatePlayer(player.getUniqueId(), BouncyBulletGamePlayer::addDeath);
 
                     new DeathSpectatorTask(updatedPlayer, 5)
-                            .runTaskTimer(BouncyBullets.getInstance(), 0, 20);
+                            .runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 20);
                 })
                 .build());
 //        this.eventNode.registerListener(PaperEventListener.builder(InventoryClickEvent.class)
@@ -162,7 +162,7 @@ public final class ActiveGameState extends GameState {
             player.player().teleport(randomSpawn);
         });
 
-        new GameTimerTask(game.getGameSettings().gameTime()).runTaskTimer(BouncyBullets.getInstance(), 0, 20);
+        new GameTimerTask(game.getGameSettings().gameTime()).runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 20);
     }
 
     @Override
@@ -198,10 +198,10 @@ public final class ActiveGameState extends GameState {
 
     private final class DeathSpectatorTask extends BukkitRunnable {
 
-        private final BouncyBulletPlayer player;
+        private final BouncyBulletGamePlayer player;
         private int timeLeft;
 
-        DeathSpectatorTask(BouncyBulletPlayer player, int respawnTime) {
+        DeathSpectatorTask(BouncyBulletGamePlayer player, int respawnTime) {
             this.player = player;
             this.timeLeft = respawnTime;
         }

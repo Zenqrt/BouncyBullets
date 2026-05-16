@@ -1,6 +1,6 @@
 package dev.zenqrt.bouncybullets.item.items;
 
-import dev.zenqrt.bouncybullets.BouncyBullets;
+import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.game.games.BulletProperties;
 import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.utils.ExplosionUtils;
@@ -34,7 +34,7 @@ public final class GrenadeLauncherGunItem extends GunItem {
         tnt.setFuseTicks(Integer.MAX_VALUE);
         tnt.setVelocity(eyeLocation.getDirection().normalize().multiply(bulletProperties.speed()));
 
-        new TNTBounceTask(tnt, BOUNCES).runTaskTimer(BouncyBullets.getInstance(), 0, 1);
+        new TNTBounceTask(tnt, BOUNCES).runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 1);
     }
 
     @Override

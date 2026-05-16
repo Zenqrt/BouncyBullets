@@ -1,8 +1,8 @@
 package dev.zenqrt.bouncybullets.game.games.kit;
 
-import dev.zenqrt.bouncybullets.BouncyBullets;
+import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
-import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.items.ActiveAbilityItem;
@@ -51,7 +51,7 @@ final class StealthPlayerClass extends EventPlayerClass {
     }
 
     @Override
-    public void registerEvents(BouncyBulletPlayer player) {
+    public void registerEvents(BouncyBulletGamePlayer player) {
         GameItem.registerGameItemEvents(List.of(ACTIVE_ABILITY));
         this.eventNode.registerListener(PaperEventListener.builder(PlayerDeathEvent.class)
                 .filter(event -> {
@@ -113,7 +113,7 @@ final class StealthPlayerClass extends EventPlayerClass {
                     player.getInventory().setItem(slotInteracted, originalItem.clone());
                     player.playSound(REFILL_SOUND, Sound.Emitter.self());
                 }
-            }.runTaskLater(BouncyBullets.getInstance(), COOLDOWN);
+            }.runTaskLater(BouncyBulletsPlugin.getInstance(), COOLDOWN);
         }
     }
 }

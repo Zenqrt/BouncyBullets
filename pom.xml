@@ -14,8 +14,9 @@
     <description>A first person shooter minigame based on the main mechanic of bullets bouncing off of surfaces.</description>
     <properties>
         <minecraft.version>1.20.4-R0.1-SNAPSHOT</minecraft.version>
-    <java.version>17</java.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>17</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <lamp.version>4.0.0-rc.16</lamp.version>
   </properties>
 
   <build>
@@ -67,8 +68,11 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.8.1</version>
           <configuration>
-            <source>${java.version}</source>
-            <target>${java.version}</target>
+              <source>${java.version}</source>
+              <target>${java.version}</target>
+              <compilerArgs>
+                  <arg>-parameters</arg>
+              </compilerArgs>
           </configuration>
         </plugin>
         <plugin>
@@ -133,6 +137,26 @@
           <version>${minecraft.version}</version>
           <classifier>remapped-mojang</classifier>
           <scope>provided</scope>
+      </dependency>
+      <!-- Required for all platforms -->
+      <dependency>
+          <groupId>io.github.revxrsal</groupId>
+          <artifactId>lamp.common</artifactId>
+          <version>${lamp.version}</version>
+      </dependency>
+
+      <!-- Bukkit module -->
+      <dependency>
+          <groupId>io.github.revxrsal</groupId>
+          <artifactId>lamp.bukkit</artifactId>
+          <version>${lamp.version}</version>
+      </dependency>
+
+      <!-- Optional: Brigadier module -->
+      <dependency>
+          <groupId>io.github.revxrsal</groupId>
+          <artifactId>lamp.brigadier</artifactId>
+          <version>${lamp.version}</version>
       </dependency>
 
   </dependencies>

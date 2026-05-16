@@ -64,7 +64,6 @@ public final class PregameGameState extends GameStateSequence {
                 .handler(event -> event.setCancelled(true))
                 .build());
         this.playerEventNode.registerListener(PaperEventListener.builder(PlayerJoinGameEvent.class)
-                .filter(event -> event.getGame().getId() == game.getId())
                 .handler(event -> {
                     players.sendMessage(MiniMessage.miniMessage().deserialize("<green>{player} joined the game! ({playerCount}/{maxPlayers})")
                             .replaceText(builder -> builder.matchLiteral("{player}").replacement(event.getPlayer().name()))

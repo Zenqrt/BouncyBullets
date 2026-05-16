@@ -1,10 +1,10 @@
 package dev.zenqrt.bouncybullets;
 
+import dev.zenqrt.bouncybullets.command.commands.BouncyBulletsCommand;
 import dev.zenqrt.bouncybullets.event.listeners.GlowListeners;
 import dev.zenqrt.bouncybullets.event.listeners.PlayerJoinListeners;
 import dev.zenqrt.bouncybullets.event.listeners.PlayerListeners;
-import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
-import dev.zenqrt.bouncybullets.game.games.GameSettings;
+import dev.zenqrt.bouncybullets.game.GameManager;
 import dev.zenqrt.bouncybullets.map.GameMapRegistry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -14,6 +14,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import revxrsal.commands.Lamp;
+import revxrsal.commands.bukkit.BukkitLamp;
+import revxrsal.commands.bukkit.actor.BukkitCommandActor;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,11 +24,9 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
-public final class BouncyBullets extends JavaPlugin {
+public final class BouncyBulletsPlugin extends JavaPlugin {
 
-    private static BouncyBulletGame game;
-    private static BouncyBullets instance;
-
+    private static BouncyBulletsPlugin instance;
 
     @Override
     public void onEnable() {
@@ -33,29 +34,16 @@ public final class BouncyBullets extends JavaPlugin {
         GameMapRegistry.registerGameMaps(new File(getDataFolder(), "maps"));
         Bukkit.getWorlds().forEach(world -> world.setAutoSave(false));
 
-        game = new BouncyBulletGame(1, new GameSettings(2, 8, 300));
-        game.start();
+        GameManager gameManager = new GameManager();
 
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListeners(), this);
         Bukkit.getPluginManager().registerEvents(new GlowListeners(), this);
 
-        registerCommand("tpgameworld", (player, args) -> {
-            player.sendMessage(Component.text("Teleporting...", NamedTextColor.GRAY).decorate(TextDecoration.ITALIC));
-            player.teleport(Bukkit.getWorld("game_world_" + game.getId()).getSpawnLocation());
-        });
-
-        registerCommand("freeze", (player, args) -> {
-            boolean canMoveOn = !game.getGameState().canMoveOn();
-
-            game.getGameState().setCanMoveOn(canMoveOn);
-
-            if (canMoveOn) {
-                Bukkit.broadcast(Component.text(player.getName() + " unfroze the current game state!"));
-            } else {
-                Bukkit.broadcast(Component.text(player.getName() + " froze the current game state!"));
-            }
-        });
+        Lamp<BukkitCommandActor> lamp = BukkitLamp.builder(this).build();
+        lamp.register(
+                new BouncyBulletsCommand(gameManager)
+        );
 
         registerCommand("backup", (player, args) -> {
             Bukkit.broadcast(Component.text("Saving backup of the world...").decorate(TextDecoration.ITALIC));
@@ -95,13 +83,7 @@ public final class BouncyBullets extends JavaPlugin {
     public void onDisable() {
     }
 
-
-
-    public static BouncyBulletGame getGame() {
-        return game;
-    }
-
-    public static BouncyBullets getInstance() {
+    public static BouncyBulletsPlugin getInstance() {
         return instance;
     }
 

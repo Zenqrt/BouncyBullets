@@ -4,7 +4,7 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
-import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.game.games.kit.PlayerClasses;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
@@ -25,10 +25,10 @@ import java.util.Objects;
 
 public final class ClassSelectGui extends ChestGui {
 
-    private final BouncyBulletPlayer player;
+    private final BouncyBulletGamePlayer player;
     private final GamePlayerList players;
 
-    public ClassSelectGui(BouncyBulletPlayer player, GamePlayerList players) {
+    public ClassSelectGui(BouncyBulletGamePlayer player, GamePlayerList players) {
         super(3, "Class Selection");
 
         this.player = player;

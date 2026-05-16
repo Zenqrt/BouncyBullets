@@ -1,6 +1,6 @@
 package dev.zenqrt.bouncybullets.item.items;
 
-import dev.zenqrt.bouncybullets.BouncyBullets;
+import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.event.events.GunShootEvent;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BulletProperties;
@@ -37,10 +37,10 @@ public abstract class GunItem extends GameItem {
 
     private static final long INTERACT_EVENT_TICK_DELAY = 4;
     private static final AttributeModifier RELOAD_SLOWDOWN_MODIFIER = new AttributeModifier(UUID.randomUUID(), "reload_slowdown", -0.05, AttributeModifier.Operation.ADD_NUMBER);
-    private static final NamespacedKey AMMO_KEY = new NamespacedKey(BouncyBullets.getInstance(), "ammo");
+    private static final NamespacedKey AMMO_KEY = new NamespacedKey(BouncyBulletsPlugin.getInstance(), "ammo");
     private static final Title AIM_CROSSHAIR_TITLE = Title.title(
-            Component.text("<  >", NamedTextColor.GOLD),
-            Component.empty(),
+            Component.text("/ \\", NamedTextColor.GRAY),
+            Component.text("\\   /", NamedTextColor.GRAY),
             Title.Times.times(Duration.ZERO, Duration.ofDays(1), Duration.ZERO));
 
     private final Map<UUID, Long> lastShootTicks = new HashMap<>();
@@ -86,7 +86,7 @@ public abstract class GunItem extends GameItem {
                                 public void run() {
                                     useGun(player, itemStack);
                                 }
-                            }.runTaskLater(BouncyBullets.getInstance(), i * gun.getGunProperties().shootDelayTicks());
+                            }.runTaskLater(BouncyBulletsPlugin.getInstance(), i * gun.getGunProperties().shootDelayTicks());
                         }
 
                         return;
@@ -118,7 +118,7 @@ public abstract class GunItem extends GameItem {
                 .filter(event -> filterGameItem(event.getPlayer().getInventory().getItem(event.getNewSlot()), this))
                 .handler(event -> {
                     Player player = event.getPlayer();
-                    Bukkit.getScheduler().runTaskTimer(BouncyBullets.getInstance(), task -> {
+                    Bukkit.getScheduler().runTaskTimer(BouncyBulletsPlugin.getInstance(), task -> {
                         if (!(filterGameItem(player.getInventory().getItemInMainHand(), this) && player.getGameMode() == GameMode.ADVENTURE)) {
                             player.sendActionBar(Component.empty());
                             task.cancel();
@@ -147,7 +147,7 @@ public abstract class GunItem extends GameItem {
                     Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).addModifier(RELOAD_SLOWDOWN_MODIFIER);
 
                     new ReloadTask(player, timeToReload, itemStack, player.getInventory().getHeldItemSlot())
-                            .runTaskTimer(BouncyBullets.getInstance(), 0, gun.getGunProperties().reloadTicksPerAmmo());
+                            .runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, gun.getGunProperties().reloadTicksPerAmmo());
                 })
                 .build());
     }

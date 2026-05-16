@@ -1,8 +1,8 @@
 package dev.zenqrt.bouncybullets.game.games.kit;
 
-import dev.zenqrt.bouncybullets.BouncyBullets;
+import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
-import dev.zenqrt.bouncybullets.game.games.BouncyBulletPlayer;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.game.games.Gun;
 import dev.zenqrt.bouncybullets.item.items.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
@@ -34,17 +34,17 @@ final class DemomanPlayerClass extends EventPlayerClass {
     private static final RailgunAbility ACTIVE_ABILITY = new RailgunAbility();
 
     @Override
-    public void registerEvents(BouncyBulletPlayer player) {
+    public void registerEvents(BouncyBulletGamePlayer player) {
         ACTIVE_ABILITY.registerEvents();
     }
 
     @Override
-    public void onStartUse(BouncyBulletPlayer player) {
+    public void onStartUse(BouncyBulletGamePlayer player) {
         Objects.requireNonNull(player.player().getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).addModifier(SPEED_MODIFIER);
     }
 
     @Override
-    public void onStopUse(BouncyBulletPlayer player) {
+    public void onStopUse(BouncyBulletGamePlayer player) {
         Objects.requireNonNull(player.player().getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).removeModifier(SPEED_MODIFIER);
     }
 
@@ -133,7 +133,7 @@ final class DemomanPlayerClass extends EventPlayerClass {
 
             SoundUtils.playSoundFromPlayer(player, CHARGING_SOUND);
 
-            new ChargingTask(player, 4, CHARGING_TICKS).runTaskTimer(BouncyBullets.getInstance(), 0, 1);
+            new ChargingTask(player, 4, CHARGING_TICKS).runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 1);
         }
 
         private class ChargingTask extends BukkitRunnable {

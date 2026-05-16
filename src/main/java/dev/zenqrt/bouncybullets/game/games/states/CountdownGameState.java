@@ -1,6 +1,6 @@
 package dev.zenqrt.bouncybullets.game.games.states;
 
-import dev.zenqrt.bouncybullets.BouncyBullets;
+import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.event.events.PlayerQuitGameEvent;
 import dev.zenqrt.bouncybullets.game.base.GameState;
 import dev.zenqrt.bouncybullets.event.EventNode;
@@ -35,7 +35,7 @@ public final class CountdownGameState extends GameState {
         super.onStateStart();
 
         registerEvents();
-        countdownTask.runTaskTimer(BouncyBullets.getInstance(), 0, 20);
+        countdownTask.runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 20);
     }
 
     private void registerEvents() {
