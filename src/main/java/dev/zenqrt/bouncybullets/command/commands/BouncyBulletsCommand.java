@@ -1,9 +1,11 @@
 package dev.zenqrt.bouncybullets.command.commands;
 
+import dev.zenqrt.bouncybullets.config.ServerConfig;
 import dev.zenqrt.bouncybullets.game.GameManager;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.GameSettings;
 import dev.zenqrt.bouncybullets.utils.Messages;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import revxrsal.commands.annotation.Command;
 import revxrsal.commands.annotation.Named;
@@ -13,10 +15,31 @@ import revxrsal.commands.exception.CommandErrorException;
 @Command({"bouncybullets", "bb"})
 public final class BouncyBulletsCommand {
 
+    private final ServerConfig config;
     private final GameManager gameManager;
 
-    public BouncyBulletsCommand(GameManager gameManager) {
+    public BouncyBulletsCommand(GameManager gameManager, ServerConfig config) {
         this.gameManager = gameManager;
+        this.config = config;
+    }
+
+    @Subcommand("setlobby")
+    public void onSetLobby(
+            Player executor
+    ) {
+        Location location = executor.getLocation();
+
+        this.config.setLobbySpawn(location);
+        this.config.save();
+
+        Messages.sendCommandSuccess(executor, "Set lobby spawn to %.2f, %.2f, %.2f".formatted(location.getX(), location.getY(), location.getZ()));
+    }
+
+    @Subcommand("lobby")
+    public void onLobby(
+            Player executor
+    ) {
+        executor.teleport(this.config.getLobbySpawn());
     }
 
     @Subcommand("game create")

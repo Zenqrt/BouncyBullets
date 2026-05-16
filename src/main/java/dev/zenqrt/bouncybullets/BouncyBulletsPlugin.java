@@ -1,6 +1,7 @@
 package dev.zenqrt.bouncybullets;
 
 import dev.zenqrt.bouncybullets.command.commands.BouncyBulletsCommand;
+import dev.zenqrt.bouncybullets.config.ServerConfig;
 import dev.zenqrt.bouncybullets.event.listeners.GlowListeners;
 import dev.zenqrt.bouncybullets.event.listeners.PlayerJoinListeners;
 import dev.zenqrt.bouncybullets.event.listeners.PlayerListeners;
@@ -31,19 +32,33 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+
+        File serverConfigFile = new File(getDataFolder(), "config.yml");
+
+        if (!serverConfigFile.exists()) {
+            try {
+                serverConfigFile.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        ServerConfig serverConfig = new ServerConfig(serverConfigFile);
+
         GameMapRegistry.registerGameMaps(new File(getDataFolder(), "maps"));
         Bukkit.getWorlds().forEach(world -> world.setAutoSave(false));
 
         GameManager gameManager = new GameManager();
 
+        Lamp<BukkitCommandActor> lamp = BukkitLamp.builder(this).build();
+        lamp.register(
+                new BouncyBulletsCommand(gameManager, serverConfig)
+        );
+
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListeners(), this);
         Bukkit.getPluginManager().registerEvents(new GlowListeners(), this);
 
-        Lamp<BukkitCommandActor> lamp = BukkitLamp.builder(this).build();
-        lamp.register(
-                new BouncyBulletsCommand(gameManager)
-        );
 
         registerCommand("backup", (player, args) -> {
             Bukkit.broadcast(Component.text("Saving backup of the world...").decorate(TextDecoration.ITALIC));
