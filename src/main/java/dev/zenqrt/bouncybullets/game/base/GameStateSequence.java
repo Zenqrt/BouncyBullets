@@ -30,6 +30,7 @@ public abstract class GameStateSequence extends GameState {
     public void switchNextState() {
         if (currentStateIndex >= states.size() - 1) {
             onLastStateFinished();
+            this.end();
             return;
         }
 
@@ -48,5 +49,9 @@ public abstract class GameStateSequence extends GameState {
             return;
 
         states.get(--currentStateIndex).start();
+    }
+
+    protected int getCurrentStateIndex() {
+        return currentStateIndex;
     }
 }

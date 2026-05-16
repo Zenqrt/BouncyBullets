@@ -4,6 +4,8 @@ import dev.zenqrt.bouncybullets.config.ServerConfig;
 import dev.zenqrt.bouncybullets.game.GameManager;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.GameSettings;
+import dev.zenqrt.bouncybullets.map.GameMap;
+import dev.zenqrt.bouncybullets.map.GameMapManager;
 import dev.zenqrt.bouncybullets.utils.Messages;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -16,10 +18,12 @@ import revxrsal.commands.exception.CommandErrorException;
 public final class BouncyBulletsCommand {
 
     private final ServerConfig config;
+    private final GameMapManager mapManager;
     private final GameManager gameManager;
 
-    public BouncyBulletsCommand(GameManager gameManager, ServerConfig config) {
+    public BouncyBulletsCommand(GameManager gameManager, GameMapManager mapManager, ServerConfig config) {
         this.gameManager = gameManager;
+        this.mapManager = mapManager;
         this.config = config;
     }
 
@@ -45,6 +49,7 @@ public final class BouncyBulletsCommand {
     @Subcommand("game create")
     public void onGameCreate(
             Player executor,
+            @Named("map") String mapId,
             @Named("min_players") int minPlayers,
             @Named("max_players") int maxPlayers,
             @Named("game_time") int gameTime,
@@ -52,7 +57,10 @@ public final class BouncyBulletsCommand {
         Messages.sendCommandInfo(executor, "Creating game...");
 
         GameSettings settings = new GameSettings(minPlayers, maxPlayers, gameTime);
-        BouncyBulletGame game = this.gameManager.createGame(settings);
+        GameMap map = this.mapManager.findGameMap(mapId)
+                .orElseThrow(() -> new CommandErrorException("Could not find map '" + mapId + "'"));
+
+        BouncyBulletGame game = this.gameManager.createGame(settings, map);
         game.start();
 
         Messages.sendCommandSuccess(executor, "Created game with id " + game.getId());

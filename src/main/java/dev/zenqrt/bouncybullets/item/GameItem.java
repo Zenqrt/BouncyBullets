@@ -14,6 +14,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -45,7 +46,7 @@ public abstract class GameItem {
         this.description = description;
     }
 
-    public static void registerGameItemEvents(List<GameItem> gameItems) {
+    public static void registerGameItemEvents(Collection<GameItem> gameItems) {
         gameItems.forEach(GameItem::registerEvents);
     }
 

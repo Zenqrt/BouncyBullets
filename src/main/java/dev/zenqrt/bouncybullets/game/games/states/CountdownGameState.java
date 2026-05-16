@@ -35,7 +35,7 @@ public final class CountdownGameState extends GameState {
         super.onStateStart();
 
         registerEvents();
-        countdownTask.runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 20);
+        this.countdownTask.runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 20);
     }
 
     private void registerEvents() {
@@ -48,7 +48,7 @@ public final class CountdownGameState extends GameState {
 
     @Override
     protected void onStateEnd() {
-        countdownTask.cancel();
+        this.countdownTask.cancel();
     }
 
     private class CountdownTask extends BukkitRunnable {

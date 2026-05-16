@@ -6,7 +6,9 @@ import dev.zenqrt.bouncybullets.event.listeners.GlowListeners;
 import dev.zenqrt.bouncybullets.event.listeners.PlayerJoinListeners;
 import dev.zenqrt.bouncybullets.event.listeners.PlayerListeners;
 import dev.zenqrt.bouncybullets.game.GameManager;
-import dev.zenqrt.bouncybullets.map.GameMapRegistry;
+import dev.zenqrt.bouncybullets.lobby.LobbyManager;
+import dev.zenqrt.bouncybullets.map.GameMapManager;
+import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -27,6 +29,7 @@ import java.util.function.BiConsumer;
 
 public final class BouncyBulletsPlugin extends JavaPlugin {
 
+    private static GameMapManager mapManager;
     private static BouncyBulletsPlugin instance;
 
     @Override
@@ -45,14 +48,15 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
 
         ServerConfig serverConfig = new ServerConfig(serverConfigFile);
 
-        GameMapRegistry.registerGameMaps(new File(getDataFolder(), "maps"));
-        Bukkit.getWorlds().forEach(world -> world.setAutoSave(false));
+        mapManager = new GameMapManager();
+        mapManager.loadGameMaps(new File(getDataFolder(), "maps"));
 
-        GameManager gameManager = new GameManager();
+        LobbyManager lobbyManager = new LobbyManager(serverConfig);
+        GameManager gameManager = new GameManager(this, mapManager, lobbyManager);
 
         Lamp<BukkitCommandActor> lamp = BukkitLamp.builder(this).build();
         lamp.register(
-                new BouncyBulletsCommand(gameManager, serverConfig)
+                new BouncyBulletsCommand(gameManager, mapManager, serverConfig)
         );
 
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(), this);
@@ -96,6 +100,8 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        Bukkit.getOnlinePlayers().forEach(PlayerUtils::forceRemove);
+        mapManager.deleteAllGameWorlds();
     }
 
     public static BouncyBulletsPlugin getInstance() {

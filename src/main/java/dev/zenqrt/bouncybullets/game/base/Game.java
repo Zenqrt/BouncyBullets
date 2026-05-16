@@ -1,23 +1,11 @@
 package dev.zenqrt.bouncybullets.game.base;
 
-public class Game extends GameState {
+public class Game extends GameStateSequence {
 
     private final int id;
-    protected GameState gameState;
 
-    public Game(int id, GameState startingGameState) {
+    public Game(int id) {
         this.id = id;
-        this.gameState = startingGameState;
-    }
-
-    @Override
-    protected void onStateStart() {
-        gameState.start();
-    }
-
-    @Override
-    protected void onStateEnd() {
-        gameState.end();
     }
 
     public int getId() {
@@ -25,14 +13,6 @@ public class Game extends GameState {
     }
 
     public GameState getGameState() {
-        return gameState;
-    }
-
-    public void switchGameState(GameState gameState) {
-        if (this.gameState.end()) {
-            this.gameState = gameState;
-
-            gameState.start();
-        }
+        return this.states.get(this.getCurrentStateIndex());
     }
 }

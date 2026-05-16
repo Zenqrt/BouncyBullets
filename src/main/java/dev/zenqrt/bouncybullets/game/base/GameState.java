@@ -40,4 +40,8 @@ public abstract class GameState {
     public void setCanMoveOn(boolean canMoveOn) {
         this.canMoveOn = canMoveOn;
     }
+
+    public boolean canPlayersJoin() {
+        return false;
+    }
 }

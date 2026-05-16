@@ -2,10 +2,10 @@ package dev.zenqrt.bouncybullets.game.games.states;
 
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent;
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
-import dev.zenqrt.bouncybullets.game.base.GameState;
 import dev.zenqrt.bouncybullets.event.EventNode;
 import dev.zenqrt.bouncybullets.event.GameEventNodes;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
+import dev.zenqrt.bouncybullets.game.base.GameState;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.game.games.Gun;
@@ -41,7 +41,7 @@ import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
-public final class ActiveGameState extends GameState {
+public final class BattleGameState extends GameState {
 
     private static final Sound KILL_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.MASTER, 1, 1);
 
@@ -52,7 +52,7 @@ public final class ActiveGameState extends GameState {
     private final GamePlayerList players;
     private final FreeForAllActiveGameMap gameMap;
 
-    public ActiveGameState(BouncyBulletGame game, GamePlayerList players, FreeForAllActiveGameMap gameMap) {
+    public BattleGameState(BouncyBulletGame game, GamePlayerList players, FreeForAllActiveGameMap gameMap) {
         this.game = game;
         this.players = players;
         this.gameMap = gameMap;
@@ -191,7 +191,7 @@ public final class ActiveGameState extends GameState {
         public void run() {
             if (--timeLeft == 0) {
                 this.cancel();
-                game.switchGameState(new EndingGameState(players));
+                game.switchNextState();
             }
         }
     }

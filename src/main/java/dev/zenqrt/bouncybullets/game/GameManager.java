@@ -1,9 +1,16 @@
 package dev.zenqrt.bouncybullets.game;
 
+import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.GameSettings;
 import dev.zenqrt.bouncybullets.game.games.Loadout;
 import dev.zenqrt.bouncybullets.game.games.kit.PlayerClasses;
+import dev.zenqrt.bouncybullets.lobby.LobbyManager;
+import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
+import dev.zenqrt.bouncybullets.map.GameMap;
+import dev.zenqrt.bouncybullets.map.GameMapManager;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -16,23 +23,44 @@ public final class GameManager {
 
     private final Map<Integer, BouncyBulletGame> games = new HashMap<>();
     private final Map<UUID, Integer> playerGames = new HashMap<>();
+    private final LobbyManager lobbyManager;
+    private final GameMapManager mapManager;
+    private final BouncyBulletsPlugin plugin;
     private final AtomicInteger nextGameId;
 
-    public GameManager() {
+    public GameManager(BouncyBulletsPlugin plugin, GameMapManager mapManager, LobbyManager lobbyManager) {
         this.nextGameId = new AtomicInteger(0);
+        this.plugin = plugin;
+        this.mapManager = mapManager;
+        this.lobbyManager = lobbyManager;
     }
 
-    public BouncyBulletGame createGame(GameSettings settings) {
+    public BouncyBulletGame createGame(GameSettings settings, GameMap map) {
         int gameId = this.nextGameId.incrementAndGet();
 
-        BouncyBulletGame game = new BouncyBulletGame(gameId, settings);
+        World gameWorld = this.mapManager.createGameWorld(gameId, map);
+        FreeForAllActiveGameMap activeMap = new FreeForAllActiveGameMap(gameWorld, map.configuration());
+
+        BouncyBulletGame game = new BouncyBulletGame(gameId, this.plugin, settings, activeMap, this, this.lobbyManager);
         this.games.put(gameId, game);
 
         return game;
     }
 
-    public void deleteGame(int gameId) {
-        this.games.remove(gameId);
+    public void deleteGame(BouncyBulletGame game) {
+        this.games.remove(game.getId());
+        tryDeleteGameWorld(game);
+    }
+
+    private void tryDeleteGameWorld(BouncyBulletGame game) {
+        Bukkit.getScheduler().runTaskTimer(this.plugin, task -> {
+            try {
+                this.mapManager.deleteGameWorld(game.getId(), game.getGameMap().world());
+                task.cancel();
+            } catch (RuntimeException ex) {
+                this.plugin.getSLF4JLogger().error("Failed to delete game world '{}': {}\nRetrying...", game.getGameMap().world().getName(), ex.getMessage());
+            }
+        }, 20, 40);
     }
 
     public Optional<BouncyBulletGame> findGame(int gameId) {
