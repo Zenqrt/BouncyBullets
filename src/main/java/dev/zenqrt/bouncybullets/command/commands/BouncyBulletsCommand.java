@@ -7,11 +7,16 @@ import dev.zenqrt.bouncybullets.game.games.GameSettings;
 import dev.zenqrt.bouncybullets.map.GameMap;
 import dev.zenqrt.bouncybullets.map.GameMapManager;
 import dev.zenqrt.bouncybullets.utils.Messages;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import revxrsal.commands.annotation.Command;
 import revxrsal.commands.annotation.Named;
 import revxrsal.commands.annotation.Subcommand;
+import revxrsal.commands.bukkit.actor.BukkitCommandActor;
 import revxrsal.commands.exception.CommandErrorException;
 
 @Command({"bouncybullets", "bb"})
@@ -87,5 +92,37 @@ public final class BouncyBulletsCommand {
 
         Messages.sendCommandInfo(executor, "Joining game...");
         this.gameManager.joinGame(executor, game);
+    }
+
+    @Subcommand("map reload")
+    public void onMapReload(
+            BukkitCommandActor actor
+    ) {
+        Messages.sendCommandInfo(actor.sender(), "Reloading maps...");
+        
+        this.mapManager.unregisterAllMaps();
+        this.mapManager.loadGameMaps();
+
+        Messages.sendCommandSuccess(actor.sender(), "Done!");
+    }
+
+    @Subcommand("map list")
+    public void onMapList(
+            BukkitCommandActor actor
+    ) {
+        Component list =
+                Component.join(
+                        JoinConfiguration.builder()
+                                .prefix(Component.text("\n\nRegistered Maps\n", NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                                .separator(Component.newline())
+                                .build(),
+                        this.mapManager.getGameMaps().entrySet().stream()
+                                .map(entry -> Component.text("- ", NamedTextColor.DARK_GRAY)
+                                        .append(Component.text(entry.getValue().displayName(), NamedTextColor.WHITE))
+                                        .append(Component.text(" (" + entry.getKey() + ")", NamedTextColor.GRAY)))
+                                .toList()
+                );
+
+        actor.sender().sendMessage(list);
     }
 }
