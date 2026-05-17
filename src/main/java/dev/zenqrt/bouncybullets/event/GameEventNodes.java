@@ -9,14 +9,14 @@ public final class GameEventNodes {
 
     public static EventNode<PlayerEvent> filteredPlayerEvents(BouncyBulletGame game) {
         EventNode<PlayerEvent> node = new PaperEventNode<>();
-        node.addGlobalFilter(event -> game.hasPlayer(event.getPlayer().getUniqueId()));
+        node.addNodeFilter(event -> game.hasPlayer(event.getPlayer().getUniqueId()));
 
         return node;
     }
 
     public static EventNode<EntityEvent> filteredEntityEvents(BouncyBulletGame game) {
         EventNode<EntityEvent> node = new PaperEventNode<>();
-        node.addGlobalFilter(event -> game.hasPlayer(event.getEntity().getUniqueId()));
+        node.addNodeFilter(event -> game.hasPlayer(event.getEntity().getUniqueId()));
 
         return node;
     }

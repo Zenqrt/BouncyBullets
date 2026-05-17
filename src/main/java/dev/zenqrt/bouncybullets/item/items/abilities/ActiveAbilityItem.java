@@ -1,14 +1,15 @@
-package dev.zenqrt.bouncybullets.item.items;
+package dev.zenqrt.bouncybullets.item.items.abilities;
 
-import dev.zenqrt.bouncybullets.event.PaperEventListener;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public abstract class ActiveAbilityItem extends GameItem {
@@ -24,18 +25,12 @@ public abstract class ActiveAbilityItem extends GameItem {
     public abstract void onUse(PlayerInteractEvent event);
 
     @Override
-    public void registerEvents() {
-        this.eventNode.registerListener(PaperEventListener.builder(PlayerInteractEvent.class)
-                .filter(event -> filterGameItem(event.getItem(), this))
-                .filter(event -> event.getAction().isRightClick())
-                .handler(event -> {
-                    event.setCancelled(true);
+    public void onInteract(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
+        event.setCancelled(true);
 
-                    if (event.getPlayer().hasCooldown(Objects.requireNonNull(event.getItem()).getType()))
-                        return;
+        if (player.hasCooldown(itemStack.getType()))
+            return;
 
-                    this.onUse(event);
-                })
-                .build());
+        this.onUse(event);
     }
 }

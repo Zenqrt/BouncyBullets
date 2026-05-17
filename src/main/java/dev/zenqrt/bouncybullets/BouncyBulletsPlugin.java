@@ -2,9 +2,7 @@ package dev.zenqrt.bouncybullets;
 
 import dev.zenqrt.bouncybullets.command.commands.BouncyBulletsCommand;
 import dev.zenqrt.bouncybullets.config.ServerConfig;
-import dev.zenqrt.bouncybullets.event.listeners.GlowListeners;
-import dev.zenqrt.bouncybullets.event.listeners.PlayerJoinListeners;
-import dev.zenqrt.bouncybullets.event.listeners.PlayerListeners;
+import dev.zenqrt.bouncybullets.event.listeners.*;
 import dev.zenqrt.bouncybullets.game.GameManager;
 import dev.zenqrt.bouncybullets.lobby.LobbyManager;
 import dev.zenqrt.bouncybullets.map.GameMapManager;
@@ -62,6 +60,8 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListeners(), this);
         Bukkit.getPluginManager().registerEvents(new GlowListeners(), this);
+        Bukkit.getPluginManager().registerEvents(new GameItemListeners(gameManager), this);
+        Bukkit.getPluginManager().registerEvents(new GunListeners(gameManager), this);
 
 
         registerCommand("backup", (player, args) -> {

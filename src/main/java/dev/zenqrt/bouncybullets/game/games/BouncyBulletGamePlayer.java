@@ -1,30 +1,64 @@
 package dev.zenqrt.bouncybullets.game.games;
 
-import dev.zenqrt.bouncybullets.game.games.kit.PlayerClass;
+import dev.zenqrt.bouncybullets.loadout.Loadout;
+import dev.zenqrt.bouncybullets.player.BouncyBulletsHUD;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public record BouncyBulletGamePlayer(UUID uuid, Player player, int kills, int deaths, Loadout loadout) {
+public class BouncyBulletGamePlayer {
 
-    public BouncyBulletGamePlayer withKills(int kills) {
-        return new BouncyBulletGamePlayer(uuid, player, kills, deaths, loadout);
+    private int deaths;
+    private int kills;
+
+    private final BouncyBulletsHUD hud;
+    private Loadout loadout;
+    private final Player player;
+    private final UUID uuid;
+
+    public BouncyBulletGamePlayer(Player player, Loadout loadout) {
+        this.uuid = player.getUniqueId();
+        this.player = player;
+        this.loadout = loadout;
+        this.hud = new BouncyBulletsHUD();
+
+        this.kills = 0;
+        this.deaths = 0;
     }
 
-    public BouncyBulletGamePlayer addKill() {
-        return withKills(this.kills + 1);
+    public void addDeath() {
+        this.deaths++;
     }
 
-    public BouncyBulletGamePlayer withDeaths(int deaths) {
-        return new BouncyBulletGamePlayer(uuid, player, kills, deaths, loadout);
+    public int getDeaths() {
+        return deaths;
     }
 
-    public BouncyBulletGamePlayer addDeath() {
-        return withDeaths(this.deaths + 1);
+    public void addKill() {
+        this.kills++;
     }
 
-    public BouncyBulletGamePlayer withPlayerClass(PlayerClass playerClass) {
-        return new BouncyBulletGamePlayer(uuid, player, kills, deaths, new Loadout(playerClass));
+    public int getKills() {
+        return kills;
     }
 
+    public BouncyBulletsHUD getHud() {
+        return hud;
+    }
+
+    public void setLoadout(Loadout loadout) {
+        this.loadout = loadout;
+    }
+
+    public Loadout getLoadout() {
+        return loadout;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
 }

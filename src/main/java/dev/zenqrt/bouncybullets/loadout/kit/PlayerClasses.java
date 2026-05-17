@@ -1,4 +1,4 @@
-package dev.zenqrt.bouncybullets.game.games.kit;
+package dev.zenqrt.bouncybullets.loadout.kit;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

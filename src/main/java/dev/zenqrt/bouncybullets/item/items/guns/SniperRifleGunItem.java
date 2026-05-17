@@ -1,15 +1,16 @@
-package dev.zenqrt.bouncybullets.item.items;
+package dev.zenqrt.bouncybullets.item.items.guns;
 
 import com.destroystokyo.paper.ParticleBuilder;
-import dev.zenqrt.bouncybullets.game.games.Gun;
+import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
+import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 
 public final class SniperRifleGunItem extends BulletProjectileGunItem {
 
-    public SniperRifleGunItem(Gun gun) {
-        super("sniper_rifle", Material.DIAMOND_HORSE_ARMOR, "Sniper Rifle", gun);
+    public SniperRifleGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
+        super("sniper_rifle", Material.DIAMOND_HORSE_ARMOR, "Sniper Rifle", gunProperties, bulletProperties);
     }
 
     @Override

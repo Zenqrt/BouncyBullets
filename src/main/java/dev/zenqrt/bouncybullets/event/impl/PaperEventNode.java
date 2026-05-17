@@ -1,8 +1,8 @@
 package dev.zenqrt.bouncybullets.event.impl;
 
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
-import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.event.EventNode;
+import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public final class PaperEventNode<E extends Event> implements EventNode<E> {
 
-    private final List<Predicate<E>> globalFilters = new ArrayList<>();
+    private final List<Predicate<E>> nodeFilters = new ArrayList<>();
     private final List<ListenerInfo<? extends E>> listeners = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
@@ -29,10 +29,10 @@ public final class PaperEventNode<E extends Event> implements EventNode<E> {
         Bukkit.getPluginManager().registerEvent(eventListener.getEventClass(), listenerInfo.bukkitListener, EventPriority.NORMAL, (listener, event) -> {
             if (eventListener.getEventClass().isAssignableFrom(event.getClass())) {
                 T eventCasted = (T) event;
-                boolean passGlobalFilters = this.globalFilters.stream()
+                boolean passNodeFilters = this.nodeFilters.stream()
                                 .allMatch(filter -> filter.test(eventCasted));
 
-                if (!passGlobalFilters)
+                if (!passNodeFilters)
                     return;
 
                 eventListener.run(eventCasted);
@@ -47,8 +47,8 @@ public final class PaperEventNode<E extends Event> implements EventNode<E> {
     }
 
     @Override
-    public void addGlobalFilter(Predicate<E> filterCondition) {
-        globalFilters.add(filterCondition);
+    public void addNodeFilter(Predicate<E> filterCondition) {
+        nodeFilters.add(filterCondition);
     }
 
     @Override

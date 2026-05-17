@@ -6,8 +6,7 @@ import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.event.events.PlayerJoinGameEvent;
 import dev.zenqrt.bouncybullets.game.base.GameStateSequence;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
-import dev.zenqrt.bouncybullets.item.GameItem;
-import dev.zenqrt.bouncybullets.item.items.LoadoutGameItem;
+import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.GameMode;
@@ -17,13 +16,11 @@ import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.inventory.Inventory;
 
 import java.util.List;
-import java.util.Map;
 
 public final class PregameGameState extends GameStateSequence {
 
     private final EventNode<PlayerEvent> playerEventNode;
 
-    private final Map<Integer, GameItem> hotbarItems;
     private final GamePlayerList players;
     final BouncyBulletGame game;
 
@@ -32,9 +29,6 @@ public final class PregameGameState extends GameStateSequence {
         this.players = players;
 
         this.playerEventNode = GameEventNodes.filteredPlayerEvents(game);
-        this.hotbarItems = Map.of(
-                0, new LoadoutGameItem(players)
-        );
 
         this.states = List.of(
                 new WaitingGameState(this, players, game.getGameSettings().minPlayers()),
@@ -43,7 +37,6 @@ public final class PregameGameState extends GameStateSequence {
     }
 
     private void registerEvents() {
-        GameItem.registerGameItemEvents(this.hotbarItems.values());
 
         this.playerEventNode.registerListener(PaperEventListener.builder(PlayerDropItemEvent.class)
                 .handler(event -> event.setCancelled(true))
@@ -63,7 +56,7 @@ public final class PregameGameState extends GameStateSequence {
     protected void onStateStart() {
         registerEvents();
 
-        players.forEach(((uuid, player) -> setupPlayer(player.player())));
+        players.forEach(((uuid, gamePlayer) -> setupPlayer(gamePlayer.getPlayer())));
 
         super.onStateStart();
     }
@@ -84,8 +77,7 @@ public final class PregameGameState extends GameStateSequence {
     }
 
     private void givePlayerItems(Inventory inventory) {
-        this.hotbarItems.forEach(
-                (slot, gameItem) -> inventory.setItem(slot, gameItem.buildItemStack()));
+        inventory.setItem(0, GameItems.LOADOUT.buildItemStack());
     }
 
     @Override

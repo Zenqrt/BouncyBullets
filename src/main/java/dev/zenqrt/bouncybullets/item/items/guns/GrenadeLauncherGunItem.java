@@ -1,8 +1,8 @@
-package dev.zenqrt.bouncybullets.item.items;
+package dev.zenqrt.bouncybullets.item.items.guns;
 
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
-import dev.zenqrt.bouncybullets.game.games.BulletProperties;
-import dev.zenqrt.bouncybullets.game.games.Gun;
+import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
+import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.utils.ExplosionUtils;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
@@ -19,8 +19,8 @@ public final class GrenadeLauncherGunItem extends GunItem {
     private static final int BOUNCES = 2;
     private static final int EXPLOSION_RADIUS = 6;
 
-    public GrenadeLauncherGunItem(Gun gun) {
-        super("grenade_launcher", Material.GOLDEN_HORSE_ARMOR, "Grenade Launcher", gun);
+    public GrenadeLauncherGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
+        super("grenade_launcher", Material.GOLDEN_HORSE_ARMOR, "Grenade Launcher", gunProperties, bulletProperties);
     }
 
     @Override
@@ -70,7 +70,7 @@ public final class GrenadeLauncherGunItem extends GunItem {
             }
 
             if (currentBounces >= maxBounces) {
-                ExplosionUtils.createExplosion(tnt.getLocation(), EXPLOSION_RADIUS, gun.getBulletProperties().maxDamage(), DamageSource.builder(DamageType.MOB_PROJECTILE).withCausingEntity(tnt.getSource()).build());
+                ExplosionUtils.createExplosion(tnt.getLocation(), EXPLOSION_RADIUS, GrenadeLauncherGunItem.super.bulletProperties.maxDamage(), DamageSource.builder(DamageType.MOB_PROJECTILE).withCausingEntity(tnt.getSource()).build());
                 tnt.remove();
                 this.cancel();
                 return;

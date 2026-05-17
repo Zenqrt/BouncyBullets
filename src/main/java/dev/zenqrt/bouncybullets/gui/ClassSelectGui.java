@@ -5,8 +5,8 @@ import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
-import dev.zenqrt.bouncybullets.game.games.kit.PlayerClasses;
-import dev.zenqrt.bouncybullets.player.GamePlayerList;
+import dev.zenqrt.bouncybullets.loadout.Loadout;
+import dev.zenqrt.bouncybullets.loadout.kit.PlayerClasses;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.GuiUtils;
 import dev.zenqrt.bouncybullets.utils.ItemUtils;
@@ -16,6 +16,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
@@ -25,14 +26,12 @@ import java.util.Objects;
 
 public final class ClassSelectGui extends ChestGui {
 
-    private final BouncyBulletGamePlayer player;
-    private final GamePlayerList players;
+    private final BouncyBulletGamePlayer gamePlayer;
 
-    public ClassSelectGui(BouncyBulletGamePlayer player, GamePlayerList players) {
+    public ClassSelectGui(BouncyBulletGamePlayer gamePlayer) {
         super(3, "Class Selection");
 
-        this.player = player;
-        this.players = players;
+        this.gamePlayer = gamePlayer;
 
         this.setOnGlobalClick(event -> event.setCancelled(true));
 
@@ -53,7 +52,7 @@ public final class ClassSelectGui extends ChestGui {
 
                 lore.add(Component.empty());
 
-                if (player.loadout().playerClass() == playerClass.getPlayerClass()) {
+                if (gamePlayer.getLoadout().playerClass() == playerClass.getPlayerClass()) {
                     meta.displayName(Objects.requireNonNull(meta.displayName()).decorate(TextDecoration.BOLD));
                     meta.addEnchant(Enchantment.DURABILITY, 1, true);
                     meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -71,10 +70,12 @@ public final class ClassSelectGui extends ChestGui {
                 event.setCancelled(true);
 
                 if (event.isLeftClick()) {
-                    players.updatePlayer(player.uuid(), player -> player.withPlayerClass(playerClass.getPlayerClass()));
-                    player.player().closeInventory();
+                    this.gamePlayer.setLoadout(new Loadout(playerClass.getPlayerClass()));
 
-                    player.player().sendMessage(Component.text("You have selected the ", NamedTextColor.GREEN)
+                    Player player = this.gamePlayer.getPlayer();
+
+                    player.closeInventory();
+                    player.sendMessage(Component.text("You have selected the ", NamedTextColor.GREEN)
                             .append(Component.text(playerClass.getPlayerClass().getName(), NamedTextColor.YELLOW))
                             .append(Component.text(" class!", NamedTextColor.GREEN)));
                 } else {

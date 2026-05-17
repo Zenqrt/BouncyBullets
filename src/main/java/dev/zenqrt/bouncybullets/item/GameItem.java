@@ -1,21 +1,21 @@
 package dev.zenqrt.bouncybullets.item;
 
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
-import dev.zenqrt.bouncybullets.event.impl.PaperEventNode;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.event.Event;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public abstract class GameItem {
@@ -27,7 +27,6 @@ public abstract class GameItem {
     private final Consumer<ItemMeta> itemMetaHandler;
     private final List<Component> description;
     protected final Material material;
-    protected final PaperEventNode<Event> eventNode = new PaperEventNode<>();
 
     public GameItem(String key, Material material, Component displayName, List<Component> description) {
         this.key = key;
@@ -46,30 +45,18 @@ public abstract class GameItem {
         this.description = description;
     }
 
-    public static void registerGameItemEvents(Collection<GameItem> gameItems) {
-        gameItems.forEach(GameItem::registerEvents);
-    }
+    public void onInteract(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {}
 
-    public static boolean filterGameItem(@Nullable ItemStack itemStack, GameItem gameItem) {
-        if (itemStack == null || !itemStack.hasItemMeta()) {
-            return false;
-        }
-
+    public static Optional<String> findGameItemId(ItemStack itemStack) {
         ItemMeta itemMeta = itemStack.getItemMeta();
 
-        if (itemMeta == null) {
-            return false;
-        }
+        if (itemMeta == null)
+            return Optional.empty();
 
         PersistentDataContainer dataContainer = itemMeta.getPersistentDataContainer();
+        String gameItemId = dataContainer.get(ITEM_KEY, PersistentDataType.STRING);
 
-        return dataContainer.has(ITEM_KEY) && dataContainer.get(ITEM_KEY, PersistentDataType.STRING).equals(gameItem.getKey());
-    }
-
-    public abstract void registerEvents();
-
-    public void unregisterEvents() {
-        this.eventNode.unregisterAllListeners();
+        return gameItemId == null ? Optional.empty() : Optional.of(gameItemId);
     }
 
     public ItemStack buildItemStack() {

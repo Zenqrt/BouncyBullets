@@ -1,4 +1,4 @@
-package dev.zenqrt.bouncybullets.game.games.kit;
+package dev.zenqrt.bouncybullets.loadout.kit;
 
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import org.bukkit.inventory.ItemStack;

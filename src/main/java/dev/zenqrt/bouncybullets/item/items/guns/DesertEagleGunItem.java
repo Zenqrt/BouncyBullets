@@ -1,15 +1,16 @@
-package dev.zenqrt.bouncybullets.item.items;
+package dev.zenqrt.bouncybullets.item.items.guns;
 
 import com.destroystokyo.paper.ParticleBuilder;
-import dev.zenqrt.bouncybullets.game.games.Gun;
+import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
+import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 
 public final class DesertEagleGunItem extends BulletProjectileGunItem {
 
-    public DesertEagleGunItem(Gun gun) {
-        super("desert_eagle", Material.DIAMOND_HOE, "Desert Eagle", gun);
+    public DesertEagleGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
+        super("desert_eagle", Material.DIAMOND_HOE, "Desert Eagle", gunProperties, bulletProperties);
     }
 
     @Override

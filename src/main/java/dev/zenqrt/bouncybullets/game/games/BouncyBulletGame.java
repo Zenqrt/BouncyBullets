@@ -9,6 +9,7 @@ import dev.zenqrt.bouncybullets.game.games.states.AnnounceWinnerGameState;
 import dev.zenqrt.bouncybullets.game.games.states.BattleGameState;
 import dev.zenqrt.bouncybullets.game.games.states.PregameGameState;
 import dev.zenqrt.bouncybullets.game.games.states.SendPlayersToLobbyGameState;
+import dev.zenqrt.bouncybullets.loadout.Loadout;
 import dev.zenqrt.bouncybullets.lobby.LobbyManager;
 import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
@@ -16,6 +17,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
@@ -50,7 +52,7 @@ public final class BouncyBulletGame extends Game {
         super.onStateEnd();
 
         this.players.values().stream()
-                .map(BouncyBulletGamePlayer::player)
+                .map(BouncyBulletGamePlayer::getPlayer)
                 .filter(player -> player.getWorld() == this.gameMap.world())
                 .forEach(player -> player.kick(Component.text("The game you were in shut down!", NamedTextColor.RED)));
         this.players.clear();
@@ -61,10 +63,7 @@ public final class BouncyBulletGame extends Game {
 
     public void insertPlayer(Player player, Loadout loadout) {
         BouncyBulletGamePlayer gamePlayer = new BouncyBulletGamePlayer(
-                player.getUniqueId(),
                 player,
-                0,
-                0,
                 loadout
         );
 
@@ -76,11 +75,15 @@ public final class BouncyBulletGame extends Game {
     public void removePlayer(UUID uuid) {
         BouncyBulletGamePlayer player = players.remove(uuid);
 
-        Bukkit.getPluginManager().callEvent(new PlayerQuitGameEvent(player.player(), this));
+        Bukkit.getPluginManager().callEvent(new PlayerQuitGameEvent(player.getPlayer(), this));
     }
 
     public GamePlayerList getPlayers() {
         return players;
+    }
+
+    public @NotNull BouncyBulletGamePlayer findPlayer(UUID uuid) {
+        return players.get(uuid);
     }
 
     public boolean hasPlayer(UUID uuid) {

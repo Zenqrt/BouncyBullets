@@ -24,7 +24,7 @@ public final class SendPlayersToLobbyGameState extends GameState {
     @Override
     protected void onStateStart() {
         List<Player> players = this.game.getPlayers().values().stream()
-                .map(BouncyBulletGamePlayer::player)
+                .map(BouncyBulletGamePlayer::getPlayer)
                 .toList();
 
         for (Player player : players) {

@@ -1,9 +1,9 @@
-package dev.zenqrt.bouncybullets.item.items;
+package dev.zenqrt.bouncybullets.item.items.guns;
 
 import com.destroystokyo.paper.ParticleBuilder;
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
-import dev.zenqrt.bouncybullets.game.games.BulletProperties;
-import dev.zenqrt.bouncybullets.game.games.Gun;
+import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
+import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
@@ -24,12 +24,12 @@ public abstract class BulletProjectileGunItem extends GunItem {
 
     private static final Sound HIT_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP.key(), Sound.Source.PLAYER, 1, 2);
 
-    public BulletProjectileGunItem(String key, Material material, Component displayName, Gun gun) {
-        super(key, material, displayName, gun);
+    public BulletProjectileGunItem(String key, Material material, Component displayName, GunProperties gunProperties, BulletProperties bulletProperties) {
+        super(key, material, displayName, gunProperties, bulletProperties);
     }
 
-    public BulletProjectileGunItem(String key, Material material, String displayName, Gun gun) {
-        super(key, material, displayName, gun);
+    public BulletProjectileGunItem(String key, Material material, String displayName, GunProperties gunProperties, BulletProperties bulletProperties) {
+        super(key, material, displayName, gunProperties, bulletProperties);
     }
 
     protected abstract ParticleBuilder getBulletParticleBuilder();
@@ -59,7 +59,9 @@ public abstract class BulletProjectileGunItem extends GunItem {
             this.bounceLocation = startLocation;
             this.lastBulletLocation = startLocation;
 
-            double recoilRange = focused ? gun.getGunProperties().recoilRangeFocused() : gun.getGunProperties().recoilRange();
+            double recoilRange = focused ? BulletProjectileGunItem.super.gunProperties.recoilRangeFocused()
+                    : BulletProjectileGunItem.super.gunProperties.recoilRange();
+
             this.currentDirection = startLocation.getDirection().normalize()
                     .add(new Vector(randomRecoil(recoilRange), randomRecoil(recoilRange), randomRecoil(recoilRange)))
                     .normalize();

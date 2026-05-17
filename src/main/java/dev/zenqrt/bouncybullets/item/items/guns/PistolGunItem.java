@@ -1,15 +1,16 @@
-package dev.zenqrt.bouncybullets.item.items;
+package dev.zenqrt.bouncybullets.item.items.guns;
 
 import com.destroystokyo.paper.ParticleBuilder;
-import dev.zenqrt.bouncybullets.game.games.Gun;
+import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
+import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 
 public final class PistolGunItem extends BulletProjectileGunItem {
 
-    public PistolGunItem(Gun gun) {
-        super("pistol", Material.GOLDEN_HOE, "BB-Pistol", gun);
+    public PistolGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
+        super("pistol", Material.GOLDEN_HOE, "BB-Pistol", gunProperties, bulletProperties);
     }
 
     @Override

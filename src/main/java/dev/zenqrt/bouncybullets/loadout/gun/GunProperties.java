@@ -1,4 +1,4 @@
-package dev.zenqrt.bouncybullets.game.games;
+package dev.zenqrt.bouncybullets.loadout.gun;
 
 public record GunProperties(
         long shootDelayTicks,

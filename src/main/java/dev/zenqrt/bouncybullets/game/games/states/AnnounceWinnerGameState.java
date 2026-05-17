@@ -25,11 +25,13 @@ public final class AnnounceWinnerGameState extends GameState {
 
     @Override
     protected void onStateStart() {
+        String winnerName = getWinner().getPlayer().getName();
+
         players.showTitle(Title.title(
                 Component.text("The winner is...", NamedTextColor.AQUA),
-                Component.text(getWinner().player().getName(), NamedTextColor.YELLOW)));
+                Component.text(winnerName, NamedTextColor.YELLOW)));
         players.sendMessage(Component.text("The winner of the game is ", NamedTextColor.AQUA)
-                .append(Component.text(getWinner().player().getName(), NamedTextColor.YELLOW)));
+                .append(Component.text(winnerName, NamedTextColor.YELLOW)));
 
         Bukkit.getScheduler().runTaskLater(
                 this.game.getPlugin(),
@@ -40,7 +42,7 @@ public final class AnnounceWinnerGameState extends GameState {
 
     private BouncyBulletGamePlayer getWinner() {
         return players.values().stream()
-                .max(Comparator.comparing(BouncyBulletGamePlayer::kills))
+                .max(Comparator.comparing(BouncyBulletGamePlayer::getKills))
                 .orElse(null);
     }
 }

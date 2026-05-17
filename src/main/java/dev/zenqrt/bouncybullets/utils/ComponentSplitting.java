@@ -23,18 +23,13 @@
  */
 package dev.zenqrt.bouncybullets.utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.regex.Pattern;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
+import java.util.regex.Pattern;
 
 public final class ComponentSplitting {
 

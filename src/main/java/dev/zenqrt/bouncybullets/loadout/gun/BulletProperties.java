@@ -1,4 +1,4 @@
-package dev.zenqrt.bouncybullets.game.games;
+package dev.zenqrt.bouncybullets.loadout.gun;
 
 public record BulletProperties(int numberOfBounces, double speed, float speedChange, double minDamage, double maxDamage, float damageChange, double effectiveDamageDist, double damageDropOffPerBlock) {
 

@@ -1,6 +1,6 @@
-package dev.zenqrt.bouncybullets.game.games;
+package dev.zenqrt.bouncybullets.loadout;
 
-import dev.zenqrt.bouncybullets.game.games.kit.PlayerClass;
+import dev.zenqrt.bouncybullets.loadout.kit.PlayerClass;
 import org.bukkit.inventory.PlayerInventory;
 
 public record Loadout(PlayerClass playerClass) {
