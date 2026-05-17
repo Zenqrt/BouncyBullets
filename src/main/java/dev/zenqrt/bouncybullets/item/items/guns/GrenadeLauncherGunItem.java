@@ -1,5 +1,6 @@
 package dev.zenqrt.bouncybullets.item.items.guns;
 
+import com.destroystokyo.paper.ParticleBuilder;
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
@@ -7,6 +8,7 @@ import dev.zenqrt.bouncybullets.utils.ExplosionUtils;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
@@ -16,7 +18,6 @@ import org.bukkit.util.Vector;
 
 public final class GrenadeLauncherGunItem extends GunItem {
 
-    private static final int BOUNCES = 2;
     private static final int EXPLOSION_RADIUS = 6;
 
     public GrenadeLauncherGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
@@ -34,7 +35,7 @@ public final class GrenadeLauncherGunItem extends GunItem {
         tnt.setFuseTicks(Integer.MAX_VALUE);
         tnt.setVelocity(eyeLocation.getDirection().normalize().multiply(bulletProperties.speed()));
 
-        new TNTBounceTask(tnt, BOUNCES).runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 1);
+        new TNTBounceTask(player, tnt, bulletProperties.numberOfBounces()).runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 1);
     }
 
     @Override
@@ -49,40 +50,83 @@ public final class GrenadeLauncherGunItem extends GunItem {
 
     private class TNTBounceTask extends BukkitRunnable {
 
-        private static final Sound BOUNCE_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_SLIME_JUMP_SMALL.key(), Sound.Source.MASTER, 0.5F, 1);
+        private static final Sound BOUNCE_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_SLIME_JUMP.key(), Sound.Source.MASTER, 0.5F, 1);
 
+        private final Player source;
         private final TNTPrimed tnt;
         private final int maxBounces;
         private int currentBounces;
         private Vector previousVelocity;
 
-        TNTBounceTask(TNTPrimed tnt, int maxBounces) {
+        TNTBounceTask(Player source, TNTPrimed tnt, int maxBounces) {
+            this.source = source;
             this.tnt = tnt;
             this.maxBounces = maxBounces;
             this.currentBounces = 0;
         }
 
         @Override
+        @SuppressWarnings("UnstableApiUsage")
         public void run() {
-            if (tnt.isDead()) {
+            if (this.tnt.isDead()) {
                 this.cancel();
                 return;
             }
 
-            if (currentBounces >= maxBounces) {
-                ExplosionUtils.createExplosion(tnt.getLocation(), EXPLOSION_RADIUS, GrenadeLauncherGunItem.super.bulletProperties.maxDamage(), DamageSource.builder(DamageType.MOB_PROJECTILE).withCausingEntity(tnt.getSource()).build());
-                tnt.remove();
+            ParticleBuilder particleBuilder =
+                    this.currentBounces == 0 ? createTntTrailFirstBounce()
+                            : this.currentBounces == 1 ? createTntTrailSecondBounce()
+                            : createTntTrailThirdBounce();
+
+            particleBuilder
+                    .location(this.tnt.getLocation())
+                    .spawn();
+
+            if (this.currentBounces >= this.maxBounces || this.source.isSneaking()) {
+                double damageMultiplier = 1 + this.currentBounces * 0.2;
+                double normalDamage = GrenadeLauncherGunItem.super.bulletProperties.maxDamage();
+
+                ExplosionUtils.createExplosion(
+                        tnt.getLocation(),
+                        EXPLOSION_RADIUS,
+                        normalDamage * damageMultiplier,
+                        DamageSource.builder(DamageType.MOB_PROJECTILE).withCausingEntity(source).build()
+                );
+
+                this.tnt.remove();
                 this.cancel();
                 return;
             }
 
             if (tnt.isOnGround() && tnt.getVelocity().getY() <= 0) {
                 currentBounces++;
-                tnt.setVelocity(previousVelocity.multiply(new Vector(1, -1, 1)).multiply(0.5));
+                tnt.setVelocity(previousVelocity.multiply(new Vector(0.5, -0.75, 0.5)));
                 tnt.getWorld().playSound(BOUNCE_SOUND, tnt);
             }
 
             previousVelocity = tnt.getVelocity();
         }
+    }
+
+    private static ParticleBuilder createTntTrailFirstBounce() {
+        return Particle.SMOKE_NORMAL.builder()
+                .extra(0)
+                .count(1)
+                .force(true);
+    }
+
+    private static ParticleBuilder createTntTrailSecondBounce() {
+        return Particle.FLAME.builder()
+                .extra(0)
+                .count(1)
+                .force(true);
+    }
+
+    private static ParticleBuilder createTntTrailThirdBounce() {
+        return Particle.SCULK_SOUL.builder()
+                .extra(0)
+                .offset(0.25, 0.25, 0.25)
+                .count(5)
+                .force(true);
     }
 }

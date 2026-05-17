@@ -19,7 +19,7 @@ public final class GameItems {
     public static final LoadoutGameItem LOADOUT = registerItem(new LoadoutGameItem());
     
     public static final DesertEagleGunItem DESERT_EAGLE = registerGun(new DesertEagleGunItem(new GunProperties(5, 10, 0.05, 0.02, 6, 10, 2), new BulletProperties(3, 500, -0.1F, 1, 7, 0.1F, 25, 4)));
-    public static final GrenadeLauncherGunItem GRENADE_LAUNCHER = registerGun(new GrenadeLauncherGunItem(new GunProperties(5, 40, 0.1, 0.02, 6, 20, 2), new BulletProperties(2, 1.25, 0, 8, 8, 0, 100, 0)));
+    public static final GrenadeLauncherGunItem GRENADE_LAUNCHER = registerGun(new GrenadeLauncherGunItem(new GunProperties(5, 40, 0.1, 0.02, 6, 20, 2), new BulletProperties(3, 1.25, 0, 8, 8, 0, 100, 0)));
     public static final PistolGunItem PISTOL = registerGun(new PistolGunItem(new GunProperties(2, 5, 0.05, 0.02, 8, 5, 2), new BulletProperties(3, 200, -0.10F, 1, 5, 0.1F, 25, 5)));
     public static final SilencedPistolGunItem SILENCED_PISTOL = registerGun(new SilencedPistolGunItem(new GunProperties(2, 5, 0.05, 0.02, 8, 5, 2), new BulletProperties(3, 200, -0.10F, 1, 5, 0.1F, 25, 5)));
     public static final SMGGunItem SMG = registerGun(new SMGGunItem(new GunProperties(3, 1, 0.05, 0.02, 32, 2, 2), new BulletProperties(2, 350, -0.2F, 0.25, 1, 0.2F, 15, 2.5)));
