@@ -39,7 +39,7 @@ final class HealerPlayerClass implements PlayerClass {
                 double maxHealth = Objects.requireNonNull(playerEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
 
                 if (playerEntity.getHealth() < maxHealth) {
-                    playerEntity.setHealth(playerEntity.getHealth() + 1);
+                    playerEntity.setHealth(Math.min(maxHealth, playerEntity.getHealth() + 1));
                 }
             }
         }.runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 40));

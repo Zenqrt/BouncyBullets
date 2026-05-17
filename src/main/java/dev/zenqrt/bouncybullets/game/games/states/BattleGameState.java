@@ -9,6 +9,7 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.loadout.Loadout;
 import dev.zenqrt.bouncybullets.loadout.kit.EventPlayerClass;
+import dev.zenqrt.bouncybullets.loadout.kit.PlayerClass;
 import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
 import dev.zenqrt.bouncybullets.utils.TaskManager;
@@ -106,12 +107,14 @@ public final class BattleGameState extends GameState {
     }
 
     private void registerEvents() {
-        this.players.forEach((uuid, player) -> {
-            if (player.getLoadout().playerClass() instanceof EventPlayerClass eventPlayerClass) {
-                eventPlayerClass.registerEvents(this.game
-                );
-                eventPlayerClass.onStartUse(player);
+        this.players.forEach((uuid, gamePlayer) -> {
+            PlayerClass playerClass = gamePlayer.getLoadout().playerClass();
+
+            if (playerClass instanceof EventPlayerClass eventPlayerClass) {
+                eventPlayerClass.registerEvents(this.game);
             }
+
+            playerClass.onStartUse(gamePlayer);
         });
         this.playerEventNode.registerListener(PaperEventListener.builder(PlayerTeleportEvent.class)
                 .filter(event -> event.getCause() == PlayerTeleportEvent.TeleportCause.SPECTATE)
