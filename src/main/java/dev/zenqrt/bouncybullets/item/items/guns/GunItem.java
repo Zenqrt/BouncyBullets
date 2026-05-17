@@ -173,9 +173,15 @@ public abstract class GunItem extends GameItem {
             return;
 
         int timeToReload = this.gunProperties.reloadTicksPerAmmo() * (this.gunProperties.magazineSize() - ammo);
+        AttributeInstance movementSpeed = Objects.requireNonNull(
+                player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED),
+                "movementSpeed"
+        );
+
+        movementSpeed.removeModifier(RELOAD_SLOWDOWN_MODIFIER);
+        movementSpeed.addTransientModifier(RELOAD_SLOWDOWN_MODIFIER);
 
         player.setCooldown(itemStack.getType(), timeToReload);
-        Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).addModifier(RELOAD_SLOWDOWN_MODIFIER);
 
         new ReloadTask(player, gamePlayer.getHud(), timeToReload, itemStack, player.getInventory().getHeldItemSlot())
                 .runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, this.gunProperties.reloadTicksPerAmmo());
