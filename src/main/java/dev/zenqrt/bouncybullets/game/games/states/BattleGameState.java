@@ -116,6 +116,8 @@ public final class BattleGameState extends GameState {
     protected void onStateEnd() {
         super.onStateEnd();
 
+        this.taskManager.removeAllTasks();
+
         this.players.forEach((uuid, gamePlayer) -> {
             gamePlayer.getLoadout().playerClass().onStopUse(gamePlayer);
 
