@@ -38,8 +38,8 @@ public abstract class GunItem extends GameItem {
     private static final AttributeModifier RELOAD_SLOWDOWN_MODIFIER = new AttributeModifier(UUID.randomUUID(), "reload_slowdown", -0.05, AttributeModifier.Operation.ADD_NUMBER);
     private static final NamespacedKey AMMO_KEY = new NamespacedKey(BouncyBulletsPlugin.getInstance(), "ammo");
     private static final Title AIM_CROSSHAIR_TITLE = Title.title(
-            Component.text("/ \\", NamedTextColor.GRAY),
-            Component.text("\\   /", NamedTextColor.GRAY),
+            Component.empty(),
+            Component.text("¯", NamedTextColor.DARK_GRAY),
             Title.Times.times(Duration.ZERO, Duration.ofDays(1), Duration.ZERO));
 
     private final Map<UUID, Long> lastShootTicks = new HashMap<>();

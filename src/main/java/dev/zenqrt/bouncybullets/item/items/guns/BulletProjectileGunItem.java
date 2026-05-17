@@ -5,7 +5,6 @@ import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -23,10 +22,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public abstract class BulletProjectileGunItem extends GunItem {
 
     private static final Sound HIT_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP.key(), Sound.Source.PLAYER, 1, 2);
-
-    public BulletProjectileGunItem(String key, Material material, Component displayName, GunProperties gunProperties, BulletProperties bulletProperties) {
-        super(key, material, displayName, gunProperties, bulletProperties);
-    }
 
     public BulletProjectileGunItem(String key, Material material, String displayName, GunProperties gunProperties, BulletProperties bulletProperties) {
         super(key, material, displayName, gunProperties, bulletProperties);
