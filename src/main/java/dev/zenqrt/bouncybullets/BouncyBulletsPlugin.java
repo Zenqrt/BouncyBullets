@@ -57,7 +57,7 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
                 new BouncyBulletsCommand(gameManager, mapManager, serverConfig)
         );
 
-        Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(gameManager), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListeners(), this);
         Bukkit.getPluginManager().registerEvents(new GlowListeners(), this);
         Bukkit.getPluginManager().registerEvents(new GameItemListeners(gameManager), this);

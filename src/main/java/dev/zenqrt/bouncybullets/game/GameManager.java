@@ -79,6 +79,15 @@ public final class GameManager {
         this.playerGames.remove(player.getUniqueId(), game);
     }
 
+    public void tryLeaveGame(UUID uuid) {
+        BouncyBulletGame game = this.playerGames.remove(uuid);
+
+        if (game == null)
+            return;
+
+        game.removePlayer(uuid);
+    }
+
     public Optional<BouncyBulletGame> findPlayerGame(UUID uuid) {
         BouncyBulletGame game = this.playerGames.get(uuid);
 
