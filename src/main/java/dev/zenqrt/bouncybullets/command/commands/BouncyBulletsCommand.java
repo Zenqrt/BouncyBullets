@@ -110,6 +110,17 @@ public final class BouncyBulletsCommand {
         this.gameManager.joinGame(executor, game);
     }
 
+    @Subcommand("game state next")
+    public void onGameStateNext(
+            Player executor
+    ) {
+        BouncyBulletGame game = this.gameManager.findPlayerGame(executor.getUniqueId())
+                .orElseThrow(() -> new CommandErrorException("You are not in a game!"));
+
+        Messages.sendCommandInfo(executor, "Switching to next state...");
+        game.switchNextState();
+    }
+
     @Subcommand("map reload")
     public void onMapReload(
             BukkitCommandActor actor

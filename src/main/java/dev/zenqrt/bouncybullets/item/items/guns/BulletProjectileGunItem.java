@@ -37,7 +37,6 @@ public abstract class BulletProjectileGunItem extends GunItem {
 
         private final Player shooter;
         private final BulletProperties bulletProperties;
-        private final Location shotFrom;
         private Location bounceLocation;
         private Location lastBulletLocation;
         private Vector currentDirection;
@@ -49,7 +48,6 @@ public abstract class BulletProjectileGunItem extends GunItem {
             this.shooter = shooter;
             this.bulletProperties = bulletProperties;
 
-            this.shotFrom = startLocation;
             this.bounceLocation = startLocation;
             this.lastBulletLocation = startLocation;
 
@@ -87,7 +85,7 @@ public abstract class BulletProjectileGunItem extends GunItem {
                 spawnCenterParticle(lastBulletLocation, hitLocation);
 
                 if (result.getHitEntity() instanceof Player hitPlayer) {
-                    double shotFromDistance = hitPlayer.getLocation().distance(this.shotFrom);
+                    double shotFromDistance = hitPlayer.getLocation().distance(this.bounceLocation);
 
                     double actualDamage = shotFromDistance > bulletProperties.effectiveDamageDist() ?
                             Math.max(bulletProperties.minDamage(), bulletProperties.damageDropOffPerBlock() * (bulletProperties.effectiveDamageDist() - shotFromDistance) + bulletProperties.maxDamage())
