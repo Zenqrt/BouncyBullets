@@ -4,6 +4,8 @@ import dev.zenqrt.bouncybullets.config.ServerConfig;
 import dev.zenqrt.bouncybullets.game.GameManager;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.GameSettings;
+import dev.zenqrt.bouncybullets.item.GameItem;
+import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.map.GameMap;
 import dev.zenqrt.bouncybullets.map.GameMapManager;
 import dev.zenqrt.bouncybullets.utils.Messages;
@@ -49,6 +51,20 @@ public final class BouncyBulletsCommand {
             Player executor
     ) {
         executor.teleport(this.config.getLobbySpawn());
+    }
+
+    @Subcommand("give item")
+    public void onGiveItem(
+            Player executor,
+            String gameItemId
+    ) {
+        GameItem gameItem = GameItems.getAllItems().get(gameItemId);
+
+        if (gameItem == null)
+            throw new CommandErrorException("Could not find game item with id '" + gameItemId + "'");
+
+        executor.getInventory().addItem(gameItem.buildItemStack());
+        Messages.sendCommandSuccess(executor, "Gave item!");
     }
 
     @Subcommand("game create")
@@ -99,7 +115,7 @@ public final class BouncyBulletsCommand {
             BukkitCommandActor actor
     ) {
         Messages.sendCommandInfo(actor.sender(), "Reloading maps...");
-        
+
         this.mapManager.unregisterAllMaps();
         this.mapManager.loadGameMaps();
 

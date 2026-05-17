@@ -22,6 +22,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -47,10 +48,19 @@ public abstract class GunItem extends GameItem {
     protected final BulletProperties bulletProperties;
 
     public GunItem(String key, Material material, Component displayName, GunProperties gunProperties, BulletProperties bulletProperties) {
-        super(key, material, displayName, buildGunPropertyDescription(bulletProperties));
+        super(key, material, displayName, buildGunPropertyDescription(bulletProperties), itemMeta ->
+                itemMeta.addAttributeModifier(
+                        Attribute.GENERIC_ATTACK_SPEED,
+                        new AttributeModifier(UUID.randomUUID(), "gun_pullout_speed", -pullOutTicksToAttackSpeed(gunProperties.pullOutTicks()), AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.HAND)
+                )
+        );
 
         this.gunProperties = gunProperties;
         this.bulletProperties = bulletProperties;
+    }
+
+    private static double pullOutTicksToAttackSpeed(int pullOutTicks) {
+        return 4 - 20D / pullOutTicks;
     }
 
     public GunItem(String key, Material material, String displayName, GunProperties gunProperties, BulletProperties bulletProperties) {
@@ -63,6 +73,9 @@ public abstract class GunItem extends GameItem {
     @Override
     public void onInteract(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
         event.setCancelled(true);
+
+        if (player.hasCooldown(this.material))
+            return;
 
         if (event.getAction().isLeftClick()) {
             displayAimZoom(player);
@@ -98,7 +111,7 @@ public abstract class GunItem extends GameItem {
                     public void run() {
                         useGun(player, gamePlayer.getHud(), itemStack);
                     }
-                }.runTaskLater(BouncyBulletsPlugin.getInstance(), i * this.gunProperties.shootDelayTicks());
+                }.runTaskLater(BouncyBulletsPlugin.getInstance(), (long) i * this.gunProperties.shootDelayTicks());
             }
 
             return;

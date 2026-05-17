@@ -1,7 +1,8 @@
 package dev.zenqrt.bouncybullets.loadout.gun;
 
 public record GunProperties(
-        long shootDelayTicks,
+        int pullOutTicks,
+        int shootDelayTicks,
         double recoilRange,
         double recoilRangeFocused,
         int magazineSize,

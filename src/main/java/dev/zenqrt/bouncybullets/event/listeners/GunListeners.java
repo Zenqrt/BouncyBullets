@@ -57,6 +57,8 @@ public final class GunListeners implements Listener {
 
         gamePlayer.getHud().updateAmmo(ammo, gunItem.getGunProperties().magazineSize());
         gamePlayer.getHud().updateHudText();
+
+        player.setCooldown(itemStack.getType(), gunItem.getGunProperties().pullOutTicks());
     }
 
     @EventHandler
