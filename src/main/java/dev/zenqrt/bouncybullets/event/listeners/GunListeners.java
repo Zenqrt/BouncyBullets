@@ -6,6 +6,7 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
+import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -24,7 +25,7 @@ public final class GunListeners implements Listener {
     }
 
     @EventHandler
-    public void displayAmmo(PlayerItemHeldEvent event) {
+    public void displayAmmoItemHeld(PlayerItemHeldEvent event) {
         Player player = event.getPlayer();
         Optional<BouncyBulletGame> gameOptional = this.gameManager.findPlayerGame(player.getUniqueId());
 
@@ -40,6 +41,38 @@ public final class GunListeners implements Listener {
             gamePlayer.getHud().updateHudText();
             return;
         }
+
+        Optional<GunItem> gunItemOptional = GameItem.findGameItemId(itemStack)
+                .map(gameId -> GameItems.getGuns().get(gameId));
+
+        if (gunItemOptional.isEmpty()) {
+            gamePlayer.getHud().hideAmmo();
+            gamePlayer.getHud().updateHudText();
+            return;
+        }
+
+        GunItem gunItem = gunItemOptional.get();
+
+        int ammo = gunItem.getAmmo(itemStack);
+
+        gamePlayer.getHud().updateAmmo(ammo, gunItem.getGunProperties().magazineSize());
+        gamePlayer.getHud().updateHudText();
+    }
+
+    @EventHandler
+    public void displayAmmoInventorySlotChange(PlayerInventorySlotChangeEvent event) {
+        Player player = event.getPlayer();
+        Optional<BouncyBulletGame> gameOptional = this.gameManager.findPlayerGame(player.getUniqueId());
+
+        if (gameOptional.isEmpty())
+            return;
+
+        BouncyBulletGame game = gameOptional.get();
+        BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
+        ItemStack itemStack = event.getNewItemStack();
+
+        if (event.getSlot() != player.getInventory().getHeldItemSlot())
+            return;
 
         Optional<GunItem> gunItemOptional = GameItem.findGameItemId(itemStack)
                 .map(gameId -> GameItems.getGuns().get(gameId));
