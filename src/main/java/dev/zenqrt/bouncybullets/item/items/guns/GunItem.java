@@ -13,6 +13,7 @@ import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -40,7 +41,7 @@ public abstract class GunItem extends GameItem {
     private static final NamespacedKey AMMO_KEY = new NamespacedKey(BouncyBulletsPlugin.getInstance(), "ammo");
     private static final Title AIM_CROSSHAIR_TITLE = Title.title(
             Component.empty(),
-            Component.text("¯", NamedTextColor.DARK_GRAY),
+            Component.text("^", NamedTextColor.DARK_GRAY).decorate(TextDecoration.BOLD),
             Title.Times.times(Duration.ZERO, Duration.ofDays(1), Duration.ZERO));
 
     private final Map<UUID, Long> lastShootTicks = new HashMap<>();
@@ -74,9 +75,13 @@ public abstract class GunItem extends GameItem {
     public void onInteract(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
         event.setCancelled(true);
 
+
         if (event.getAction().isLeftClick()) {
             displayAimZoom(player);
         } else if (event.getAction().isRightClick()) {
+            System.out.println("Interact right click");
+            System.out.println("hasCooldown: " + player.hasCooldown(this.material));
+
             if (player.hasCooldown(this.material))
                 return;
 
@@ -123,7 +128,7 @@ public abstract class GunItem extends GameItem {
     }
 
     private void useGun(Player player, BouncyBulletsHUD hud, ItemStack itemStack) {
-        long currentGameTime = player.getWorld().getGameTime();
+        long currentGameTime = player.getServer().getCurrentTick();
 
         if (getAmmo(itemStack) <= 0)
             return;
@@ -145,7 +150,7 @@ public abstract class GunItem extends GameItem {
         shootProjectile(player, event.getBulletProperties());
         useAmmo(itemStack, hud);
 
-        lastShootTicks.put(player.getUniqueId(), player.getWorld().getGameTime());
+        lastShootTicks.put(player.getUniqueId(), currentGameTime);
     }
 
     private void useAmmo(ItemStack itemStack, BouncyBulletsHUD hud) {
