@@ -23,6 +23,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -37,12 +39,12 @@ import org.bukkit.scoreboard.Team;
 
 import java.time.Duration;
 import java.util.Comparator;
-import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class BattleGameState extends GameState {
 
     private static final Sound KILL_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.MASTER, 1, 1);
+    private static final AttributeModifier NO_KNOCKBACK_MODIFIER = new AttributeModifier("bouncy-bullets_no_kb", 100, AttributeModifier.Operation.ADD_NUMBER);
 
     private final EventNode<PlayerEvent> playerEventNode;
     private final EventNode<EntityEvent> playerEntityEventNode;
@@ -77,13 +79,16 @@ public final class BattleGameState extends GameState {
 
         team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
 
-        players.forEach((uuid, gamePlayer) -> {
+        this.players.forEach((uuid, gamePlayer) -> {
             Player player = gamePlayer.getPlayer();
+            AttributeInstance knockbackResistance = player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
 
-            player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE).setBaseValue(100);
+            assert knockbackResistance != null;
+
+            knockbackResistance.addTransientModifier(NO_KNOCKBACK_MODIFIER);
+
             team.addPlayer(player);
             setupPlayerInventory(player, gamePlayer.getLoadout());
-            Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE)).setBaseValue(0.5);
 
             Location randomSpawn = gameMap.spawnLocations().get(ThreadLocalRandom.current().nextInt(gameMap.spawnLocations().size())).toLocation(gameMap.world());
             player.teleport(randomSpawn);
@@ -103,9 +108,18 @@ public final class BattleGameState extends GameState {
     protected void onStateEnd() {
         super.onStateEnd();
 
-        this.players.forEach((uuid, player) -> player.getLoadout().playerClass().onStopUse(player));
+        this.players.forEach((uuid, gamePlayer) -> {
+            gamePlayer.getLoadout().playerClass().onStopUse(gamePlayer);
+
+            AttributeInstance knockbackResistance = gamePlayer.getPlayer().getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
+
+            assert knockbackResistance != null;
+
+            knockbackResistance.removeModifier(NO_KNOCKBACK_MODIFIER);
+        });
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private void registerEvents() {
         this.players.forEach((uuid, gamePlayer) -> {
             PlayerClass playerClass = gamePlayer.getLoadout().playerClass();
