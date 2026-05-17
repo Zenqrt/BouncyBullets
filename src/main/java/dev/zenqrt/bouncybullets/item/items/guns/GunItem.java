@@ -19,6 +19,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -26,8 +27,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.Duration;
@@ -36,6 +35,7 @@ import java.util.*;
 public abstract class GunItem extends GameItem {
 
     private static final long INTERACT_EVENT_TICK_DELAY = 4;
+    private static final UUID AIM_ZOOM_MODIFIER_UUID = UUID.randomUUID();
     private static final AttributeModifier RELOAD_SLOWDOWN_MODIFIER = new AttributeModifier(UUID.randomUUID(), "reload_slowdown", -0.05, AttributeModifier.Operation.ADD_NUMBER);
     private static final NamespacedKey AMMO_KEY = new NamespacedKey(BouncyBulletsPlugin.getInstance(), "ammo");
     private static final Title AIM_CROSSHAIR_TITLE = Title.title(
@@ -87,12 +87,14 @@ public abstract class GunItem extends GameItem {
     }
 
     private void displayAimZoom(Player player) {
-        if (player.hasPotionEffect(PotionEffectType.SLOW)) {
-            player.clearTitle();
-            player.removePotionEffect(PotionEffectType.SLOW);
+        AttributeInstance movementSpeed = player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+
+        assert movementSpeed != null;
+
+        if (movementSpeed.getModifier(AIM_ZOOM_MODIFIER_UUID) != null) {
+            stopAiming(player);
         } else {
-            player.showTitle(AIM_CROSSHAIR_TITLE);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, this.gunProperties.scopeMagnifyMultiplier(), false, false, false));
+            startAiming(player, this.gunProperties);
         }
     }
 
@@ -119,7 +121,6 @@ public abstract class GunItem extends GameItem {
 
         useGun(player, gamePlayer.getHud(), itemStack);
     }
-
 
     private void useGun(Player player, BouncyBulletsHUD hud, ItemStack itemStack) {
         long currentGameTime = player.getWorld().getGameTime();
@@ -198,6 +199,38 @@ public abstract class GunItem extends GameItem {
 
     public BulletProperties getBulletProperties() {
         return bulletProperties;
+    }
+
+    public static void startAiming(Player player, GunProperties gunProperties) {
+        AttributeInstance movementSpeed = player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+
+        assert movementSpeed != null;
+
+        AttributeModifier zoomModifier = new AttributeModifier(
+                AIM_ZOOM_MODIFIER_UUID,
+                "aim_zoom",
+                -0.15 * gunProperties.scopeMagnifyMultiplier(),
+                AttributeModifier.Operation.ADD_SCALAR
+        );
+        movementSpeed.addTransientModifier(zoomModifier);
+        player.showTitle(AIM_CROSSHAIR_TITLE);
+    }
+
+    public static void stopAiming(Player player) {
+        AttributeInstance movementSpeed = player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+
+        assert movementSpeed != null;
+
+        player.clearTitle();
+        movementSpeed.removeModifier(AIM_ZOOM_MODIFIER_UUID);
+    }
+
+    public static boolean isAiming(Player player) {
+        AttributeInstance movementSpeed = player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+
+        assert movementSpeed != null;
+
+        return movementSpeed.getModifier(AIM_ZOOM_MODIFIER_UUID) != null;
     }
 
     private class ReloadTask extends BukkitRunnable {

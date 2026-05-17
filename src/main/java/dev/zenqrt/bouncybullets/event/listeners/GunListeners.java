@@ -32,6 +32,8 @@ public final class GunListeners implements Listener {
         if (gameOptional.isEmpty())
             return;
 
+        GunItem.stopAiming(player);
+
         BouncyBulletGame game = gameOptional.get();
         BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
         ItemStack itemStack = player.getInventory().getItem(event.getNewSlot());
@@ -115,6 +117,7 @@ public final class GunListeners implements Listener {
         BouncyBulletGame game = gameOptional.get();
         BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
 
+        GunItem.stopAiming(player);
         gunItem.reload(gamePlayer, player, itemStack);
     }
 

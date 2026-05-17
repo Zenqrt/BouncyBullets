@@ -11,7 +11,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
@@ -31,7 +30,7 @@ public abstract class BulletProjectileGunItem extends GunItem {
 
     @Override
     protected void shootProjectile(Player player, BulletProperties bulletProperties) {
-        new ShootBulletTask(player, player.getEyeLocation(), bulletProperties, player.hasPotionEffect(PotionEffectType.SLOW)).runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 1);
+        new ShootBulletTask(player, player.getEyeLocation(), bulletProperties, GunItem.isAiming(player)).runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 1);
     }
 
     private class ShootBulletTask extends BukkitRunnable {
