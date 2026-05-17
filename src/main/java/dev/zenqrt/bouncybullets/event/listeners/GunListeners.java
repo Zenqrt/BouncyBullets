@@ -25,7 +25,7 @@ public final class GunListeners implements Listener {
     }
 
     @EventHandler
-    public void displayAmmoItemHeld(PlayerItemHeldEvent event) {
+    public void onPlayerItemHeld(PlayerItemHeldEvent event) {
         Player player = event.getPlayer();
         Optional<BouncyBulletGame> gameOptional = this.gameManager.findPlayerGame(player.getUniqueId());
 

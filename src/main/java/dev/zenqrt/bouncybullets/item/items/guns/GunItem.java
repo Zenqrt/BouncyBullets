@@ -74,12 +74,12 @@ public abstract class GunItem extends GameItem {
     public void onInteract(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
         event.setCancelled(true);
 
-        if (player.hasCooldown(this.material))
-            return;
-
         if (event.getAction().isLeftClick()) {
             displayAimZoom(player);
         } else if (event.getAction().isRightClick()) {
+            if (player.hasCooldown(this.material))
+                return;
+
             BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
 
             shootGun(gamePlayer, player, itemStack);
@@ -221,6 +221,7 @@ public abstract class GunItem extends GameItem {
         public void run() {
             if (player.getInventory().getHeldItemSlot() != slot || ticks >= timeToReload) {
                 Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).removeModifier(RELOAD_SLOWDOWN_MODIFIER);
+                player.setCooldown(itemStack.getType(), 0);
                 this.cancel();
                 return;
             }
