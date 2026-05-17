@@ -14,5 +14,4 @@ public final class AdventureUtils {
     public static Component withoutItalics(String text) {
         return MiniMessage.miniMessage().deserialize(text).decoration(TextDecoration.ITALIC, false);
     }
-
 }

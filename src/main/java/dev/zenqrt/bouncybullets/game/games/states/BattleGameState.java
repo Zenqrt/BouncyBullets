@@ -12,6 +12,8 @@ import dev.zenqrt.bouncybullets.loadout.kit.EventPlayerClass;
 import dev.zenqrt.bouncybullets.loadout.kit.PlayerClass;
 import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
+import dev.zenqrt.bouncybullets.sidebar.sidebars.BouncyBulletsSidebar;
+import dev.zenqrt.bouncybullets.utils.NMSConverter;
 import dev.zenqrt.bouncybullets.utils.TaskManager;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -38,9 +40,9 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.time.Duration;
-import java.util.Comparator;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 
 public final class BattleGameState extends GameState {
 
@@ -50,6 +52,8 @@ public final class BattleGameState extends GameState {
 
     private final EventNode<PlayerEvent> playerEventNode;
     private final EventNode<EntityEvent> playerEntityEventNode;
+
+    private final Map<UUID, BouncyBulletsSidebar> sidebarMap = new HashMap<>();
 
     private final TaskManager taskManager;
     private final BouncyBulletGame game;
@@ -81,22 +85,23 @@ public final class BattleGameState extends GameState {
 
         team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
 
+        List<Player> initialTopPlayers = players.values().stream()
+                .map(BouncyBulletGamePlayer::getPlayer)
+                .limit(3)
+                .toList();
+
         this.players.forEach((uuid, gamePlayer) -> {
             Player player = gamePlayer.getPlayer();
-            AttributeInstance knockbackResistance = Objects.requireNonNull(
-                    player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE),
-                    "knockbackResistance"
-            );
-            AttributeInstance movementSpeed = Objects.requireNonNull(
-                    player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED),
-                    "movementSpeed"
-            );
 
-            knockbackResistance.addTransientModifier(NO_KNOCKBACK_MODIFIER);
-            movementSpeed.addTransientModifier(GAME_SPEED_MODIFIER);
+            setupPlayerAttributes(player);
+            setupPlayerInventory(player, gamePlayer.getLoadout());
 
             team.addPlayer(player);
-            setupPlayerInventory(player, gamePlayer.getLoadout());
+
+            BouncyBulletsSidebar sidebar = new BouncyBulletsSidebar(this.game.getGameSettings().gameTime(), initialTopPlayers);
+            sidebar.addViewer(NMSConverter.serverPlayer(player));
+
+            this.sidebarMap.put(player.getUniqueId(), sidebar);
 
             Location randomSpawn = gameMap.spawnLocations().get(ThreadLocalRandom.current().nextInt(gameMap.spawnLocations().size())).toLocation(gameMap.world());
             player.teleport(randomSpawn);
@@ -138,6 +143,10 @@ public final class BattleGameState extends GameState {
             player.getInventory().clear();
             player.setGameMode(GameMode.SPECTATOR);
             player.clearActivePotionEffects();
+
+            this.sidebarMap.forEach((ignored, sidebar) -> sidebar.removeAllViewers());
+            this.sidebarMap.clear();
+
             player.sendActionBar(Component.empty());
         });
     }
@@ -187,8 +196,13 @@ public final class BattleGameState extends GameState {
                             BouncyBulletGamePlayer killerGamePlayer = this.game.findPlayer(killer.getUniqueId());
 
                             killerGamePlayer.addKill();
-                            player.setSpectatorTarget(killer);
+                            updateSidebar(
+                                    killerGamePlayer.getUuid(),
+                                    sidebar -> sidebar.setYourKills(killerGamePlayer.getKills())
+                            );
+                            updateKillsLeaderboard();
 
+                            player.setSpectatorTarget(killer);
                             killer.playSound(KILL_SOUND, Sound.Emitter.self());
                             players.sendMessage(Component.text(player.getName() + " \uD83D\uDD2B " + killer.getName(), NamedTextColor.RED));
                         }
@@ -209,6 +223,27 @@ public final class BattleGameState extends GameState {
 //                .build());
     }
 
+    private void updateSidebar(UUID uuid, Consumer<BouncyBulletsSidebar> updateHandler) {
+        BouncyBulletsSidebar sidebar = this.sidebarMap.get(uuid);
+        updateHandler.accept(sidebar);
+    }
+
+    private void updateKillsLeaderboard() {
+        List<BouncyBulletGamePlayer> topKillers = this.game.getPlayers().values()
+                .stream()
+                .sorted(Comparator.comparing(BouncyBulletGamePlayer::getKills).reversed())
+                .limit(3)
+                .toList();
+
+        for (BouncyBulletsSidebar sidebar : this.sidebarMap.values()) {
+            for (int i = topKillers.size() - 1; i >= 0; i--) {
+                BouncyBulletGamePlayer gamePlayer = topKillers.get(i);
+
+                sidebar.setPlace(i + 1, gamePlayer.getPlayer(), gamePlayer.getKills());
+            }
+        }
+    }
+
     private Location chooseBestSpawnLocation() {
         return gameMap.spawnLocations().stream()
                 .map(location -> location.toLocation(gameMap.world()))
@@ -221,6 +256,20 @@ public final class BattleGameState extends GameState {
                 .mapToDouble(gamePlayer -> location.distance(gamePlayer.getPlayer().getLocation()))
                 .min()
                 .orElse(0);
+    }
+
+    private static void setupPlayerAttributes(Player player) {
+        AttributeInstance knockbackResistance = Objects.requireNonNull(
+                player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE),
+                "knockbackResistance"
+        );
+        AttributeInstance movementSpeed = Objects.requireNonNull(
+                player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED),
+                "movementSpeed"
+        );
+
+        knockbackResistance.addTransientModifier(NO_KNOCKBACK_MODIFIER);
+        movementSpeed.addTransientModifier(GAME_SPEED_MODIFIER);
     }
 
     private static void setupPlayerInventory(Player player, Loadout loadout) {
@@ -242,6 +291,10 @@ public final class BattleGameState extends GameState {
         public void run() {
             if (--timeLeft == 0) {
                 game.switchNextState();
+            }
+
+            for (BouncyBulletsSidebar sidebar : BattleGameState.this.sidebarMap.values()) {
+                sidebar.setGameTime(timeLeft);
             }
         }
     }
