@@ -4,10 +4,13 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.item.items.abilities.RailgunAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
+import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
@@ -42,4 +45,13 @@ final class DemomanPlayerClass implements PlayerClass {
         }};
     }
 
+    @Override
+    public Map<EquipmentSlot, ItemStack> getArmorEquipment() {
+        return Map.of(
+                EquipmentSlot.HEAD, new ItemStack(Material.BLAST_FURNACE),
+                EquipmentSlot.CHEST, new ItemStack(Material.NETHERITE_CHESTPLATE),
+                EquipmentSlot.LEGS, new ItemStack(Material.CHAINMAIL_LEGGINGS),
+                EquipmentSlot.FEET, new ItemStack(Material.IRON_BOOTS)
+        );
+    }
 }

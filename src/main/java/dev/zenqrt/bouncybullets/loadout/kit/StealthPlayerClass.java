@@ -6,13 +6,18 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.item.items.abilities.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
+import dev.zenqrt.bouncybullets.utils.ItemUtils;
+import org.bukkit.Color;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.Map;
 import java.util.TreeMap;
 
 final class StealthPlayerClass extends EventPlayerClass {
@@ -35,6 +40,15 @@ final class StealthPlayerClass extends EventPlayerClass {
         items.put(2, ACTIVE_ABILITY.buildItemStack());
 
         return items;
+    }
+
+    @Override
+    public Map<EquipmentSlot, ItemStack> getArmorEquipment() {
+        return Map.of(
+                EquipmentSlot.HEAD, ItemUtils.createLeatherArmor(Material.LEATHER_HELMET, Color.BLACK),
+                EquipmentSlot.LEGS, new ItemStack(Material.CHAINMAIL_LEGGINGS),
+                EquipmentSlot.FEET, ItemUtils.createLeatherArmor(Material.LEATHER_BOOTS, Color.fromRGB(43, 43, 43))
+        );
     }
 
     @Override

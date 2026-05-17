@@ -11,13 +11,16 @@ import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.GlowUtils;
+import dev.zenqrt.bouncybullets.utils.ItemUtils;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.RayTraceResult;
@@ -102,6 +105,14 @@ final class SniperPlayerClass extends EventPlayerClass {
             put(1, SECONDARY_GUN.buildItemStack());
 //            put(2, ACTIVE_ABILITY.buildItemStack());
         }};
+    }
+
+    @Override
+    public Map<EquipmentSlot, ItemStack> getArmorEquipment() {
+        return Map.of(
+                EquipmentSlot.LEGS, ItemUtils.createLeatherArmor(Material.LEATHER_LEGGINGS, Color.fromRGB(46, 79, 51)),
+                EquipmentSlot.FEET, ItemUtils.createLeatherArmor(Material.LEATHER_BOOTS, Color.fromRGB(42, 48, 43))
+        );
     }
 
     private static class TargetAbility extends ActiveAbilityItem {

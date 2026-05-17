@@ -6,16 +6,15 @@ import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.item.items.abilities.FullHealAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.TreeMap;
+import java.util.*;
 
 final class HealerPlayerClass implements PlayerClass {
 
@@ -64,5 +63,15 @@ final class HealerPlayerClass implements PlayerClass {
                 put(1, ACTIVE_ABILITY.buildItemStack());
             }
         };
+    }
+
+    @Override
+    public Map<EquipmentSlot, ItemStack> getArmorEquipment() {
+        return Map.of(
+                EquipmentSlot.HEAD, new ItemStack(Material.FLOWERING_AZALEA),
+                EquipmentSlot.CHEST, new ItemStack(Material.GOLDEN_CHESTPLATE),
+                EquipmentSlot.LEGS, new ItemStack(Material.CHAINMAIL_LEGGINGS),
+                EquipmentSlot.FEET, new ItemStack(Material.IRON_BOOTS)
+        );
     }
 }
