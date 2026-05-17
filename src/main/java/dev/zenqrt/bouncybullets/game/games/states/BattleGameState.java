@@ -39,12 +39,14 @@ import org.bukkit.scoreboard.Team;
 
 import java.time.Duration;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class BattleGameState extends GameState {
 
     private static final Sound KILL_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.MASTER, 1, 1);
     private static final AttributeModifier NO_KNOCKBACK_MODIFIER = new AttributeModifier("bouncy-bullets_no_kb", 100, AttributeModifier.Operation.ADD_NUMBER);
+    private static final AttributeModifier GAME_SPEED_MODIFIER = new AttributeModifier("bouncy-bullets_game_speed", 0.04, AttributeModifier.Operation.ADD_NUMBER);
 
     private final EventNode<PlayerEvent> playerEventNode;
     private final EventNode<EntityEvent> playerEntityEventNode;
@@ -81,11 +83,17 @@ public final class BattleGameState extends GameState {
 
         this.players.forEach((uuid, gamePlayer) -> {
             Player player = gamePlayer.getPlayer();
-            AttributeInstance knockbackResistance = player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
-
-            assert knockbackResistance != null;
+            AttributeInstance knockbackResistance = Objects.requireNonNull(
+                    player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE),
+                    "knockbackResistance"
+            );
+            AttributeInstance movementSpeed = Objects.requireNonNull(
+                    player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED),
+                    "movementSpeed"
+            );
 
             knockbackResistance.addTransientModifier(NO_KNOCKBACK_MODIFIER);
+            movementSpeed.addTransientModifier(GAME_SPEED_MODIFIER);
 
             team.addPlayer(player);
             setupPlayerInventory(player, gamePlayer.getLoadout());
@@ -111,11 +119,24 @@ public final class BattleGameState extends GameState {
         this.players.forEach((uuid, gamePlayer) -> {
             gamePlayer.getLoadout().playerClass().onStopUse(gamePlayer);
 
-            AttributeInstance knockbackResistance = gamePlayer.getPlayer().getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
+            Player player = gamePlayer.getPlayer();
 
-            assert knockbackResistance != null;
+            AttributeInstance knockbackResistance = Objects.requireNonNull(
+                    player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE),
+                    "knockbackResistance"
+            );
+            AttributeInstance movementSpeed = Objects.requireNonNull(
+                    player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED),
+                    "movementSpeed"
+            );
 
             knockbackResistance.removeModifier(NO_KNOCKBACK_MODIFIER);
+            movementSpeed.removeModifier(GAME_SPEED_MODIFIER);
+
+            player.getInventory().clear();
+            player.setGameMode(GameMode.SPECTATOR);
+            player.clearActivePotionEffects();
+            player.sendActionBar(Component.empty());
         });
     }
 
