@@ -1,7 +1,6 @@
 package dev.zenqrt.bouncybullets.item.items.abilities;
 
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
-import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import dev.zenqrt.bouncybullets.utils.SoundUtils;
 import net.kyori.adventure.sound.Sound;
@@ -26,8 +25,7 @@ public final class HealerActiveAbilityItem extends ActiveAbilityItem {
     public HealerActiveAbilityItem() {
         super("healer_active_ability",
                 Material.NETHER_STAR,
-                AdventureUtils.withoutItalics("Miracle", NamedTextColor.LIGHT_PURPLE)
-                        .append(Component.text(" (Right Click)", NamedTextColor.GRAY)),
+                "Miracle",
                 MiniMessageUtils.wordWrapLore(List.of(
                         "<gray>Upon right-click, fully heal yourself and gain <gold>4❤ <gray>of absorption health.",
                         "",

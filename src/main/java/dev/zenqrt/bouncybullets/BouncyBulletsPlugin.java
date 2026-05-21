@@ -2,8 +2,12 @@ package dev.zenqrt.bouncybullets;
 
 import dev.zenqrt.bouncybullets.command.commands.BouncyBulletsCommand;
 import dev.zenqrt.bouncybullets.config.ServerConfig;
-import dev.zenqrt.bouncybullets.event.listeners.*;
+import dev.zenqrt.bouncybullets.event.listeners.GameItemListeners;
+import dev.zenqrt.bouncybullets.event.listeners.GunListeners;
+import dev.zenqrt.bouncybullets.event.listeners.PlayerJoinListeners;
+import dev.zenqrt.bouncybullets.event.listeners.PlayerListeners;
 import dev.zenqrt.bouncybullets.game.GameManager;
+import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.lobby.LobbyManager;
 import dev.zenqrt.bouncybullets.map.GameMapManager;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
@@ -59,10 +63,9 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(gameManager), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListeners(), this);
-        Bukkit.getPluginManager().registerEvents(new GlowListeners(), this);
         Bukkit.getPluginManager().registerEvents(new GameItemListeners(gameManager), this);
         Bukkit.getPluginManager().registerEvents(new GunListeners(gameManager), this);
-
+        Bukkit.getPluginManager().registerEvents(GameItems.SNIPER_ACTIVE_ABILITY, this);
 
         registerCommand("backup", (player, args) -> {
             Bukkit.broadcast(Component.text("Saving backup of the world...").decorate(TextDecoration.ITALIC));
@@ -79,23 +82,6 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
 
             Bukkit.broadcast(Component.text("Successfully saved a backup of the world.", NamedTextColor.GREEN));
         });
-
-//        registerCommand("glow", (player, args) -> {
-//            Player target = Bukkit.getPlayer(args[0]);
-//
-//            if (target == null) {
-//                player.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
-//                return;
-//            }
-//
-//            GlowManager.addGlowing(player.getUniqueId(), target.getEntityId());
-//            GlowUtils.showGlow(player, target);
-//
-//            player.sendMessage(Component.text("Glow added to " + target.getName(), NamedTextColor.GREEN));
-//        });
-
-//        registerCommand("forcerc", (player, args) -> {
-//        });
     }
 
     @Override

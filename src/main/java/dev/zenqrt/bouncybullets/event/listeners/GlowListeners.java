@@ -28,8 +28,12 @@ public final class GlowListeners implements Listener {
                     @Override
                     public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise) throws Exception {
                         if (packet instanceof ClientboundSetEntityDataPacket dataPacket && GlowManager.isGlowing(player.getUniqueId(), dataPacket.id())) {
-                            ClientboundSetEntityDataPacket newPacket = new ClientboundSetEntityDataPacket(dataPacket.id(), GlowUtils.addGlowToDataValues(dataPacket.packedItems()));
-                            super.write(ctx, newPacket, promise);
+                            ClientboundSetEntityDataPacket modifiedDataPacket = new ClientboundSetEntityDataPacket(
+                                    dataPacket.id(),
+                                    GlowUtils.createDataValuesWithGlow(dataPacket.packedItems())
+                            );
+
+                            super.write(ctx, modifiedDataPacket, promise);
                             return;
                         }
 

@@ -1,9 +1,6 @@
 package dev.zenqrt.bouncybullets.item;
 
-import dev.zenqrt.bouncybullets.item.items.abilities.WingmanActiveAbilityItem;
-import dev.zenqrt.bouncybullets.item.items.abilities.HealerActiveAbilityItem;
-import dev.zenqrt.bouncybullets.item.items.abilities.StealthActiveAbilityItem;
-import dev.zenqrt.bouncybullets.item.items.abilities.DemomanActiveAbilityItem;
+import dev.zenqrt.bouncybullets.item.items.abilities.*;
 import dev.zenqrt.bouncybullets.item.items.guns.*;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
@@ -66,6 +63,7 @@ public final class GameItems {
     public static final DemomanActiveAbilityItem DEMOMAN_ACTIVE_ABILITY = registerItem(new DemomanActiveAbilityItem());
     public static final StealthActiveAbilityItem STEALTH_ACTIVE_ABILITY = registerItem(new StealthActiveAbilityItem());
     public static final WingmanActiveAbilityItem WINGMAN_ACTIVE_ABILITY = registerItem(new WingmanActiveAbilityItem());
+    public static final SniperActiveAbilityItem SNIPER_ACTIVE_ABILITY = registerItem(new SniperActiveAbilityItem());
 
     private static <T extends GunItem> T registerGun(T gunItem) {
         GUNS.put(gunItem.getKey(), gunItem);

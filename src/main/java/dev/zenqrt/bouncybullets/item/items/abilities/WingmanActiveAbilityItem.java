@@ -4,12 +4,9 @@ import com.destroystokyo.paper.ParticleBuilder;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.tasks.ShootBulletTask;
-import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
@@ -40,8 +37,7 @@ public final class WingmanActiveAbilityItem extends ActiveAbilityItem {
         super(
                 "wingman_active_ability",
                 Material.FIREWORK_STAR,
-                AdventureUtils.withoutItalics("Bullet Spread", NamedTextColor.LIGHT_PURPLE)
-                        .append(Component.text(" (Right Click)", NamedTextColor.GRAY)),
+                "Bullet Spread",
                 MiniMessageUtils.wordWrapLore(
                         List.of(
                                 "<gray>Fire a wave of bullets around you, dealing <red>" + BULLET_PROPERTIES.maxDamage() + "❤<gray> damage per bullet.",

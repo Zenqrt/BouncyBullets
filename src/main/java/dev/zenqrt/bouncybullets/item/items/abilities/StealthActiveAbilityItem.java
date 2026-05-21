@@ -2,11 +2,8 @@ package dev.zenqrt.bouncybullets.item.items.abilities;
 
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
-import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -28,11 +25,11 @@ public final class StealthActiveAbilityItem extends ActiveAbilityItem {
     public StealthActiveAbilityItem() {
         super("stealth_active_ability",
                 Material.POTION,
-                AdventureUtils.withoutItalics("Invisibility Cloak", NamedTextColor.LIGHT_PURPLE)
-                        .append(Component.text(" (Right Click)", NamedTextColor.GRAY)),
+                "Invisibility Cloak",
                 MiniMessageUtils.wordWrapLore(
                         List.of(
                                 "<gray>Upon right click, become invisible for <green>5</green> seconds.",
+
                                 "",
                                 "<dark_gray>Cooldown: <green>" + (COOLDOWN / 20) + "s"
                         ),

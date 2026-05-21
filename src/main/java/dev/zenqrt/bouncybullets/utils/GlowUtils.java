@@ -12,34 +12,64 @@ import java.util.Objects;
 
 public final class GlowUtils {
 
-    public static void showGlow(Player player, Player target) {
-        if (target.isGlowing())
-            return;
+    public static void showGlow(Entity entity, Player viewer) {
+        List<SynchedEntityData.DataValue<?>> dataValues = Objects.requireNonNullElse(
+                entity.getEntityData().getNonDefaultValues(),
+                new ArrayList<>()
+        );
 
-        List<SynchedEntityData.DataValue<?>> dataValues = addGlowToDataValues(Objects.requireNonNullElse(NMSConverter.serverPlayer(target).getEntityData().packDirty(), new ArrayList<>()));
+        ClientboundSetEntityDataPacket dataPacket = new ClientboundSetEntityDataPacket(
+                entity.getId(),
+                createDataValuesWithGlow(dataValues)
+        );
 
-        ClientboundSetEntityDataPacket packet = new ClientboundSetEntityDataPacket(player.getEntityId(), dataValues);
-        NMSConverter.serverPlayer(player).connection.send(packet);
+        NMSConverter.serverPlayer(viewer).connection.send(dataPacket);
     }
 
-    public static List<SynchedEntityData.DataValue<?>> addGlowToDataValues(List<SynchedEntityData.DataValue<?>> dataValues) {
+    public static List<SynchedEntityData.DataValue<?>> createDataValuesWithGlow(List<SynchedEntityData.DataValue<?>> dataValues) {
+        List<SynchedEntityData.DataValue<?>> newDataValues = new ArrayList<>(dataValues);
+
         EntityDataAccessor<Byte> accessor = ReflectionUtils.getStaticDeclaredField(Entity.class, "ao");
         var serializer = accessor.getSerializer();
         int dataSharedFlagsId = accessor.getId();
 
-        SynchedEntityData.DataValue<Byte> dataValue = dataValues.stream()
-                .filter(data -> data.id() == dataSharedFlagsId)
-                .findFirst()
-                .map(value -> {
-                    dataValues.remove(value);
+        for (int i = 0; i < dataValues.size(); i++) {
+            SynchedEntityData.DataValue<?> value = dataValues.get(i);
 
-                    return new SynchedEntityData.DataValue<>(dataSharedFlagsId, serializer, (byte) ((byte) value.value() | 1 << 6));
-                })
-                .orElseGet(() -> new SynchedEntityData.DataValue<>(dataSharedFlagsId, serializer, (byte) (1 << 6)));
+            if (value.id() != dataSharedFlagsId)
+                continue;
 
-        dataValues.add(dataValue);
+            byte flags = (byte) value.value();
 
-        return dataValues;
+            newDataValues.set(i, new SynchedEntityData.DataValue<>(dataSharedFlagsId, serializer, (byte) (flags | (1 << 6))));
+            return newDataValues;
+        }
+
+        newDataValues.add(new SynchedEntityData.DataValue<>(dataSharedFlagsId, serializer, (byte) (1 << 6)));
+        return newDataValues;
+    }
+
+    public static List<SynchedEntityData.DataValue<?>> createDataValuesWithoutGlow(List<SynchedEntityData.DataValue<?>> dataValues) {
+        List<SynchedEntityData.DataValue<?>> newDataValues = new ArrayList<>(dataValues);
+
+        EntityDataAccessor<Byte> accessor = ReflectionUtils.getStaticDeclaredField(Entity.class, "ao");
+        var serializer = accessor.getSerializer();
+        int dataSharedFlagsId = accessor.getId();
+
+        for (int i = 0; i < dataValues.size(); i++) {
+            SynchedEntityData.DataValue<?> value = dataValues.get(i);
+
+            if (value.id() != dataSharedFlagsId)
+                continue;
+
+            byte flags = (byte) value.value();
+
+            newDataValues.set(i, new SynchedEntityData.DataValue<>(dataSharedFlagsId, serializer, (byte) (flags ^ (1 << 6))));
+            return newDataValues;
+        }
+
+        newDataValues.add(new SynchedEntityData.DataValue<>(dataSharedFlagsId, serializer, (byte) 0));
+        return newDataValues;
     }
 
 }

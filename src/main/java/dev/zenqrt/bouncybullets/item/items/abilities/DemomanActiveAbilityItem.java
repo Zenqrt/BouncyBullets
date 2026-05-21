@@ -38,8 +38,7 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
     public DemomanActiveAbilityItem() {
         super("demoman_active_ability",
                 Material.ECHO_SHARD,
-                AdventureUtils.withoutItalics("Pocket Railgun", NamedTextColor.LIGHT_PURPLE)
-                        .append(AdventureUtils.withoutItalics(" (Right Click)", NamedTextColor.GRAY)),
+                "Pocket Railgun",
                 MiniMessageUtils.wordWrapLore(List.of(
                         "<gray>Fire a powerful projectile that creates a large explosion on impact, dealing <red>" + DAMAGE + "❤ <gray>damage to enemies in the area.",
                         "",
