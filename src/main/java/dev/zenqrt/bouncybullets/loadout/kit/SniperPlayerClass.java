@@ -19,7 +19,10 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
 
 // TODO: Change active ability to marking player and dealing more damage to them for a short period of time
 // TODO: Ability: Make every player glowing and the next shot does twice as much damage
@@ -30,7 +33,7 @@ final class SniperPlayerClass extends EventPlayerClass {
     private static final ActiveAbilityItem ACTIVE_ABILITY = GameItems.SNIPER_ACTIVE_ABILITY;
 
     private final Map<UUID, Long> lastMoved = new HashMap<>();
-    private final List<BukkitTask> tasks = new ArrayList<>();
+    private final Map<UUID, BukkitTask> chargeTasks = new HashMap<>();
 
     @Override
     public void registerEvents(BouncyBulletGame game) {
@@ -63,29 +66,36 @@ final class SniperPlayerClass extends EventPlayerClass {
     public void onStartUse(BouncyBulletGamePlayer gamePlayer) {
         Player player = gamePlayer.getPlayer();
 
-        tasks.add(Bukkit.getScheduler().runTaskTimer(BouncyBulletsPlugin.getInstance(), () -> {
-            long interval = System.currentTimeMillis() - this.lastMoved.getOrDefault(player.getUniqueId(), System.currentTimeMillis());
-            float progress = interval / 5000f;
+        this.chargeTasks.put(
+                gamePlayer.getUuid(),
+                Bukkit.getScheduler().runTaskTimer(
+                        BouncyBulletsPlugin.getInstance(),
+                        () -> {
+                            long interval = System.currentTimeMillis() - this.lastMoved.getOrDefault(player.getUniqueId(), System.currentTimeMillis());
+                            float progress = interval / 10000f;
 
-            if (progress > 1) {
-                if (player.getExp() == 1) {
-                    return;
-                }
+                            if (progress > 1) {
+                                if (player.getExp() == 1) {
+                                    return;
+                                }
 
-                progress = 1;
-            }
+                                progress = 1;
+                            }
 
-            player.setExp(progress);
+                            player.setExp(progress);
 
-            int damage = (int) (50 * progress);
-            player.setLevel(damage);
-        }, 0, 1));
+                            int damage = (int) (50 * progress);
+                            player.setLevel(damage);
+                        },
+                0, 1));
     }
 
     @Override
     public void onStopUse(BouncyBulletGamePlayer gamePlayer) {
-        tasks.forEach(BukkitTask::cancel);
-        tasks.clear();
+        BukkitTask task = this.chargeTasks.remove(gamePlayer.getUuid());
+
+        if (task != null)
+            task.cancel();
     }
 
     @Override

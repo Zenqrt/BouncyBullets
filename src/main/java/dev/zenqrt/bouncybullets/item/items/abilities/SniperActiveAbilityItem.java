@@ -59,11 +59,8 @@ public final class SniperActiveAbilityItem extends ActiveAbilityItem implements 
 
     @EventHandler
     public void onGunShoot(GunShootEvent event) {
-        System.out.println("Gun shot by: " + event.getShooter().getUniqueId());
         if (!this.abilityActive.contains(event.getShooter().getUniqueId()))
             return;
-
-        System.out.println("Yes");
 
         BulletProperties bulletProperties = event.getBulletProperties();
         BulletProperties modifiedProperties = bulletProperties
@@ -75,7 +72,6 @@ public final class SniperActiveAbilityItem extends ActiveAbilityItem implements 
     @Override
     public void onUse(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
         this.abilityActive.add(player.getUniqueId());
-        System.out.println("Used: " + player.getUniqueId());
 
         IntSet ids = new IntOpenHashSet();
 

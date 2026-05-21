@@ -41,7 +41,7 @@ public enum PlayerClasses {
     ),
             List.of(
                     "<gold>Passive Ability:",
-                    "<gray>For each second of standing still, accumulate <red>1% <gray>damage increase, up to <red>50% <gray>maximum. This is shown in the experience bar."
+                    "<gray>For each second of standing still, accumulate <red>5% <gray>damage increase, up to <red>50% <gray>maximum. This is shown in the experience bar."
             )),
     DEMOMAN(new DemomanPlayerClass(), Material.TNT, List.of(
             Component.text("Rocket Launcher", NamedTextColor.GRAY),
