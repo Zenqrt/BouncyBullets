@@ -30,7 +30,7 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
 
     private static final int COOLDOWN = 2400;
     private static final double DAMAGE = 15;
-    private static final int CHARGING_TICKS = 60;
+    private static final int CHARGING_TICKS = 40;
     private static final Sound CHARGING_SOUND = Sound.sound(org.bukkit.Sound.BLOCK_BEACON_ACTIVATE, Sound.Source.PLAYER, 1, 1);
     private final Map<UUID, ItemStack[]> inventoryContents = new HashMap<>();
     private final List<UUID> isCharging = new ArrayList<>();
