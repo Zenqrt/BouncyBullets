@@ -25,7 +25,7 @@ import org.bukkit.util.RayTraceResult;
 
 import java.util.*;
 
-public final class RailgunAbilityItem extends ActiveAbilityItem {
+public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
 
 
     private static final int COOLDOWN = 2400;
@@ -35,7 +35,7 @@ public final class RailgunAbilityItem extends ActiveAbilityItem {
     private final Map<UUID, ItemStack[]> inventoryContents = new HashMap<>();
     private final List<UUID> isCharging = new ArrayList<>();
 
-    public RailgunAbilityItem() {
+    public DemomanActiveAbilityItem() {
         super("demoman_active_ability",
                 Material.ECHO_SHARD,
                 AdventureUtils.withoutItalics("Pocket Railgun", NamedTextColor.LIGHT_PURPLE)
@@ -135,6 +135,7 @@ public final class RailgunAbilityItem extends ActiveAbilityItem {
             shooter.setCooldown(material, COOLDOWN);
         }
 
+        @SuppressWarnings("UnstableApiUsage")
         private void shoot() {
             Location location = shooter.getEyeLocation();
 

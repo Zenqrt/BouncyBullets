@@ -1,9 +1,9 @@
 package dev.zenqrt.bouncybullets.item;
 
-import dev.zenqrt.bouncybullets.item.items.abilities.BulletSpreadAbilityItem;
-import dev.zenqrt.bouncybullets.item.items.abilities.FullHealAbilityItem;
-import dev.zenqrt.bouncybullets.item.items.abilities.InvisibilityAbilityItem;
-import dev.zenqrt.bouncybullets.item.items.abilities.RailgunAbilityItem;
+import dev.zenqrt.bouncybullets.item.items.abilities.WingmanActiveAbilityItem;
+import dev.zenqrt.bouncybullets.item.items.abilities.HealerActiveAbilityItem;
+import dev.zenqrt.bouncybullets.item.items.abilities.StealthActiveAbilityItem;
+import dev.zenqrt.bouncybullets.item.items.abilities.DemomanActiveAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.*;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
@@ -62,10 +62,10 @@ public final class GameItems {
             )
     );
     
-    public static final FullHealAbilityItem FULL_HEAL = registerItem(new FullHealAbilityItem());
-    public static final RailgunAbilityItem RAILGUN = registerItem(new RailgunAbilityItem());
-    public static final InvisibilityAbilityItem INVISIBILITY = registerItem(new InvisibilityAbilityItem());
-    public static final BulletSpreadAbilityItem BULLET_SPREAD = registerItem(new BulletSpreadAbilityItem());
+    public static final HealerActiveAbilityItem HEALER_ACTIVE_ABILITY = registerItem(new HealerActiveAbilityItem());
+    public static final DemomanActiveAbilityItem DEMOMAN_ACTIVE_ABILITY = registerItem(new DemomanActiveAbilityItem());
+    public static final StealthActiveAbilityItem STEALTH_ACTIVE_ABILITY = registerItem(new StealthActiveAbilityItem());
+    public static final WingmanActiveAbilityItem WINGMAN_ACTIVE_ABILITY = registerItem(new WingmanActiveAbilityItem());
 
     private static <T extends GunItem> T registerGun(T gunItem) {
         GUNS.put(gunItem.getKey(), gunItem);

@@ -3,7 +3,7 @@ package dev.zenqrt.bouncybullets.loadout.kit;
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.item.GameItems;
-import dev.zenqrt.bouncybullets.item.items.abilities.FullHealAbilityItem;
+import dev.zenqrt.bouncybullets.item.items.abilities.HealerActiveAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -19,7 +19,7 @@ import java.util.*;
 final class HealerPlayerClass implements PlayerClass {
 
     private static final GunItem PRIMARY_GUN = GameItems.PISTOL;
-    private static final FullHealAbilityItem ACTIVE_ABILITY = GameItems.FULL_HEAL;
+    private static final HealerActiveAbilityItem ACTIVE_ABILITY = GameItems.HEALER_ACTIVE_ABILITY;
 
     private final List<BukkitTask> healTasks = new ArrayList<>();
 

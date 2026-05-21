@@ -24,7 +24,7 @@ final class StealthPlayerClass extends EventPlayerClass {
 
     private static final GunItem PRIMARY_GUN = GameItems.SMG;
     private static final GunItem SECONDARY_GUN = GameItems.SILENCED_PISTOL;
-    private static final ActiveAbilityItem ACTIVE_ABILITY = GameItems.INVISIBILITY;
+    private static final ActiveAbilityItem ACTIVE_ABILITY = GameItems.STEALTH_ACTIVE_ABILITY;
 
     @Override
     public String getName() {
@@ -52,6 +52,7 @@ final class StealthPlayerClass extends EventPlayerClass {
     }
 
     @Override
+    @SuppressWarnings("UnstableApiUsage")
     public void registerEvents(BouncyBulletGame game) {
         this.eventNode.registerListener(PaperEventListener.builder(PlayerDeathEvent.class)
                 .filter(event -> {

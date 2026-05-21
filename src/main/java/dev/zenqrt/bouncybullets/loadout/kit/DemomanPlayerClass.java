@@ -2,7 +2,7 @@ package dev.zenqrt.bouncybullets.loadout.kit;
 
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.item.GameItems;
-import dev.zenqrt.bouncybullets.item.items.abilities.RailgunAbilityItem;
+import dev.zenqrt.bouncybullets.item.items.abilities.DemomanActiveAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -19,7 +19,7 @@ final class DemomanPlayerClass implements PlayerClass {
     private static final AttributeModifier SPEED_MODIFIER = new AttributeModifier("demoman_speed_modifier", -0.02, AttributeModifier.Operation.ADD_NUMBER);
     private static final GunItem PRIMARY_GUN = GameItems.GRENADE_LAUNCHER;
     private static final GunItem SECONDARY_GUN = GameItems.DESERT_EAGLE;
-    private static final RailgunAbilityItem ACTIVE_ABILITY = GameItems.RAILGUN;
+    private static final DemomanActiveAbilityItem ACTIVE_ABILITY = GameItems.DEMOMAN_ACTIVE_ABILITY;
 
     @Override
     public void onStartUse(BouncyBulletGamePlayer gamePlayer) {

@@ -17,13 +17,13 @@ import org.bukkit.inventory.ItemStack;
 import java.util.List;
 import java.util.Objects;
 
-public final class FullHealAbilityItem extends ActiveAbilityItem {
+public final class HealerActiveAbilityItem extends ActiveAbilityItem {
 
     private static final long COOLDOWN = 1200;
     private static final Sound HEAL_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, Sound.Source.PLAYER, 1, 1.5F);
     private static final Sound DISAPPROVAL_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_VILLAGER_NO, Sound.Source.PLAYER, 1, 0.75F);
 
-    public FullHealAbilityItem() {
+    public HealerActiveAbilityItem() {
         super("healer_active_ability",
                 Material.NETHER_STAR,
                 AdventureUtils.withoutItalics("Miracle", NamedTextColor.LIGHT_PURPLE)

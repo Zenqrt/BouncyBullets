@@ -20,12 +20,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
 
-public final class InvisibilityAbilityItem extends ActiveAbilityItem {
+public final class StealthActiveAbilityItem extends ActiveAbilityItem {
 
     private static final int COOLDOWN = 1200;
     private static final Sound REFILL_SOUND = Sound.sound(org.bukkit.Sound.BLOCK_BREWING_STAND_BREW, Sound.Source.PLAYER, 1, 1);
 
-    public InvisibilityAbilityItem() {
+    public StealthActiveAbilityItem() {
         super("stealth_active_ability",
                 Material.POTION,
                 AdventureUtils.withoutItalics("Invisibility Cloak", NamedTextColor.LIGHT_PURPLE)

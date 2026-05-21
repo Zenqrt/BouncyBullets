@@ -22,7 +22,7 @@ import java.util.*;
 public final class WingmanPlayerClass extends EventPlayerClass {
 
     private static final GunItem PRIMARY_GUN = GameItems.TWIN_PISTOL;
-    private static final ActiveAbilityItem ACTIVE_ABILITY = GameItems.BULLET_SPREAD;
+    private static final ActiveAbilityItem ACTIVE_ABILITY = GameItems.WINGMAN_ACTIVE_ABILITY;
 
     private static final Sound DOUBLE_JUMP_SOUND = Sound.sound(Key.key("entity.bat.takeoff"), Sound.Source.MASTER, 1, 1.25F);
     private static final int DOUBLE_JUMP_COOLDOWN_TICKS = 100;          // 5 seconds

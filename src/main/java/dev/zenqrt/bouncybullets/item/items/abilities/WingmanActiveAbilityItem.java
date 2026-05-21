@@ -21,7 +21,7 @@ import org.bukkit.util.Vector;
 
 import java.util.List;
 
-public final class BulletSpreadAbilityItem extends ActiveAbilityItem {
+public final class WingmanActiveAbilityItem extends ActiveAbilityItem {
 
     private static final int COOLDOWN_TICKS = 1200;
     private static final BulletProperties BULLET_PROPERTIES = new BulletProperties(
@@ -36,7 +36,7 @@ public final class BulletSpreadAbilityItem extends ActiveAbilityItem {
     );
     private static final Sound SHOOT_SOUND = Sound.sound(Key.key("entity.iron_golem.hurt"), Sound.Source.PLAYER, 1, 2);
 
-    public BulletSpreadAbilityItem() {
+    public WingmanActiveAbilityItem() {
         super(
                 "wingman_active_ability",
                 Material.FIREWORK_STAR,
