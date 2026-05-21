@@ -50,7 +50,18 @@ public enum PlayerClasses {
             List.of(
                     "<gold>Passive Ability:",
                     "<gray>None."
-            ));
+            )),
+    WINGMAN(new WingmanPlayerClass(), Material.ELYTRA,
+            List.of(
+                    Component.text("Twin Pistols", NamedTextColor.GRAY),
+                    Component.text("Bullet Spread", NamedTextColor.LIGHT_PURPLE)
+            ),
+            List.of(
+                    "<gold>Passive Ability:",
+                    "<gray>Gain a charged double jump every <green>10s<gray>, up to a max level of <red>5<gray>. Each charge level launches you further."
+            )
+    )
+    ;
 
     private final PlayerClass playerClass;
     private final ItemStack icon;

@@ -81,7 +81,9 @@ public class PacketSidebar {
     }
 
     public void removeAllViewers() {
-        this.viewers.forEach(player -> player.connection.send(createRemoveObjectivePacket()));
+        ClientboundSetObjectivePacket removeObjectivePacket = createRemoveObjectivePacket();
+
+        this.viewers.forEach(player -> player.connection.send(removeObjectivePacket));
         this.viewers.clear();
     }
 

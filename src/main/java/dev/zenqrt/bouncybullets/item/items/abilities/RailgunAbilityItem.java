@@ -1,6 +1,7 @@
 package dev.zenqrt.bouncybullets.item.items.abilities;
 
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.ExplosionUtils;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
@@ -48,9 +49,7 @@ public final class RailgunAbilityItem extends ActiveAbilityItem {
     }
 
     @Override
-    public void onUse(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-
+    public void onUse(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
         if (this.isCharging.contains(player.getUniqueId())) {
             return;
         }
@@ -66,14 +65,14 @@ public final class RailgunAbilityItem extends ActiveAbilityItem {
             inventory.setItem(i, new ItemStack(Material.BLACK_STAINED_GLASS_PANE));
         }
 
-        ItemStack itemStack = new ItemStack(this.material);
-        itemStack.editMeta(meta -> {
+        ItemStack chargingItem = new ItemStack(this.material);
+        chargingItem.editMeta(meta -> {
             meta.displayName(AdventureUtils.withoutItalics("Charging...", NamedTextColor.GRAY));
             meta.addEnchant(Enchantment.DURABILITY, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         });
 
-        inventory.setItem(4, itemStack);
+        inventory.setItem(4, chargingItem);
         inventory.setHeldItemSlot(4);
 
         SoundUtils.playSoundFromPlayer(player, CHARGING_SOUND);

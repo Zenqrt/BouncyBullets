@@ -30,7 +30,7 @@ public final class MiniMessageUtils {
     }
 
     private static String wrapTextIgnoringTags(String text, int wrapLength) {
-        if (text.isEmpty() || text.isBlank())
+        if (text.isBlank())
             return text;
 
         StringBuilder output = new StringBuilder();

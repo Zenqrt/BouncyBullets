@@ -6,24 +6,17 @@ import dev.zenqrt.bouncybullets.event.events.GunShootEvent;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.item.GameItems;
-import dev.zenqrt.bouncybullets.item.items.abilities.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
-import dev.zenqrt.bouncybullets.utils.AdventureUtils;
-import dev.zenqrt.bouncybullets.utils.GlowUtils;
 import dev.zenqrt.bouncybullets.utils.ItemUtils;
-import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.util.RayTraceResult;
 
 import java.util.*;
 
@@ -88,7 +81,7 @@ final class SniperPlayerClass extends EventPlayerClass {
     }
 
     @Override
-    public void onStopUse(BouncyBulletGamePlayer player) {
+    public void onStopUse(BouncyBulletGamePlayer gamePlayer) {
         tasks.forEach(BukkitTask::cancel);
         tasks.clear();
     }
@@ -115,33 +108,33 @@ final class SniperPlayerClass extends EventPlayerClass {
         );
     }
 
-    private static class TargetAbility extends ActiveAbilityItem {
-
-        private static final int TIME_SECONDS = 10;
-        private static final float DAMAGE_INCREASE = 1;
-
-        TargetAbility() {
-            super("sniper_active_ability", Material.SPECTRAL_ARROW, AdventureUtils.withoutItalics("Target", NamedTextColor.LIGHT_PURPLE),
-                    MiniMessageUtils.wordWrapLore(List.of(
-                            "<gray>Upon right-click, mark a player for <green>" + TIME_SECONDS + " <gray>seconds, causing damage to that player to be increased by <red>100%<gray>."
-                    ), 30));
-        }
-
-        @Override
-        public void onUse(PlayerInteractEvent event) {
-            Player player = event.getPlayer();
-
-//            MapPalette.resizeImage()
-            RayTraceResult result = player.getWorld().rayTraceEntities(player.getEyeLocation(), player.getEyeLocation().getDirection(), 100, 2);
-
-            if (result == null)
-                return;
-
-            if (!(result.getHitEntity() instanceof Player hitPlayer))
-                return;
-
-            GlowUtils.showGlow(player, hitPlayer);
-        }
-    }
-
+//    private static class TargetAbility extends ActiveAbilityItem {
+//
+//        private static final int TIME_SECONDS = 10;
+//        private static final float DAMAGE_INCREASE = 1;
+//
+//        TargetAbility() {
+//            super("sniper_active_ability", Material.SPECTRAL_ARROW, AdventureUtils.withoutItalics("Target", NamedTextColor.LIGHT_PURPLE),
+//                    MiniMessageUtils.wordWrapLore(List.of(
+//                            "<gray>Upon right-click, mark a player for <green>" + TIME_SECONDS + " <gray>seconds, causing damage to that player to be increased by <red>100%<gray>."
+//                    ), 30));
+//        }
+//
+//        @Override
+//        public void onUse(PlayerInteractEvent event) {
+//            Player player = event.getPlayer();
+//
+////            MapPalette.resizeImage()
+//            RayTraceResult result = player.getWorld().rayTraceEntities(player.getEyeLocation(), player.getEyeLocation().getDirection(), 100, 2);
+//
+//            if (result == null)
+//                return;
+//
+//            if (!(result.getHitEntity() instanceof Player hitPlayer))
+//                return;
+//
+//            GlowUtils.showGlow(player, hitPlayer);
+//        }
+//    }
+//
 }

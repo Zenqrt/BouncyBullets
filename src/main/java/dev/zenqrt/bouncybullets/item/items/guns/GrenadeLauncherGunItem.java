@@ -2,6 +2,7 @@ package dev.zenqrt.bouncybullets.item.items.guns;
 
 import com.destroystokyo.paper.ParticleBuilder;
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.utils.ExplosionUtils;
@@ -25,7 +26,7 @@ public final class GrenadeLauncherGunItem extends GunItem {
     }
 
     @Override
-    protected void shootProjectile(Player player, BulletProperties bulletProperties) {
+    protected void shootProjectile(BouncyBulletGame game, Player player, BulletProperties bulletProperties) {
         Location eyeLocation = player.getEyeLocation();
 
         player.setVelocity(eyeLocation.getDirection().normalize().multiply(-1));

@@ -1,6 +1,7 @@
 package dev.zenqrt.bouncybullets.item.items.abilities;
 
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import net.kyori.adventure.sound.Sound;
@@ -18,7 +19,6 @@ import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
-import java.util.Objects;
 
 public final class InvisibilityAbilityItem extends ActiveAbilityItem {
 
@@ -45,16 +45,12 @@ public final class InvisibilityAbilityItem extends ActiveAbilityItem {
     }
 
     @Override
-    public void onUse(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-
+    public void onUse(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 100, 1, false, false, true));
         player.playSound(Sound.sound(org.bukkit.Sound.ENTITY_GENERIC_DRINK, Sound.Source.PLAYER, 1, 1));
 
-        ItemStack originalItem = Objects.requireNonNull(event.getItem());
-
         ItemStack usedItem = new ItemStack(Material.GLASS_BOTTLE);
-        usedItem.setItemMeta(originalItem.getItemMeta());
+        usedItem.setItemMeta(itemStack.getItemMeta());
 
         player.getInventory().setItemInMainHand(usedItem);
         player.setCooldown(Material.GLASS_BOTTLE, COOLDOWN);
@@ -64,7 +60,7 @@ public final class InvisibilityAbilityItem extends ActiveAbilityItem {
         new BukkitRunnable() {
             @Override
             public void run() {
-                player.getInventory().setItem(slotInteracted, originalItem.clone());
+                player.getInventory().setItem(slotInteracted, itemStack.clone());
                 player.playSound(REFILL_SOUND, Sound.Emitter.self());
             }
         }.runTaskLater(BouncyBulletsPlugin.getInstance(), COOLDOWN);

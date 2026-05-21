@@ -12,6 +12,6 @@ public interface PlayerClass {
     TreeMap<Integer, ItemStack> getItems();
     Map<EquipmentSlot, ItemStack> getArmorEquipment();
 
-    default void onStartUse(BouncyBulletGamePlayer player) {}
-    default void onStopUse(BouncyBulletGamePlayer player) {}
+    default void onStartUse(BouncyBulletGamePlayer gamePlayer) {}
+    default void onStopUse(BouncyBulletGamePlayer gamePlayer) {}
 }

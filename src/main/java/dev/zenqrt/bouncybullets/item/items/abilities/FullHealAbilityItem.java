@@ -1,5 +1,6 @@
 package dev.zenqrt.bouncybullets.item.items.abilities;
 
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import dev.zenqrt.bouncybullets.utils.SoundUtils;
@@ -11,6 +12,7 @@ import org.bukkit.Particle;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 import java.util.Objects;
@@ -35,8 +37,7 @@ public final class FullHealAbilityItem extends ActiveAbilityItem {
     }
 
     @Override
-    public void onUse(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
+    public void onUse(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
         double maxHealth = Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
 
         if (player.getHealth() == maxHealth) {

@@ -24,8 +24,8 @@ final class HealerPlayerClass implements PlayerClass {
     private final List<BukkitTask> healTasks = new ArrayList<>();
 
     @Override
-    public void onStartUse(BouncyBulletGamePlayer player) {
-        Player playerEntity = player.getPlayer();
+    public void onStartUse(BouncyBulletGamePlayer gamePlayer) {
+        Player playerEntity = gamePlayer.getPlayer();
         Objects.requireNonNull(playerEntity.getAttribute(Attribute.GENERIC_MAX_ABSORPTION)).setBaseValue(5);
 
         healTasks.add(new BukkitRunnable() {
@@ -45,7 +45,7 @@ final class HealerPlayerClass implements PlayerClass {
     }
 
     @Override
-    public void onStopUse(BouncyBulletGamePlayer player) {
+    public void onStopUse(BouncyBulletGamePlayer gamePlayer) {
         this.healTasks.forEach(BukkitTask::cancel);
         this.healTasks.clear();
     }

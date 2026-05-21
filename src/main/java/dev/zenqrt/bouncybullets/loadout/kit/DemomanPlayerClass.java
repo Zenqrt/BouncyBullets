@@ -22,13 +22,13 @@ final class DemomanPlayerClass implements PlayerClass {
     private static final RailgunAbilityItem ACTIVE_ABILITY = GameItems.RAILGUN;
 
     @Override
-    public void onStartUse(BouncyBulletGamePlayer player) {
-        Objects.requireNonNull(player.getPlayer().getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).addModifier(SPEED_MODIFIER);
+    public void onStartUse(BouncyBulletGamePlayer gamePlayer) {
+        Objects.requireNonNull(gamePlayer.getPlayer().getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).addModifier(SPEED_MODIFIER);
     }
 
     @Override
-    public void onStopUse(BouncyBulletGamePlayer player) {
-        Objects.requireNonNull(player.getPlayer().getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).removeModifier(SPEED_MODIFIER);
+    public void onStopUse(BouncyBulletGamePlayer gamePlayer) {
+        Objects.requireNonNull(gamePlayer.getPlayer().getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).removeModifier(SPEED_MODIFIER);
     }
 
     @Override

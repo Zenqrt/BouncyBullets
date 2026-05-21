@@ -68,26 +68,43 @@ public abstract class GunItem extends GameItem {
         this(key, material, AdventureUtils.withoutItalics(displayName, NamedTextColor.YELLOW), gunProperties, bulletProperties);
     }
 
-    protected abstract void shootProjectile(Player player, BulletProperties bulletProperties);
+    protected abstract void shootProjectile(BouncyBulletGame game, Player player, BulletProperties bulletProperties);
     protected abstract Sound getShootingSound();
+
+    @Override
+    public void onHeld(BouncyBulletGame game, Player player, ItemStack itemStack, ItemStack previousItemStack) {
+        final BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
+
+        int ammo = getAmmo(itemStack);
+        int magSize = this.getGunProperties().magazineSize();
+
+        gamePlayer.getHud().updateAmmo(ammo, magSize);
+        gamePlayer.getHud().updateHudText();
+
+        player.setCooldown(itemStack.getType(), this.getGunProperties().pullOutTicks());
+    }
+
+    @Override
+    public void onUnheld(BouncyBulletGame game, Player player, ItemStack itemStack, ItemStack newItemStack) {
+        final BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
+
+        gamePlayer.getHud().hideAmmo();
+        gamePlayer.getHud().updateHudText();
+    }
 
     @Override
     public void onInteract(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
         event.setCancelled(true);
 
-
         if (event.getAction().isLeftClick()) {
             displayAimZoom(player);
         } else if (event.getAction().isRightClick()) {
-            System.out.println("Interact right click");
-            System.out.println("hasCooldown: " + player.hasCooldown(this.material));
-
             if (player.hasCooldown(this.material))
                 return;
 
             BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
 
-            shootGun(gamePlayer, player, itemStack);
+            shootGun(game, gamePlayer, player, itemStack);
         }
     }
 
@@ -103,20 +120,20 @@ public abstract class GunItem extends GameItem {
         }
     }
 
-    private void shootGun(BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack) {
+    private void shootGun(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack) {
         if (player.getGameMode() != GameMode.ADVENTURE)
             return;
 
         if (this.gunProperties.shootDelayTicks() < INTERACT_EVENT_TICK_DELAY) {
             long shootDivisions = INTERACT_EVENT_TICK_DELAY / this.gunProperties.shootDelayTicks();
 
-            useGun(player, gamePlayer.getHud(), itemStack);
+            useGun(game, player, gamePlayer.getHud(), itemStack);
 
             for (int i = 1; i < shootDivisions; i++) {
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        useGun(player, gamePlayer.getHud(), itemStack);
+                        useGun(game, player, gamePlayer.getHud(), itemStack);
                     }
                 }.runTaskLater(BouncyBulletsPlugin.getInstance(), (long) i * this.gunProperties.shootDelayTicks());
             }
@@ -124,10 +141,10 @@ public abstract class GunItem extends GameItem {
             return;
         }
 
-        useGun(player, gamePlayer.getHud(), itemStack);
+        useGun(game, player, gamePlayer.getHud(), itemStack);
     }
 
-    private void useGun(Player player, BouncyBulletsHUD hud, ItemStack itemStack) {
+    private void useGun(BouncyBulletGame game, Player player, BouncyBulletsHUD hud, ItemStack itemStack) {
         long currentGameTime = player.getServer().getCurrentTick();
 
         if (getAmmo(itemStack) <= 0)
@@ -147,7 +164,7 @@ public abstract class GunItem extends GameItem {
 
         player.getWorld().playSound(getShootingSound(), player.getX(), player.getY(), player.getZ());
 
-        shootProjectile(player, event.getBulletProperties());
+        shootProjectile(game, player, event.getBulletProperties());
         useAmmo(itemStack, hud);
 
         lastShootTicks.put(player.getUniqueId(), currentGameTime);

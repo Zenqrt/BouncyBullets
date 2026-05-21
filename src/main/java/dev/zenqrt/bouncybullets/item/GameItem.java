@@ -45,6 +45,8 @@ public abstract class GameItem {
     }
 
     public void onInteract(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {}
+    public void onHeld(BouncyBulletGame game, Player player, ItemStack itemStack, ItemStack previousItemStack) {}
+    public void onUnheld(BouncyBulletGame game, Player player, ItemStack itemStack, ItemStack newItemStack) {}
 
     public static Optional<String> findGameItemId(ItemStack itemStack) {
         ItemMeta itemMeta = itemStack.getItemMeta();

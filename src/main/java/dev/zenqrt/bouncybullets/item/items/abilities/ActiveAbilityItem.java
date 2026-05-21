@@ -22,7 +22,7 @@ public abstract class ActiveAbilityItem extends GameItem {
         super(key, material, displayName, description);
     }
 
-    public abstract void onUse(PlayerInteractEvent event);
+    public abstract void onUse(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event);
 
     @Override
     public void onInteract(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
@@ -31,6 +31,6 @@ public abstract class ActiveAbilityItem extends GameItem {
         if (player.hasCooldown(itemStack.getType()))
             return;
 
-        this.onUse(event);
+        this.onUse(game, player, itemStack, event);
     }
 }
