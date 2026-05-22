@@ -58,7 +58,10 @@ public enum PlayerClassType {
             ),
             List.of(
                     "<gold>Passive Ability:",
-                    "<gray>Gain a charged double jump every <green>10s<gray>, up to a max level of <red>5<gray>. Each charge level launches you further."
+                    "<gray>Gain a charged double jump every <green>10s<gray>, up to a max level of <red>5<gray>. Each charge level launches you further.",
+                    "",
+                    "<gold>Passive Ability:",
+                    "<gray>Any shots fired while flying above <green>2 blocks <gray>does <red>50% <gray>more damage"
             )
     ),
 //    SIDEWINDER(new SidewinderPlayerClass(), Material.FEATHER,

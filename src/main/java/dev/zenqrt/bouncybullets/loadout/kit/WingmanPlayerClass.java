@@ -1,11 +1,13 @@
 package dev.zenqrt.bouncybullets.loadout.kit;
 
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
+import dev.zenqrt.bouncybullets.event.events.GunShootEvent;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.item.items.abilities.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
+import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
@@ -64,6 +66,18 @@ public final class WingmanPlayerClass extends EventPlayerClass {
                     );
                 })
                 .build()
+        );
+        this.eventNode.registerListener(PaperEventListener.builder(GunShootEvent.class)
+                .filter(event -> isPlayerClass(game, event.getShooter(), this))
+                .filter(event -> event.getShooter().isGliding())
+                .handler(event -> {
+                    BulletProperties modified = event.getBulletProperties()
+                            .withMaxDamage(
+                                    event.getBulletProperties().maxDamage() * 1.5
+                            );
+
+                    event.setBulletProperties(modified);
+                }).build()
         );
     }
 
