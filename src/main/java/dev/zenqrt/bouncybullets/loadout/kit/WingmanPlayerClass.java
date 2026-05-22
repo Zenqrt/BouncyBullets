@@ -69,8 +69,20 @@ public final class WingmanPlayerClass extends EventPlayerClass {
     }
 
     @Override
+    public void onRespawn(BouncyBulletGamePlayer gamePlayer) {
+        Player player = gamePlayer.getPlayer();
+
+        if (player.getLevel() <= 0)
+            return;
+
+        player.setAllowFlight(true);
+    }
+
+    @Override
     public void onStartUse(BouncyBulletGamePlayer gamePlayer) {
         gamePlayer.getPlayer().setAllowFlight(true);
+        gamePlayer.getPlayer().setLevel(0);
+        gamePlayer.getPlayer().setExp(0);
     }
 
     @Override

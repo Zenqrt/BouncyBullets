@@ -14,4 +14,5 @@ public interface PlayerClass {
 
     default void onStartUse(BouncyBulletGamePlayer gamePlayer) {}
     default void onStopUse(BouncyBulletGamePlayer gamePlayer) {}
+    default void onRespawn(BouncyBulletGamePlayer gamePlayer) {}
 }

@@ -25,7 +25,7 @@ public final class GameItems {
     public static final GrenadeLauncherGunItem GRENADE_LAUNCHER = registerGun(
             new GrenadeLauncherGunItem(
                     new GunProperties(5, 40, 0.1, 0.02, 6, 20, 2),
-                    new BulletProperties(3, 1.25, 0, 8, 8, 0, 100, 0)
+                    new BulletProperties(3, 1.25, 0, 6, 6, 0, 100, 0)
             )
     );
     public static final PistolGunItem PISTOL = registerGun(
@@ -55,7 +55,7 @@ public final class GameItems {
     public static final TwinPistolGunItem TWIN_PISTOL = registerGun(
             new TwinPistolGunItem(
                     new GunProperties(5, 3, 0.05, 0.02, 16, 5, 2),
-                    new BulletProperties(3, 200, -0.1F, 1, 5, 0.1F, 25, 5)
+                    new BulletProperties(3, 200, -0.1F, 1, 3, 0.1F, 25, 5)
             )
     );
     

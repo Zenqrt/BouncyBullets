@@ -7,6 +7,7 @@ import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.base.GameState;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
+import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
 import dev.zenqrt.bouncybullets.loadout.Loadout;
 import dev.zenqrt.bouncybullets.loadout.kit.EventPlayerClass;
 import dev.zenqrt.bouncybullets.loadout.kit.PlayerClass;
@@ -43,6 +44,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public final class BattleGameState extends GameState {
 
@@ -153,15 +155,21 @@ public final class BattleGameState extends GameState {
 
     @SuppressWarnings("UnstableApiUsage")
     private void registerEvents() {
+        Set<EventPlayerClass> playerClasses = this.players.values().stream()
+                .map(gamePlayer -> gamePlayer.getLoadout().playerClass())
+                .filter(playerClass -> playerClass instanceof EventPlayerClass)
+                .map(playerClass -> (EventPlayerClass) playerClass)
+                .collect(Collectors.toSet());
+
+        for (EventPlayerClass playerClass : playerClasses) {
+            playerClass.registerEvents(this.game);
+        }
+
         this.players.forEach((uuid, gamePlayer) -> {
             PlayerClass playerClass = gamePlayer.getLoadout().playerClass();
-
-            if (playerClass instanceof EventPlayerClass eventPlayerClass) {
-                eventPlayerClass.registerEvents(this.game);
-            }
-
             playerClass.onStartUse(gamePlayer);
         });
+
         this.playerEventNode.registerListener(PaperEventListener.builder(PlayerTeleportEvent.class)
                 .filter(event -> event.getCause() == PlayerTeleportEvent.TeleportCause.SPECTATE)
                 .handler(event ->  {
@@ -193,20 +201,25 @@ public final class BattleGameState extends GameState {
 
                     if (lastDamageEvent != null) {
                         if (lastDamageEvent.getDamageSource().getCausingEntity() instanceof Player killer && players.containsKey(killer.getUniqueId())) {
-                            BouncyBulletGamePlayer killerGamePlayer = this.game.findPlayer(killer.getUniqueId());
+                            if (killer != player) {
+                                BouncyBulletGamePlayer killerGamePlayer = this.game.findPlayer(killer.getUniqueId());
 
-                            killerGamePlayer.addKill();
-                            updateSidebar(
-                                    killerGamePlayer.getUuid(),
-                                    sidebar -> sidebar.setYourKills(killerGamePlayer.getKills())
-                            );
-                            updateKillsLeaderboard();
+                                killerGamePlayer.addKill();
+                                updateSidebar(
+                                        killerGamePlayer.getUuid(),
+                                        sidebar -> sidebar.setYourKills(killerGamePlayer.getKills())
+                                );
+                                updateKillsLeaderboard();
+                            }
 
                             player.setSpectatorTarget(killer);
                             killer.playSound(KILL_SOUND, Sound.Emitter.self());
                             players.sendMessage(Component.text(player.getName() + " \uD83D\uDD2B " + killer.getName(), NamedTextColor.RED));
                         }
                     }
+
+                    if (GunItem.isAiming(player))
+                        GunItem.stopAiming(player);
 
                     BouncyBulletGamePlayer gamePlayer = this.game.findPlayer(player.getUniqueId());
                     gamePlayer.addDeath();
@@ -327,9 +340,12 @@ public final class BattleGameState extends GameState {
                 this.cancel();
 
                 setupPlayerInventory(player, gamePlayer.getLoadout());
+
                 player.setGameMode(GameMode.ADVENTURE);
                 player.teleport(chooseBestSpawnLocation());
                 player.clearTitle();
+
+                gamePlayer.getLoadout().playerClass().onRespawn(gamePlayer);
                 return;
             }
 

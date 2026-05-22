@@ -17,7 +17,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
@@ -82,7 +81,7 @@ public final class BouncyBulletGame extends Game {
         return players;
     }
 
-    public @NotNull BouncyBulletGamePlayer findPlayer(UUID uuid) {
+    public BouncyBulletGamePlayer findPlayer(UUID uuid) {
         return players.get(uuid);
     }
 
