@@ -28,7 +28,7 @@ public enum PlayerClassType {
         meta.addItemFlags(ItemFlag.HIDE_ITEM_SPECIFICS);
     },
             List.of(
-                    Component.text("Pistol", NamedTextColor.GRAY),
+                    Component.text("BB-Pistol", NamedTextColor.GRAY),
                     Component.text("Miracle", NamedTextColor.LIGHT_PURPLE)
             ),
             List.of(
@@ -44,7 +44,8 @@ public enum PlayerClassType {
                     "<gray>For each second of standing still, accumulate <red>5% <gray>damage increase, up to <red>50% <gray>maximum. This is shown in the experience bar."
             )),
     DEMOMAN(new DemomanPlayerClass(), Material.TNT, List.of(
-            Component.text("Rocket Launcher", NamedTextColor.GRAY),
+            Component.text("Grenade Launcher", NamedTextColor.GRAY),
+            Component.text("Desert Eagle", NamedTextColor.GRAY),
             Component.text("Pocket Railgun", NamedTextColor.LIGHT_PURPLE)
     ),
             List.of(
@@ -64,6 +65,19 @@ public enum PlayerClassType {
                     "<gray>Any shots fired while flying above <green>2 blocks <gray>does <red>50% <gray>more damage"
             )
     ),
+    HEAVY(new HeavyPlayerClass(), Material.IRON_CHESTPLATE,
+            List.of(
+                    Component.text("Minigun", NamedTextColor.GRAY),
+                    Component.text("Bulletproof", NamedTextColor.LIGHT_PURPLE)
+            ),
+            List.of(
+                    "<gold>Passive Ability: <aqua>Tank",
+                    "<gray>Gain an extra row of <red>20❤<gray>.",
+                    "",
+                    "<gold>Passive Ability: <aqua>Sluggish",
+                    "<gray>Your speed is decreased by some amount."
+            )
+    )
 //    SIDEWINDER(new SidewinderPlayerClass(), Material.FEATHER,
 //            List.of(),
 //            List.of()

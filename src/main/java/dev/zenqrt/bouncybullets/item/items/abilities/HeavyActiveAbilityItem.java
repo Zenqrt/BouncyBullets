@@ -1,0 +1,101 @@
+package dev.zenqrt.bouncybullets.item.items.abilities;
+
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
+import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+
+public final class HeavyActiveAbilityItem extends ActiveAbilityItem implements Listener {
+
+    private static final int COOLDOWN_TICKS = 1800;                 // 90 seconds
+    private static final int ABILITY_DURATION_TICKS = 300;          // 15 seconds
+    private static final float DEFLECT_CHANCE = 0.9F;
+    private static final Sound ACTIVATE_SOUND = Sound.sound(Key.key("entity.zombie_villager.cure"), Sound.Source.PLAYER, 1, 0.75F);
+    private static final Sound DEACTIVATE_SOUND = Sound.sound(Key.key("block.beacon.deactivate"), Sound.Source.PLAYER, 1, 0.8F);
+    private static final Sound DEFLECT_SOUND = Sound.sound(Key.key("entity.zombie.attack_iron_door"), Sound.Source.PLAYER, 1, 2);
+
+    private final Set<UUID> abilityActive = new HashSet<>();
+
+    public HeavyActiveAbilityItem() {
+        super(
+                "heavy_active_ability",
+                Material.HEART_OF_THE_SEA,
+                "I AM BULLETPROOF!! (almost)",
+                MiniMessageUtils.wordWrapLore(
+                        List.of(
+                                "<gray>Gain a <red>90% <gray>chance to deflect any bullet that hits you for <green>" + (ABILITY_DURATION_TICKS / 20) + "s<gray>.",
+                                "",
+                                "<dark_gray>Cooldown: <green>" + (COOLDOWN_TICKS / 20) + "s"
+                        ),
+                        30
+                )
+        );
+    }
+
+    @EventHandler
+    public void onEntityDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player player) || !this.abilityActive.contains(player.getUniqueId()))
+            return;
+
+        if (cannotDeflect(ThreadLocalRandom.current()))
+            return;
+
+        event.setCancelled(true);
+        player.getWorld().playSound(DEFLECT_SOUND, player);
+    }
+
+    private static boolean cannotDeflect(Random random) {
+        return random.nextFloat() > DEFLECT_CHANCE;
+    }
+
+    @Override
+    public void onUse(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
+        this.abilityActive.add(player.getUniqueId());
+
+        addGlowToArmor(player.getInventory());
+        player.getWorld().playSound(ACTIVATE_SOUND, player);
+
+        Bukkit.getScheduler().runTaskLater(
+                game.getPlugin(),
+                () -> {
+                    this.abilityActive.remove(player.getUniqueId());
+
+                    removeGlowFromArmor(player.getInventory());
+                    player.getWorld().playSound(DEACTIVATE_SOUND, player);
+                },
+                ABILITY_DURATION_TICKS
+        );
+    }
+
+    private static void addGlowToArmor(PlayerInventory inventory) {
+        for (ItemStack armorItem : inventory.getArmorContents()) {
+            if (armorItem == null)
+                continue;
+
+            armorItem.editMeta(meta -> meta.addEnchant(Enchantment.DURABILITY, 1, false));
+        }
+    }
+
+    private static void removeGlowFromArmor(PlayerInventory inventory) {
+        for (ItemStack armorItem : inventory.getArmorContents()) {
+            if (armorItem == null)
+                continue;
+
+            armorItem.editMeta(meta -> meta.removeEnchant(Enchantment.DURABILITY));
+        }
+    }
+
+}

@@ -66,6 +66,7 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new GameItemListeners(gameManager), this);
         Bukkit.getPluginManager().registerEvents(new GunListeners(gameManager), this);
         Bukkit.getPluginManager().registerEvents(GameItems.SNIPER_ACTIVE_ABILITY, this);
+        Bukkit.getPluginManager().registerEvents(GameItems.HEAVY_ACTIVE_ABILITY, this);
 
         registerCommand("backup", (player, args) -> {
             Bukkit.broadcast(Component.text("Saving backup of the world...").decorate(TextDecoration.ITALIC));

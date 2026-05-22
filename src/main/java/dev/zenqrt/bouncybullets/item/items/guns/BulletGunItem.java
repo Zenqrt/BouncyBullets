@@ -20,8 +20,6 @@ public abstract class BulletGunItem extends GunItem {
         super(key, material, displayName, gunProperties, bulletProperties);
     }
 
-
-
     protected abstract ParticleBuilder getBulletParticleBuilder();
 
     @Override

@@ -35,6 +35,12 @@ public final class GameItems {
                     new BulletProperties(3, 1.25, 0, 6, 6, 0, 100, 0)
             )
     );
+    public static final MinigunGunItem MINIGUN = registerGun(
+            new MinigunGunItem(
+                    new GunProperties(10, 1, 0.05, 0.03, 100, 2, 1),
+                    new BulletProperties(2, 350, -0.2F, 0.25, 1, 0.2F, 20, 2.5)
+            )
+    );
     public static final PistolGunItem PISTOL = registerGun(
             new PistolGunItem(
                     new GunProperties(2, 5, 0.05, 0.02, 8, 5, 2),
@@ -68,9 +74,10 @@ public final class GameItems {
 
     public static final HealerActiveAbilityItem HEALER_ACTIVE_ABILITY = registerItem(new HealerActiveAbilityItem());
     public static final DemomanActiveAbilityItem DEMOMAN_ACTIVE_ABILITY = registerItem(new DemomanActiveAbilityItem());
+    public static final HeavyActiveAbilityItem HEAVY_ACTIVE_ABILITY = registerItem(new HeavyActiveAbilityItem());
+    public static final SniperActiveAbilityItem SNIPER_ACTIVE_ABILITY = registerItem(new SniperActiveAbilityItem());
     public static final StealthActiveAbilityItem STEALTH_ACTIVE_ABILITY = registerItem(new StealthActiveAbilityItem());
     public static final WingmanActiveAbilityItem WINGMAN_ACTIVE_ABILITY = registerItem(new WingmanActiveAbilityItem());
-    public static final SniperActiveAbilityItem SNIPER_ACTIVE_ABILITY = registerItem(new SniperActiveAbilityItem());
 
     private static <T extends GunItem> T registerGun(T gunItem) {
         GUNS.put(gunItem.getKey(), gunItem);
