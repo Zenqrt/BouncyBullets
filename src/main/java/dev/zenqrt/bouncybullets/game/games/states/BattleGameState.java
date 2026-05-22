@@ -123,6 +123,9 @@ public final class BattleGameState extends GameState {
     protected void onStateEnd() {
         super.onStateEnd();
 
+        this.playerEventNode.unregisterAllListeners();
+        this.playerEntityEventNode.unregisterAllListeners();
+
         this.taskManager.removeAllTasks();
 
         this.players.forEach((uuid, gamePlayer) -> {

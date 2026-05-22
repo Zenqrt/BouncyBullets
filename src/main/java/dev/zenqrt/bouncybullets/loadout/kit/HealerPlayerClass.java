@@ -14,7 +14,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 final class HealerPlayerClass implements PlayerClass {
 
@@ -56,13 +59,11 @@ final class HealerPlayerClass implements PlayerClass {
     }
 
     @Override
-    public TreeMap<Integer, ItemStack> getItems() {
-        return new TreeMap<>() {
-            {
-                put(0, PRIMARY_GUN.buildItemStack());
-                put(1, ACTIVE_ABILITY.buildItemStack());
-            }
-        };
+    public Map<Integer, ItemStack> getItems() {
+        return Map.of(
+                0, PRIMARY_GUN.buildItemStack(),
+                1, ACTIVE_ABILITY.buildItemStack()
+        );
     }
 
     @Override

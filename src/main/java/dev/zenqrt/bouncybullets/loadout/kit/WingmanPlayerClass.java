@@ -19,7 +19,6 @@ import org.bukkit.util.Vector;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.UUID;
 
 public final class WingmanPlayerClass extends EventPlayerClass {
@@ -105,11 +104,11 @@ public final class WingmanPlayerClass extends EventPlayerClass {
     }
 
     @Override
-    public TreeMap<Integer, ItemStack> getItems() {
-        return new TreeMap<>() {{
-            put(0, PRIMARY_GUN.buildItemStack());
-            put(1, ACTIVE_ABILITY.buildItemStack());
-        }};
+    public Map<Integer, ItemStack> getItems() {
+        return Map.of(
+                0, PRIMARY_GUN.buildItemStack(),
+                1, ACTIVE_ABILITY.buildItemStack()
+        );
     }
 
     @Override

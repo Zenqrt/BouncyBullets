@@ -21,7 +21,6 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.UUID;
 
 // TODO: Change active ability to marking player and dealing more damage to them for a short period of time
@@ -104,12 +103,12 @@ final class SniperPlayerClass extends EventPlayerClass {
     }
 
     @Override
-    public TreeMap<Integer, ItemStack> getItems() {
-        return new TreeMap<>() {{
-            put(0, PRIMARY_GUN.buildItemStack());
-            put(1, SECONDARY_GUN.buildItemStack());
-            put(2, ACTIVE_ABILITY.buildItemStack());
-        }};
+    public Map<Integer, ItemStack> getItems() {
+        return Map.of(
+                0, PRIMARY_GUN.buildItemStack(),
+                1, SECONDARY_GUN.buildItemStack(),
+                2, ACTIVE_ABILITY.buildItemStack()
+        );
     }
 
     @Override

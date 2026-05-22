@@ -15,7 +15,14 @@ public final class GameItems {
     private static final Map<String, GunItem> GUNS = new HashMap<>();
 
     public static final LoadoutGameItem LOADOUT = registerItem(new LoadoutGameItem());
-    
+
+    public static final SpecialBurstRifleGunItem SPECIAL_BURST_RIFLE = registerGun(
+            new SpecialBurstRifleGunItem(
+                    new GunProperties(3, 12, 0.05, 0.02, 18, 2, 2),
+                    new BulletProperties(4, 350, -0.2F, 0.25, 2, 0.2F, 20, 2.5),
+                    3
+            )
+    );
     public static final DesertEagleGunItem DESERT_EAGLE = registerGun(
             new DesertEagleGunItem(
                     new GunProperties(5, 10, 0.05, 0.02, 6, 10, 2),
@@ -58,7 +65,7 @@ public final class GameItems {
                     new BulletProperties(3, 200, -0.1F, 1, 3, 0.1F, 25, 5)
             )
     );
-    
+
     public static final HealerActiveAbilityItem HEALER_ACTIVE_ABILITY = registerItem(new HealerActiveAbilityItem());
     public static final DemomanActiveAbilityItem DEMOMAN_ACTIVE_ABILITY = registerItem(new DemomanActiveAbilityItem());
     public static final StealthActiveAbilityItem STEALTH_ACTIVE_ABILITY = registerItem(new StealthActiveAbilityItem());

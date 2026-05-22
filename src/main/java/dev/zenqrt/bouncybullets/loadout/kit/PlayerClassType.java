@@ -12,7 +12,7 @@ import org.bukkit.potion.PotionType;
 import java.util.List;
 import java.util.function.Consumer;
 
-public enum PlayerClasses {
+public enum PlayerClassType {
     STEALTH(new StealthPlayerClass(), Material.IRON_HORSE_ARMOR,
             List.of(
                     Component.text("SMG", NamedTextColor.GRAY),
@@ -60,7 +60,11 @@ public enum PlayerClasses {
                     "<gold>Passive Ability:",
                     "<gray>Gain a charged double jump every <green>10s<gray>, up to a max level of <red>5<gray>. Each charge level launches you further."
             )
-    )
+    ),
+//    SIDEWINDER(new SidewinderPlayerClass(), Material.FEATHER,
+//            List.of(),
+//            List.of()
+//    )
     ;
 
     private final PlayerClass playerClass;
@@ -68,7 +72,7 @@ public enum PlayerClasses {
     private final List<Component> itemContents;
     private final List<String> description;
 
-    PlayerClasses(PlayerClass playerClass, Material material, Consumer<ItemMeta> itemMetaHandler, List<Component> itemContents, List<String> description) {
+    PlayerClassType(PlayerClass playerClass, Material material, Consumer<ItemMeta> itemMetaHandler, List<Component> itemContents, List<String> description) {
         this.playerClass = playerClass;
         this.itemContents = itemContents;
         this.description = description;
@@ -77,7 +81,7 @@ public enum PlayerClasses {
         this.icon.editMeta(itemMetaHandler);
     }
 
-    PlayerClasses(PlayerClass playerClass, Material material, List<Component> itemContents, List<String> description) {
+    PlayerClassType(PlayerClass playerClass, Material material, List<Component> itemContents, List<String> description) {
         this(playerClass, material, meta -> {}, itemContents, description);
     }
 

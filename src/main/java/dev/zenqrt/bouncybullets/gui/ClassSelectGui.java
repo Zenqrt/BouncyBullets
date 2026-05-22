@@ -6,7 +6,7 @@ import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.loadout.Loadout;
-import dev.zenqrt.bouncybullets.loadout.kit.PlayerClasses;
+import dev.zenqrt.bouncybullets.loadout.kit.PlayerClassType;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.GuiUtils;
 import dev.zenqrt.bouncybullets.utils.ItemUtils;
@@ -22,6 +22,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public final class ClassSelectGui extends ChestGui {
@@ -42,7 +43,7 @@ public final class ClassSelectGui extends ChestGui {
     private void displayClasses() {
         OutlinePane pane = new OutlinePane(1, 1, 7, 1);
 
-        for (PlayerClasses playerClass : PlayerClasses.values()) {
+        for (PlayerClassType playerClass : PlayerClassType.values()) {
             ItemStack icon = ItemUtils.clone(playerClass.getIcon());
 
             icon.editMeta(meta -> {
@@ -87,7 +88,7 @@ public final class ClassSelectGui extends ChestGui {
         this.addPane(pane);
     }
 
-    private static List<Component> buildClassInformationLore(PlayerClasses playerClass) {
+    private static List<Component> buildClassInformationLore(PlayerClassType playerClass) {
         List<Component> lore = new ArrayList<>(playerClass.getItemContents().stream()
                 .map(component -> Component.text("• ", NamedTextColor.DARK_GRAY).append(component))
                 .map(component -> component.decoration(TextDecoration.ITALIC, false))
@@ -98,7 +99,7 @@ public final class ClassSelectGui extends ChestGui {
         return lore;
     }
 
-    private static List<Component> buildClassDescriptionLore(PlayerClasses playerClass) {
+    private static List<Component> buildClassDescriptionLore(PlayerClassType playerClass) {
         return MiniMessageUtils.wordWrapLore(playerClass.getDescription(), 30).stream()
                 .map(component -> component.decoration(TextDecoration.ITALIC, false))
                 .toList();
@@ -107,13 +108,13 @@ public final class ClassSelectGui extends ChestGui {
     private static class ClassInfoGui extends ChestGui {
 
         private final ChestGui previousGui;
-        private final PlayerClasses playerClass;
+        private final PlayerClassType classType;
 
-        public ClassInfoGui(ChestGui previousGui, PlayerClasses playerClass) {
-            super(5, playerClass.getPlayerClass().getName() + " Class Info");
+        public ClassInfoGui(ChestGui previousGui, PlayerClassType classType) {
+            super(5, classType.getPlayerClass().getName() + " Class Info");
 
             this.previousGui = previousGui;
-            this.playerClass = playerClass;
+            this.classType = classType;
 
             this.setOnGlobalClick(event -> event.setCancelled(true));
             this.addPane(GuiUtils.createBackgroundPane(getRows()));
@@ -139,10 +140,10 @@ public final class ClassSelectGui extends ChestGui {
         private void displayInfo() {
             StaticPane classPane = new StaticPane(4, 0, 1, 1);
 
-            ItemStack icon = ItemUtils.clone(playerClass.getIcon());
+            ItemStack icon = ItemUtils.clone(classType.getIcon());
             icon.editMeta(meta -> {
-                meta.displayName(AdventureUtils.withoutItalics(playerClass.getPlayerClass().getName(), NamedTextColor.GREEN));
-                meta.lore(buildClassInformationLore(playerClass));
+                meta.displayName(AdventureUtils.withoutItalics(classType.getPlayerClass().getName(), NamedTextColor.GREEN));
+                meta.lore(buildClassInformationLore(classType));
 
                 meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             });
@@ -152,7 +153,9 @@ public final class ClassSelectGui extends ChestGui {
             itemsPane.setGap(1);
             itemsPane.align(OutlinePane.Alignment.CENTER);
 
-            playerClass.getPlayerClass().getItems().forEach((slot, item) -> itemsPane.addItem(new GuiItem(item.clone(), event -> event.setCancelled(true))));
+            this.classType.getPlayerClass().getItems().entrySet().stream()
+                            .sorted(Map.Entry.comparingByKey())
+                            .forEach(entry -> itemsPane.addItem(new GuiItem(entry.getValue().clone(), event -> event.setCancelled(true))));
 
             this.addPane(classPane);
             this.addPane(itemsPane);

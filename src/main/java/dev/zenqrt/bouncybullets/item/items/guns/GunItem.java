@@ -17,7 +17,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
@@ -36,7 +35,6 @@ import java.util.*;
 
 public abstract class GunItem extends GameItem {
 
-    private static final long INTERACT_EVENT_TICK_DELAY = 4;
     private static final UUID AIM_ZOOM_MODIFIER_UUID = UUID.randomUUID();
     private static final AttributeModifier RELOAD_SLOWDOWN_MODIFIER = new AttributeModifier(UUID.randomUUID(), "reload_slowdown", -0.05, AttributeModifier.Operation.ADD_NUMBER);
     private static final NamespacedKey AMMO_KEY = new NamespacedKey(BouncyBulletsPlugin.getInstance(), "ammo");
@@ -46,7 +44,7 @@ public abstract class GunItem extends GameItem {
             Component.text("^", NamedTextColor.DARK_GRAY).decorate(TextDecoration.BOLD),
             Title.Times.times(Duration.ZERO, Duration.ofDays(1), Duration.ZERO));
 
-    private final Map<UUID, Long> lastShootTicks = new HashMap<>();
+    protected final Map<UUID, Long> lastShootTicks = new HashMap<>();
     protected final GunProperties gunProperties;
     protected final BulletProperties bulletProperties;
 
@@ -70,6 +68,7 @@ public abstract class GunItem extends GameItem {
         this(key, material, AdventureUtils.withoutItalics(displayName, NamedTextColor.YELLOW), gunProperties, bulletProperties);
     }
 
+    protected abstract void useGun(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack);
     protected abstract void shootProjectile(BouncyBulletGame game, Player player, BulletProperties bulletProperties);
     protected abstract Sound getShootingSound();
 
@@ -106,7 +105,7 @@ public abstract class GunItem extends GameItem {
 
             BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
 
-            shootGun(game, gamePlayer, player, itemStack);
+            useGun(game, gamePlayer, player, itemStack);
         }
     }
 
@@ -122,57 +121,38 @@ public abstract class GunItem extends GameItem {
         }
     }
 
-    private void shootGun(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack) {
-        if (player.getGameMode() != GameMode.ADVENTURE)
-            return;
+//    private void shootGun(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack) {
+//        if (this.gunProperties.shootDelayTicks() < INTERACT_EVENT_TICK_DELAY) {
+//            long shootDivisions = INTERACT_EVENT_TICK_DELAY / this.gunProperties.shootDelayTicks();
+//
+//            useGun(game, player, gamePlayer.getHud(), itemStack);
+//
+//            for (int i = 1; i < shootDivisions; i++) {
+//                new BukkitRunnable() {
+//                    @Override
+//                    public void run() {
+//                        useGun(game, player, gamePlayer.getHud(), itemStack);
+//                    }
+//                }.runTaskLater(BouncyBulletsPlugin.getInstance(), (long) i * this.gunProperties.shootDelayTicks());
+//            }
+//
+//            return;
+//        }
+//
+//        useGun(game, player, gamePlayer.getHud(), itemStack);
+//    }
 
-        if (this.gunProperties.shootDelayTicks() < INTERACT_EVENT_TICK_DELAY) {
-            long shootDivisions = INTERACT_EVENT_TICK_DELAY / this.gunProperties.shootDelayTicks();
-
-            useGun(game, player, gamePlayer.getHud(), itemStack);
-
-            for (int i = 1; i < shootDivisions; i++) {
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        useGun(game, player, gamePlayer.getHud(), itemStack);
-                    }
-                }.runTaskLater(BouncyBulletsPlugin.getInstance(), (long) i * this.gunProperties.shootDelayTicks());
-            }
-
-            return;
-        }
-
-        useGun(game, player, gamePlayer.getHud(), itemStack);
-    }
-
-    private void useGun(BouncyBulletGame game, Player player, BouncyBulletsHUD hud, ItemStack itemStack) {
-        long currentGameTime = player.getServer().getCurrentTick();
-
-        if (getAmmo(itemStack) <= 0)
-            return;
-
-        if (lastShootTicks.containsKey(player.getUniqueId())) {
-            long lastShootTick = lastShootTicks.get(player.getUniqueId());
-            long tickInterval = currentGameTime - lastShootTick;
-
-            if (tickInterval < this.gunProperties.shootDelayTicks()) {
-                return;
-            }
-        }
-
+    protected final void shootGun(BouncyBulletGame game, Player player, BouncyBulletsHUD hud, ItemStack itemStack) {
         GunShootEvent event = new GunShootEvent(this, player, this.bulletProperties);
         Bukkit.getPluginManager().callEvent(event);
 
-        player.getWorld().playSound(getShootingSound(), player.getX(), player.getY(), player.getZ());
+        player.getWorld().playSound(getShootingSound(), player);
 
         shootProjectile(game, player, event.getBulletProperties());
         useAmmo(itemStack, hud);
-
-        lastShootTicks.put(player.getUniqueId(), currentGameTime);
     }
 
-    private void useAmmo(ItemStack itemStack, BouncyBulletsHUD hud) {
+    protected final void useAmmo(ItemStack itemStack, BouncyBulletsHUD hud) {
         itemStack.editMeta(meta -> {
             PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
             int ammo = dataContainer.getOrDefault(AMMO_KEY, PersistentDataType.INTEGER, this.gunProperties.magazineSize());
@@ -217,7 +197,7 @@ public abstract class GunItem extends GameItem {
     private static List<Component> buildGunPropertyDescription(BulletProperties bulletProperties) {
         return MiniMessageUtils.wordWrapLore(List.of(
                 "<gray>Damage: <red>" + bulletProperties.maxDamage() + "❤",
-                "<gray>Speed: <yellow>" + bulletProperties.speed() + " blocks/sec",
+                "<gray>Speed: <yellow>" + bulletProperties.speed() + " blocks/s",
                 "<gray>Bounces: <yellow>" + bulletProperties.numberOfBounces()
 
         ), 30);

@@ -1,6 +1,10 @@
 package dev.zenqrt.bouncybullets.event.listeners;
 
 import dev.zenqrt.bouncybullets.game.GameManager;
+import dev.zenqrt.bouncybullets.utils.PlayerUtils;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandlerContext;
+import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -20,6 +24,19 @@ public final class PlayerJoinListeners implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         event.joinMessage(null);
 
+        PlayerUtils.injectPacketListener(
+                event.getPlayer(),
+                "test",
+                new ChannelDuplexHandler() {
+                    @Override
+                    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                        if (msg instanceof ServerboundUseItemPacket packet)
+                            System.out.println("Found server action packet with: " + packet.getHand());
+
+                        super.channelRead(ctx, msg);
+                    }
+                }
+        );
     }
 
     @EventHandler

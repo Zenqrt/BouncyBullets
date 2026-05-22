@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
-public final class TwinPistolGunItem extends BulletProjectileGunItem {
+public final class TwinPistolGunItem extends BulletGunItem {
 
     public TwinPistolGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
         super("twin_pistol", Material.NETHERITE_HOE, "Twin Pistol", gunProperties, bulletProperties);

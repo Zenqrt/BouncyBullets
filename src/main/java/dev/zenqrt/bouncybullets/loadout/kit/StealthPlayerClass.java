@@ -18,7 +18,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.Map;
-import java.util.TreeMap;
 
 final class StealthPlayerClass extends EventPlayerClass {
 
@@ -32,14 +31,12 @@ final class StealthPlayerClass extends EventPlayerClass {
     }
 
     @Override
-    public TreeMap<Integer, ItemStack> getItems() {
-        TreeMap<Integer, ItemStack> items = new TreeMap<>();
-
-        items.put(0, PRIMARY_GUN.buildItemStack());
-        items.put(1, SECONDARY_GUN.buildItemStack());
-        items.put(2, ACTIVE_ABILITY.buildItemStack());
-
-        return items;
+    public Map<Integer, ItemStack> getItems() {
+        return Map.of(
+                0, PRIMARY_GUN.buildItemStack(),
+                1, SECONDARY_GUN.buildItemStack(),
+                2, ACTIVE_ABILITY.buildItemStack()
+        );
     }
 
     @Override

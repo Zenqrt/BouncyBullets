@@ -7,7 +7,7 @@ import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 
-public final class SMGGunItem extends BulletProjectileGunItem {
+public final class SMGGunItem extends BulletGunItem {
 
     public SMGGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
         super("smg", Material.IRON_HORSE_ARMOR, "SMG", gunProperties, bulletProperties);

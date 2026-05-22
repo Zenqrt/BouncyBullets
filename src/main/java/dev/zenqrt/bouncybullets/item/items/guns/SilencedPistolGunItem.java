@@ -7,7 +7,7 @@ import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 
-public final class SilencedPistolGunItem extends BulletProjectileGunItem {
+public final class SilencedPistolGunItem extends BulletGunItem {
 
     public SilencedPistolGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
         super("silenced_pistol", Material.IRON_HOE, "Silenced Pistol", gunProperties, bulletProperties);

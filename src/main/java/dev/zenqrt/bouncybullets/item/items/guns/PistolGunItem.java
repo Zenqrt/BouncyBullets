@@ -7,7 +7,7 @@ import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 
-public final class PistolGunItem extends BulletProjectileGunItem {
+public final class PistolGunItem extends BulletGunItem {
 
     public PistolGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
         super("pistol", Material.GOLDEN_HOE, "BB-Pistol", gunProperties, bulletProperties);

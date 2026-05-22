@@ -4,7 +4,7 @@ import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.GameSettings;
 import dev.zenqrt.bouncybullets.loadout.Loadout;
-import dev.zenqrt.bouncybullets.loadout.kit.PlayerClasses;
+import dev.zenqrt.bouncybullets.loadout.kit.PlayerClassType;
 import dev.zenqrt.bouncybullets.lobby.LobbyManager;
 import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
 import dev.zenqrt.bouncybullets.map.GameMap;
@@ -70,7 +70,7 @@ public final class GameManager {
     }
 
     public void joinGame(Player player, BouncyBulletGame game) {
-        game.insertPlayer(player, new Loadout(PlayerClasses.STEALTH.getPlayerClass()));
+        game.insertPlayer(player, new Loadout(PlayerClassType.STEALTH.getPlayerClass()));
         this.playerGames.put(player.getUniqueId(), game);
     }
 

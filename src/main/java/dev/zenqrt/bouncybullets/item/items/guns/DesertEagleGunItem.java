@@ -7,7 +7,7 @@ import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 
-public final class DesertEagleGunItem extends BulletProjectileGunItem {
+public final class DesertEagleGunItem extends BulletGunItem {
 
     public DesertEagleGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
         super("desert_eagle", Material.DIAMOND_HOE, "Desert Eagle", gunProperties, bulletProperties);

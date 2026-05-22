@@ -12,7 +12,6 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
 
 final class DemomanPlayerClass implements PlayerClass {
 
@@ -37,12 +36,12 @@ final class DemomanPlayerClass implements PlayerClass {
     }
 
     @Override
-    public TreeMap<Integer, ItemStack> getItems() {
-        return new TreeMap<>() {{
-            put(0, PRIMARY_GUN.buildItemStack());
-            put(1, SECONDARY_GUN.buildItemStack());
-            put(2, ACTIVE_ABILITY.buildItemStack());
-        }};
+    public Map<Integer, ItemStack> getItems() {
+        return Map.of(
+                0, PRIMARY_GUN.buildItemStack(),
+                1, SECONDARY_GUN.buildItemStack(),
+                2, ACTIVE_ABILITY.buildItemStack()
+        );
     }
 
     @Override
