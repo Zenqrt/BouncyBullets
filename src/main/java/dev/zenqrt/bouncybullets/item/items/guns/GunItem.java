@@ -65,7 +65,18 @@ public abstract class GunItem extends GameItem {
     }
 
     public GunItem(String key, Material material, String displayName, GunProperties gunProperties, BulletProperties bulletProperties) {
-        this(key, material, AdventureUtils.withoutItalics(displayName, NamedTextColor.YELLOW), gunProperties, bulletProperties);
+        this(
+                key,
+                material,
+                AdventureUtils.withoutItalics(displayName, NamedTextColor.YELLOW)
+                        .append(
+                                Component.text(" (", NamedTextColor.GRAY)
+                                        .append(Component.keybind("key.swapOffhand"))
+                                        .append(Component.text(" to reload)"))
+                        ),
+                gunProperties,
+                bulletProperties
+        );
     }
 
     protected abstract void useGun(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack);
