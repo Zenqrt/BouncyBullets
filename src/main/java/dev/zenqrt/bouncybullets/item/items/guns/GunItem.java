@@ -10,6 +10,7 @@ import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.player.BouncyBulletsHUD;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -39,6 +40,7 @@ public abstract class GunItem extends GameItem {
     private static final UUID AIM_ZOOM_MODIFIER_UUID = UUID.randomUUID();
     private static final AttributeModifier RELOAD_SLOWDOWN_MODIFIER = new AttributeModifier(UUID.randomUUID(), "reload_slowdown", -0.05, AttributeModifier.Operation.ADD_NUMBER);
     private static final NamespacedKey AMMO_KEY = new NamespacedKey(BouncyBulletsPlugin.getInstance(), "ammo");
+    private static final Sound AIM_SOUND = Sound.sound(Key.key("ui.button.click"), Sound.Source.MASTER, 0.5F, 2F);
     private static final Title AIM_CROSSHAIR_TITLE = Title.title(
             Component.empty(),
             Component.text("^", NamedTextColor.DARK_GRAY).decorate(TextDecoration.BOLD),
@@ -242,6 +244,7 @@ public abstract class GunItem extends GameItem {
         );
         movementSpeed.addTransientModifier(zoomModifier);
         player.showTitle(AIM_CROSSHAIR_TITLE);
+        player.playSound(AIM_SOUND, Sound.Emitter.self());
     }
 
     public static void stopAiming(Player player) {

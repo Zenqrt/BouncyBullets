@@ -27,7 +27,6 @@ import java.util.*;
 
 public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
 
-
     private static final int COOLDOWN = 1200;
     private static final double DAMAGE = 15;
     private static final int CHARGING_TICKS = 40;
