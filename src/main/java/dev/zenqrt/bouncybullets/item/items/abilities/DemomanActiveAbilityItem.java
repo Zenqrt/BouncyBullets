@@ -57,9 +57,12 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
 
         PlayerInventory inventory = player.getInventory();
 
-        this.inventoryContents.put(player.getUniqueId(), inventory.getContents());
+        this.inventoryContents.put(player.getUniqueId(), inventory.getStorageContents());
 
-        inventory.clear();
+        for (int i = 0; i < inventory.getStorageContents().length; i++) {
+            inventory.setItem(i, null);
+        }
+
         for (int i = 0; i < 9; i++) {
             inventory.setItem(i, new ItemStack(Material.BLACK_STAINED_GLASS_PANE));
         }
@@ -127,7 +130,7 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
         }
 
         private void endAbility() {
-            shooter.getInventory().setContents(inventoryContents.get(shooter.getUniqueId()));
+            shooter.getInventory().setStorageContents(inventoryContents.get(shooter.getUniqueId()));
             isCharging.remove(shooter.getUniqueId());
             inventoryContents.remove(shooter.getUniqueId());
 
