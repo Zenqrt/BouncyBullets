@@ -43,7 +43,24 @@ public final class GrenadeLauncherGunItem extends GunItem {
 
     @Override
     protected void useGun(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack) {
+        long currentGameTime = player.getServer().getCurrentTick();
+        int ammo = getAmmo(itemStack);
+
+        if (ammo <= 0)
+            return;
+
+        if (super.lastShootTicks.containsKey(player.getUniqueId())) {
+            long lastShootTick = super.lastShootTicks.get(player.getUniqueId());
+            long tickInterval = currentGameTime - lastShootTick;
+
+            if (tickInterval < super.gunProperties.shootDelayTicks()) {
+                return;
+            }
+        }
+
         shootGun(game, player, gamePlayer.getHud(), itemStack);
+
+        super.lastShootTicks.put(player.getUniqueId(), currentGameTime);
     }
 
     @Override
@@ -108,7 +125,7 @@ public final class GrenadeLauncherGunItem extends GunItem {
 
             if (tnt.isOnGround() && tnt.getVelocity().getY() <= 0) {
                 currentBounces++;
-                tnt.setVelocity(previousVelocity.multiply(new Vector(0.5, -0.75, 0.5)));
+                tnt.setVelocity(previousVelocity.multiply(new Vector(0.5, -0.85, 0.5)));
                 tnt.getWorld().playSound(BOUNCE_SOUND, tnt);
             }
 
