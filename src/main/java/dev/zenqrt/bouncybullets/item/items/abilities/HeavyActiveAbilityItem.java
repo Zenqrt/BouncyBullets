@@ -1,6 +1,7 @@
 package dev.zenqrt.bouncybullets.item.items.abilities;
 
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
@@ -63,15 +64,22 @@ public final class HeavyActiveAbilityItem extends ActiveAbilityItem implements L
 
     @Override
     public void onUse(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
-        this.abilityActive.add(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+
+        this.abilityActive.add(uuid);
 
         addGlowToArmor(player.getInventory());
         player.getWorld().playSound(ACTIVATE_SOUND, player);
 
+        BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(uuid);
+
         Bukkit.getScheduler().runTaskLater(
                 game.getPlugin(),
                 () -> {
-                    this.abilityActive.remove(player.getUniqueId());
+                    if (gamePlayer.isDead())
+                        return;
+
+                    this.abilityActive.remove(uuid);
 
                     removeGlowFromArmor(player.getInventory());
                     player.getWorld().playSound(DEACTIVATE_SOUND, player);

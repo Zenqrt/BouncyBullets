@@ -83,10 +83,16 @@ public final class ShootBulletTask extends BukkitRunnable {
                         : bulletProperties.maxDamage();
                 double damage = actualDamage + (actualDamage * (bulletProperties.damageChange() * bounces));
 
-                hitPlayer.damage(damage, DamageSource.builder(DamageType.MOB_PROJECTILE).withCausingEntity(shooter).build());
+                hitPlayer.damage(
+                        damage,
+                        DamageSource.builder(DamageType.MOB_PROJECTILE)
+                                .withDirectEntity(this.shooter)
+                                .withCausingEntity(this.shooter)
+                                .build()
+                );
                 hitPlayer.setNoDamageTicks(0);
 
-                shooter.playSound(HIT_SOUND, Sound.Emitter.self());
+                this.shooter.playSound(HIT_SOUND, Sound.Emitter.self());
                 this.cancel();
 
                 return;

@@ -36,6 +36,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.PlayerInventory;
@@ -123,6 +124,8 @@ public final class BattleGameState extends GameState {
 
             Location randomSpawn = gameMap.spawnLocations().get(ThreadLocalRandom.current().nextInt(gameMap.spawnLocations().size())).toLocation(gameMap.world());
             player.teleport(randomSpawn);
+
+            gamePlayer.setAlive(true);
         });
 
         this.taskManager.runTaskTimer(
@@ -144,6 +147,7 @@ public final class BattleGameState extends GameState {
 
         this.players.forEach((_, gamePlayer) -> {
             gamePlayer.getLoadout().playerClass().onStopUse(gamePlayer);
+            gamePlayer.setAlive(false);
 
             Player player = gamePlayer.getPlayer();
 
@@ -234,7 +238,9 @@ public final class BattleGameState extends GameState {
                         GunItem.stopAiming(player);
 
                     BouncyBulletGamePlayer gamePlayer = this.game.findPlayerOrThrow(player.getUniqueId());
+
                     gamePlayer.addDeath();
+                    gamePlayer.setAlive(false);
 
                     this.taskManager.runTaskTimer(
                             new DeathSpectatorTask(gamePlayer, 5),
@@ -242,10 +248,10 @@ public final class BattleGameState extends GameState {
                     );
                 })
                 .build());
-//        this.eventNode.registerListener(PaperEventListener.builder(InventoryClickEvent.class)
-//                .filter(event -> players.containsKey(event.getWhoClicked().getUniqueId()))
-//                .handler(event -> event.setCancelled(true))
-//                .build());
+        this.stateEventNode.registerListener(PaperEventListener.builder(InventoryClickEvent.class)
+                .filter(event -> this.players.containsKey(event.getWhoClicked().getUniqueId()))
+                .handler(event -> event.setCancelled(true))
+                .build());
     }
 
     private void updateSidebar(UUID uuid, Consumer<BouncyBulletsSidebar> updateHandler) {
@@ -340,22 +346,23 @@ public final class BattleGameState extends GameState {
 
         @Override
         public void run() {
-            Player player = gamePlayer.getPlayer();
+            Player player = this.gamePlayer.getPlayer();
 
-            if (--timeLeft == 0) {
+            if (--this.timeLeft == 0) {
                 this.cancel();
 
-                setupPlayerInventory(player, gamePlayer.getLoadout());
+                setupPlayerInventory(player, this.gamePlayer.getLoadout());
 
                 player.setGameMode(GameMode.ADVENTURE);
                 player.teleport(chooseBestSpawnLocation());
                 player.clearTitle();
 
-                gamePlayer.getLoadout().playerClass().onRespawn(gamePlayer);
+                this.gamePlayer.setAlive(true);
+                this.gamePlayer.getLoadout().playerClass().onRespawn(this.gamePlayer);
                 return;
             }
 
-            player.sendTitlePart(TitlePart.SUBTITLE, Component.text("Respawning in " + timeLeft + "..."));
+            player.sendTitlePart(TitlePart.SUBTITLE, Component.text("Respawning in " + this.timeLeft + "..."));
         }
     }
 }

@@ -1,6 +1,7 @@
 package dev.zenqrt.bouncybullets.item.items.abilities;
 
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.utils.*;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -55,7 +56,6 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
         this.isCharging.add(uuid);
 
         PlayerInventory inventory = player.getInventory();
-
         this.inventoryContents.put(uuid, inventory.getStorageContents());
 
         clearStorage(inventory);
@@ -63,7 +63,9 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
 
         SoundUtils.playSoundFromPlayer(player, CHARGING_SOUND);
 
-        new ChargingTask(player, 4, CHARGING_TICKS).runTaskTimer(game.getPlugin(), 0, 1);
+        BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(uuid);
+
+        new ChargingTask(gamePlayer, player, 4, CHARGING_TICKS).runTaskTimer(game.getPlugin(), 0, 1);
     }
 
     private static void clearStorage(PlayerInventory inventory) {
@@ -93,12 +95,14 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
         private static final Sound SHOOT_SOUND = Sound.sound(Key.key("entity.generic.explode"), Sound.Source.PLAYER, 1, 1.5F);
         private static final double BEAM_RADIUS = 1;
 
+        private final BouncyBulletGamePlayer gamePlayer;
         private final Player shooter;
         private final int itemSlot;
         private final int chargingTicks;
         private int currentTick;
 
-        ChargingTask(Player shooter, int itemSlot, int chargingTicks) {
+        ChargingTask(BouncyBulletGamePlayer gamePlayer, Player shooter, int itemSlot, int chargingTicks) {
+            this.gamePlayer = gamePlayer;
             this.shooter = shooter;
             this.itemSlot = itemSlot;
             this.chargingTicks = chargingTicks;
@@ -106,7 +110,7 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
 
         @Override
         public void run() {
-            if (this.shooter.getGameMode() == GameMode.SPECTATOR || this.shooter.getInventory().getHeldItemSlot() != itemSlot) {
+            if (this.gamePlayer.isDead() || this.shooter.getInventory().getHeldItemSlot() != itemSlot) {
                 endAbility();
 
                 this.cancel();

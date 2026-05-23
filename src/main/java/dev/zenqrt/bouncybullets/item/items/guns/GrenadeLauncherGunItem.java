@@ -39,7 +39,9 @@ public final class GrenadeLauncherGunItem extends GunItem {
         tnt.setFuseTicks(Integer.MAX_VALUE);
         tnt.setVelocity(eyeLocation.getDirection().normalize().multiply(bulletProperties.speed()));
 
-        new TNTBounceTask(player, tnt, bulletProperties.numberOfBounces()).runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 1);
+        BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
+
+        new TNTBounceTask(gamePlayer, player, tnt, bulletProperties.numberOfBounces()).runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 1);
     }
 
     @Override
@@ -78,13 +80,15 @@ public final class GrenadeLauncherGunItem extends GunItem {
 
         private static final Sound BOUNCE_SOUND = Sound.sound(Sounds.ENTITY_SLIME_JUMP, Sound.Source.MASTER, 0.5F, 1);
 
+        private final BouncyBulletGamePlayer gamePlayer;
         private final Player source;
         private final TNTPrimed tnt;
         private final int maxBounces;
         private int currentBounces;
         private Vector previousVelocity;
 
-        TNTBounceTask(Player source, TNTPrimed tnt, int maxBounces) {
+        TNTBounceTask(BouncyBulletGamePlayer gamePlayer, Player source, TNTPrimed tnt, int maxBounces) {
+            this.gamePlayer = gamePlayer;
             this.source = source;
             this.tnt = tnt;
             this.maxBounces = maxBounces;
@@ -93,7 +97,7 @@ public final class GrenadeLauncherGunItem extends GunItem {
 
         @Override
         public void run() {
-            if (this.tnt.isDead()) {
+            if (this.tnt.isDead() || this.gamePlayer.isDead()) {
                 this.cancel();
                 return;
             }

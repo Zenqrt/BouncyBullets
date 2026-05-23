@@ -99,7 +99,7 @@ public final class StealthPlayerClass implements EventPlayerClass {
                     UUID uuid = player.getUniqueId();
                     BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(uuid);
 
-                    if (event.isSneaking() && canGoInvisible(gamePlayer)) {
+                    if (event.isSneaking() && canGoInvisible(gamePlayer) && gamePlayer.isAlive()) {
                         if (this.combatTimerTasks.containsKey(uuid) || player.isSprinting()) {
                             player.sendMessage(Component.text("You are currently in combat!", NamedTextColor.RED));
                             player.playSound(CHARGE_DENIED_SOUND, Sound.Emitter.self());
