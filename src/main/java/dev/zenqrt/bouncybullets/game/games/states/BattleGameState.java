@@ -214,7 +214,7 @@ public final class BattleGameState extends GameState {
                     if (lastDamageEvent != null) {
                         if (lastDamageEvent.getDamageSource().getCausingEntity() instanceof Player killer && players.containsKey(killer.getUniqueId())) {
                             if (killer != player) {
-                                BouncyBulletGamePlayer killerGamePlayer = this.game.findPlayer(killer.getUniqueId());
+                                BouncyBulletGamePlayer killerGamePlayer = this.game.findPlayerOrThrow(killer.getUniqueId());
 
                                 killerGamePlayer.addKill();
                                 updateSidebar(
@@ -233,7 +233,7 @@ public final class BattleGameState extends GameState {
                     if (GunItem.isAiming(player))
                         GunItem.stopAiming(player);
 
-                    BouncyBulletGamePlayer gamePlayer = this.game.findPlayer(player.getUniqueId());
+                    BouncyBulletGamePlayer gamePlayer = this.game.findPlayerOrThrow(player.getUniqueId());
                     gamePlayer.addDeath();
 
                     this.taskManager.runTaskTimer(

@@ -41,7 +41,7 @@ public final class StealthActiveAbilityItem extends ActiveAbilityItem {
 
     @Override
     public void onUse(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
-        BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
+        BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
 
         if (!StealthPlayerClass.canGoInvisible(gamePlayer))
             return;

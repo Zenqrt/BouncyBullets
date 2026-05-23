@@ -98,7 +98,7 @@ public abstract class GunItem extends GameItem {
 
     @Override
     public void onHeld(BouncyBulletGame game, Player player, ItemStack itemStack, ItemStack previousItemStack) {
-        final BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
+        final BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
 
         int ammo = getAmmo(itemStack);
         int magSize = this.getGunProperties().magazineSize();
@@ -111,7 +111,7 @@ public abstract class GunItem extends GameItem {
 
     @Override
     public void onUnheld(BouncyBulletGame game, Player player, ItemStack itemStack, ItemStack newItemStack) {
-        final BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
+        final BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
 
         gamePlayer.getHud().hideAmmo();
         gamePlayer.getHud().updateHudText();
@@ -127,7 +127,7 @@ public abstract class GunItem extends GameItem {
             if (player.hasCooldown(this.material))
                 return;
 
-            BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
+            BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
 
             useGun(game, gamePlayer, player, itemStack);
         }

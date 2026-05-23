@@ -25,7 +25,7 @@ public final class LoadoutGameItem extends GameItem {
 
     @Override
     public void onInteract(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
-        BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
+        BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
 
         new ClassSelectGui(gamePlayer)
                 .show(player);

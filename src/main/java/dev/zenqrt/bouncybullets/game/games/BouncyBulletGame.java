@@ -19,6 +19,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public final class BouncyBulletGame extends Game {
@@ -81,8 +82,19 @@ public final class BouncyBulletGame extends Game {
         return players;
     }
 
-    public BouncyBulletGamePlayer findPlayer(UUID uuid) {
-        return players.get(uuid);
+    public BouncyBulletGamePlayer findPlayerOrThrow(UUID uuid) {
+        BouncyBulletGamePlayer gamePlayer = this.players.get(uuid);
+
+        if (gamePlayer == null)
+            throw new NullPointerException("gamePlayer was null");
+
+        return gamePlayer;
+    }
+
+    public Optional<BouncyBulletGamePlayer> findPlayer(UUID uuid) {
+        BouncyBulletGamePlayer gamePlayer = this.players.get(uuid);
+
+        return gamePlayer == null ? Optional.empty() : Optional.of(gamePlayer);
     }
 
     public boolean hasPlayer(UUID uuid) {

@@ -97,7 +97,7 @@ public final class StealthPlayerClass implements EventPlayerClass {
                 .handler(event -> {
                     Player player = event.getPlayer();
                     UUID uuid = player.getUniqueId();
-                    BouncyBulletGamePlayer gamePlayer = game.findPlayer(uuid);
+                    BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(uuid);
 
                     if (event.isSneaking() && canGoInvisible(gamePlayer)) {
                         if (this.combatTimerTasks.containsKey(uuid) || player.isSprinting()) {
@@ -118,7 +118,7 @@ public final class StealthPlayerClass implements EventPlayerClass {
                 .filter(PlayerToggleSprintEvent::isSprinting)
                 .handler(event -> {
                     Player player = event.getPlayer();
-                    BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
+                    BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
 
                     if (!gamePlayer.isInvisible())
                         return;
@@ -133,7 +133,7 @@ public final class StealthPlayerClass implements EventPlayerClass {
                 .handler(event -> {
                     Player player = (Player) event.getEntity();
                     UUID uuid = player.getUniqueId();
-                    BouncyBulletGamePlayer gamePlayer = game.findPlayer(uuid);
+                    BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(uuid);
 
                     applyCombatTimer(uuid, game);
 
@@ -151,7 +151,7 @@ public final class StealthPlayerClass implements EventPlayerClass {
                 .handler(event -> {
                     Player player = (Player) event.getDamager();
                     UUID uuid = player.getUniqueId();
-                    BouncyBulletGamePlayer gamePlayer = game.findPlayer(uuid);
+                    BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(uuid);
 
                     applyCombatTimer(uuid, game);
 
@@ -172,7 +172,7 @@ public final class StealthPlayerClass implements EventPlayerClass {
     }
 
     private void applyCombatTimer(UUID uuid, BouncyBulletGame game) {
-        BouncyBulletGamePlayer gamePlayer = game.findPlayer(uuid);
+        BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(uuid);
 
         tryRemoveCombatTimer(uuid, false);
 

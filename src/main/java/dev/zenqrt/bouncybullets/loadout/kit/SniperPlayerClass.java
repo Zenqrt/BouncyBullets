@@ -49,7 +49,7 @@ final class SniperPlayerClass implements EventPlayerClass {
                 .filter(event -> event.getGunItem() == GameItems.SNIPER_RIFLE)
                 .handler(event -> {
                     Player player = event.getShooter();
-                    BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
+                    BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
 
                     if (gamePlayer.getLoadout().playerClass() != this)
                         return;
