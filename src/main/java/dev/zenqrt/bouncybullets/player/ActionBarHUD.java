@@ -49,7 +49,6 @@ public class ActionBarHUD {
     }
 
     public void show(Audience audience) {
-
         audience.sendActionBar(this.hudText);
     }
 

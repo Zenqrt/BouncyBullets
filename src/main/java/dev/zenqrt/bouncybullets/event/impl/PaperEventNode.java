@@ -5,7 +5,6 @@ import dev.zenqrt.bouncybullets.event.EventNode;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 
@@ -26,7 +25,7 @@ public final class PaperEventNode<E extends Event> implements EventNode<E> {
         ListenerInfo<? extends E> listenerInfo = new ListenerInfo<>(eventListener, new Listener() {});
         this.listeners.add(listenerInfo);
 
-        Bukkit.getPluginManager().registerEvent(eventListener.getEventClass(), listenerInfo.bukkitListener, EventPriority.NORMAL, (listener, event) -> {
+        Bukkit.getPluginManager().registerEvent(eventListener.getEventClass(), listenerInfo.bukkitListener, eventListener.getPriority(), (listener, event) -> {
             if (eventListener.getEventClass().isAssignableFrom(event.getClass())) {
                 T eventCasted = (T) event;
                 boolean passNodeFilters = this.nodeFilters.stream()

@@ -20,8 +20,11 @@ public enum PlayerClassType {
                     Component.text("Invisibility Cloak", NamedTextColor.LIGHT_PURPLE)
             ),
             List.of(
-                    "<gold>Passive Ability:",
-                    "<gray>Upon killing a player, receive a <aqua>Speed II <gray>effect for <green>5 <gray>seconds."
+                    "<gold>Passive Ability: <aqua>Out of Sight",
+                    "<gray>While sneaking, your stealth meter fills up. Once the meter is filled, you gain <white>Invisibility<gray>. Running, shooting, or taking damage will reveal yourself.",
+                    "",
+                    "<gold>Passive Ability: <aqua>Surprise Attack",
+                    "<gray>After emerging from being invisible, gain <aqua>Speed II <gray>for <green>5s<gray>."
     )),
     HEALER(new HealerPlayerClass(), Material.SPLASH_POTION, meta -> {
         ((PotionMeta) meta).setBasePotionType(PotionType.INSTANT_HEAL);
@@ -32,7 +35,7 @@ public enum PlayerClassType {
                     Component.text("Miracle", NamedTextColor.LIGHT_PURPLE)
             ),
             List.of(
-                    "<gold>Passive Ability:",
+                    "<gold>Passive Ability: <aqua>Blessing",
                     "<gray>Regenerate <red>1❤</red> every <green>2 <gray>seconds."
             )),
     SNIPER(new SniperPlayerClass(), Material.ENDER_EYE, List.of(
@@ -50,7 +53,7 @@ public enum PlayerClassType {
     ),
             List.of(
                     "<gold>Passive Ability:",
-                    "<gray>None."
+                    "<gray>Your speed is decreased by some amount."
             )),
     WINGMAN(new WingmanPlayerClass(), Material.ELYTRA,
             List.of(
@@ -58,11 +61,11 @@ public enum PlayerClassType {
                     Component.text("Bullet Spread", NamedTextColor.LIGHT_PURPLE)
             ),
             List.of(
-                    "<gold>Passive Ability:",
+                    "<gold>Passive Ability: <aqua>Wing's Thrust",
                     "<gray>Gain a charged double jump every <green>10s<gray>, up to a max level of <red>5<gray>. Each charge level launches you further.",
                     "",
-                    "<gold>Passive Ability:",
-                    "<gray>Any shots fired while flying above <green>2 blocks <gray>does <red>50% <gray>more damage"
+                    "<gold>Passive Ability: <aqua>idk what to call this",
+                    "<gray>Any shots fired while flying above <green>2 blocks <gray>does <red>50% <gray>more damage."
             )
     ),
     HEAVY(new HeavyPlayerClass(), Material.IRON_CHESTPLATE,

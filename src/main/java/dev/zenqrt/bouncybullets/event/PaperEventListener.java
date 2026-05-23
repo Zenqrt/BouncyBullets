@@ -1,6 +1,7 @@
 package dev.zenqrt.bouncybullets.event;
 
 import org.bukkit.event.Event;
+import org.bukkit.event.EventPriority;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -11,21 +12,28 @@ import java.util.function.Predicate;
 public interface PaperEventListener<T extends Event> {
 
     Class<T> getEventClass();
+    EventPriority getPriority();
     void run(@NotNull T event);
 
 
     static <E extends Event> Builder<E> builder(Class<E> eventClass) {
-        return new Builder<>(eventClass);
+        return new Builder<>(eventClass, EventPriority.NORMAL);
+    }
+
+    static <E extends Event> Builder<E> builder(Class<E> eventClass, EventPriority priority) {
+        return new Builder<>(eventClass, priority);
     }
 
     class Builder<T extends Event> {
 
         private final Class<T> eventClass;
         private final List<Predicate<T>> filters = new ArrayList<>();
+        private final EventPriority priority;
         private Consumer<T> handler;
 
-        public Builder(Class<T> eventClass) {
+        Builder(Class<T> eventClass, EventPriority priority) {
             this.eventClass = eventClass;
+            this.priority = priority;
         }
 
         public Builder<T> filter(Predicate<T> filter) {
@@ -43,6 +51,11 @@ public interface PaperEventListener<T extends Event> {
                 @Override
                 public Class<T> getEventClass() {
                     return eventClass;
+                }
+
+                @Override
+                public EventPriority getPriority() {
+                    return priority;
                 }
 
                 @Override

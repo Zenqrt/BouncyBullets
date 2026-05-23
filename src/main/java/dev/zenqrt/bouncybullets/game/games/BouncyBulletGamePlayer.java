@@ -3,6 +3,9 @@ package dev.zenqrt.bouncybullets.game.games;
 import dev.zenqrt.bouncybullets.loadout.Loadout;
 import dev.zenqrt.bouncybullets.player.BouncyBulletsHUD;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.UUID;
 
@@ -10,6 +13,8 @@ public class BouncyBulletGamePlayer {
 
     private int deaths;
     private int kills;
+    private boolean invisible;
+    private ItemStack[] pastArmorContents;
 
     private final BouncyBulletsHUD hud;
     private Loadout loadout;
@@ -24,6 +29,24 @@ public class BouncyBulletGamePlayer {
 
         this.kills = 0;
         this.deaths = 0;
+    }
+
+    public void hide() {
+        this.invisible = true;
+        this.pastArmorContents = this.player.getInventory().getArmorContents();
+
+        this.player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, true, false, true));
+        this.player.getInventory().setArmorContents(new ItemStack[]{null, null, null, null});
+    }
+
+    public void reveal() {
+        this.invisible = false;
+        this.player.removePotionEffect(PotionEffectType.INVISIBILITY);
+        this.player.getInventory().setArmorContents(this.pastArmorContents);
+    }
+
+    public boolean isInvisible() {
+        return invisible;
     }
 
     public void addDeath() {
