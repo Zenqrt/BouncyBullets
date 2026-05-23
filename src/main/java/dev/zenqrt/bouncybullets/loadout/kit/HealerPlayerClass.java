@@ -6,13 +6,12 @@ import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.item.items.abilities.HealerActiveAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
-import org.bukkit.GameMode;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
@@ -33,20 +32,22 @@ final class HealerPlayerClass implements PlayerClass {
         PlayerUtils.requireNonNullAttribute(player, Attribute.MAX_ABSORPTION)
                         .setBaseValue(5);
 
-        healTasks.add(new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (player.getGameMode() != GameMode.ADVENTURE) {
-                    return;
-                }
+        this.healTasks.add(
+                Bukkit.getScheduler().runTaskTimer(
+                        BouncyBulletsPlugin.getInstance(),
+                        () -> {
+                            if (gamePlayer.isDead())
+                                return;
 
-                double maxHealth = PlayerUtils.requireNonNullAttribute(player, Attribute.MAX_HEALTH).getValue();
+                            double maxHealth = PlayerUtils.requireNonNullAttribute(player, Attribute.MAX_HEALTH).getValue();
 
-                if (player.getHealth() < maxHealth) {
-                    player.setHealth(Math.min(maxHealth, player.getHealth() + 1));
-                }
-            }
-        }.runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 40));
+                            if (player.getHealth() < maxHealth) {
+                                player.setHealth(Math.min(maxHealth, player.getHealth() + 1));
+                            }
+                        },
+                        0, 40
+                )
+        );
     }
 
     @Override
