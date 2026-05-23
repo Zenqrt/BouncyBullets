@@ -56,10 +56,10 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
 
         Lamp<BukkitCommandActor> lamp = BukkitLamp.builder(this).build();
         lamp.register(
-                new BouncyBulletsCommand(gameManager, mapManager, serverConfig)
+                new BouncyBulletsCommand(gameManager, mapManager, serverConfig, lobbyManager)
         );
 
-        Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(gameManager), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(gameManager, lobbyManager, serverConfig), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListeners(), this);
         Bukkit.getPluginManager().registerEvents(new GameItemListeners(gameManager), this);
         Bukkit.getPluginManager().registerEvents(new GunListeners(gameManager), this);
