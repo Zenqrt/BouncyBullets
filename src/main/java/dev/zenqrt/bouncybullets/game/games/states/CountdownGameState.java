@@ -40,9 +40,9 @@ public final class CountdownGameState extends GameState {
 
     private void registerEvents() {
         this.playerEventNode.registerListener(PaperEventListener.builder(PlayerQuitGameEvent.class)
-                .filter(event -> event.getGame().getId() == pregameState.game.getId())
-                .filter(event -> players.size() < minPlayerCount)
-                .handler(event -> pregameState.switchPreviousState())
+                .filter(event -> event.getGame().getId() == this.pregameState.game.getId())
+                .filter(_ -> this.players.size() < this.minPlayerCount)
+                .handler(_ -> this.pregameState.switchPreviousState())
                 .build());
     }
 
@@ -61,21 +61,21 @@ public final class CountdownGameState extends GameState {
 
         @Override
         public void run() {
-            if (timeLeft == 0) {
-                pregameState.switchNextState();
+            if (this.timeLeft == 0) {
+                CountdownGameState.this.pregameState.switchNextState();
                 return;
             }
 
-            if (timeLeft <= 5 || timeLeft % 15 == 0) {
+            if (this.timeLeft <= 5 || this.timeLeft % 15 == 0) {
                 broadcastTimer();
             }
 
-            timeLeft--;
+            this.timeLeft--;
         }
 
         private void broadcastTimer() {
-            players.sendMessage(MiniMessage.miniMessage().deserialize("The game starts in <yellow>" + timeLeft + "</yellow> seconds!"));
-            players.playSound(Sound.sound(org.bukkit.Sound.BLOCK_NOTE_BLOCK_HAT, Sound.Source.MASTER, 1, 1), Sound.Emitter.self());
+            CountdownGameState.this.players.sendMessage(MiniMessage.miniMessage().deserialize("The game starts in <yellow>" + this.timeLeft + "</yellow> seconds!"));
+            CountdownGameState.this.players.playSound(Sound.sound(org.bukkit.Sound.BLOCK_NOTE_BLOCK_HAT, Sound.Source.MASTER, 1, 1), Sound.Emitter.self());
         }
     }
 }

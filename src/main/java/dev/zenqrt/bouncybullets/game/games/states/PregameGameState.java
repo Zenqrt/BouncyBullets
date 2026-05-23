@@ -56,7 +56,7 @@ public final class PregameGameState extends GameStateSequence {
     protected void onStateStart() {
         registerEvents();
 
-        players.forEach(((uuid, gamePlayer) -> setupPlayer(gamePlayer.getPlayer())));
+        players.forEach(((_, gamePlayer) -> setupPlayer(gamePlayer.getPlayer())));
 
         super.onStateStart();
     }
@@ -82,13 +82,13 @@ public final class PregameGameState extends GameStateSequence {
 
     @Override
     protected void onLastStateFinished() {
-        game.switchNextState();
+        this.game.switchNextState();
     }
 
     @Override
     protected void onStateEnd() {
         super.onStateEnd();
-        playerEventNode.unregisterAllListeners();
+        this.playerEventNode.unregisterAllListeners();
     }
 
     @Override
