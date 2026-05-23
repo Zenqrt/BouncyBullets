@@ -5,7 +5,7 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.tasks.ShootBulletTask;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
-import net.kyori.adventure.key.Key;
+import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -31,7 +31,7 @@ public final class WingmanActiveAbilityItem extends ActiveAbilityItem {
             20,
             5
     );
-    private static final Sound SHOOT_SOUND = Sound.sound(Key.key("entity.iron_golem.hurt"), Sound.Source.PLAYER, 1, 2);
+    private static final Sound SHOOT_SOUND = Sound.sound(Sounds.ENTITY_IRON_GOLEM_HURT, Sound.Source.PLAYER, 1, 2);
 
     public WingmanActiveAbilityItem() {
         super(

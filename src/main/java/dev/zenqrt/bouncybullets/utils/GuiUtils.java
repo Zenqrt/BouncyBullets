@@ -10,7 +10,7 @@ import org.bukkit.inventory.ItemStack;
 public final class GuiUtils {
 
     public static Pane createBackgroundPane(int rows) {
-        OutlinePane pane = new OutlinePane(0, 0, 9, rows, Pane.Priority.LOWEST);
+        OutlinePane pane = new OutlinePane(9, rows, Pane.Priority.LOWEST);
         pane.setRepeat(true);
 
         ItemStack background = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);

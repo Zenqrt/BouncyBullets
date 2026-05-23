@@ -10,7 +10,8 @@ import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.player.BouncyBulletsHUD;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
-import net.kyori.adventure.key.Key;
+import dev.zenqrt.bouncybullets.utils.PlayerUtils;
+import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -24,21 +25,28 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public abstract class GunItem extends GameItem {
 
-    private static final UUID AIM_ZOOM_MODIFIER_UUID = UUID.randomUUID();
-    private static final AttributeModifier RELOAD_SLOWDOWN_MODIFIER = new AttributeModifier(UUID.randomUUID(), "reload_slowdown", -0.05, AttributeModifier.Operation.ADD_NUMBER);
+    private static final NamespacedKey AIM_ZOOM_MODIFIER_KEY = BouncyBulletsPlugin.createKey("aim_zoom");
+    private static final AttributeModifier RELOAD_SLOWDOWN_MODIFIER = new AttributeModifier(
+            BouncyBulletsPlugin.createKey("reload_slowdown"),
+            -0.05,
+            AttributeModifier.Operation.ADD_NUMBER
+    );
     private static final NamespacedKey AMMO_KEY = new NamespacedKey(BouncyBulletsPlugin.getInstance(), "ammo");
-    private static final Sound AIM_SOUND = Sound.sound(Key.key("ui.button.click"), Sound.Source.MASTER, 0.5F, 2F);
+    private static final Sound AIM_SOUND = Sound.sound(Sounds.UI_BUTTON_CLICK, Sound.Source.MASTER, 0.5F, 2F);
     private static final Title AIM_CROSSHAIR_TITLE = Title.title(
             Component.empty(),
             Component.text("^", NamedTextColor.DARK_GRAY).decorate(TextDecoration.BOLD),
@@ -51,8 +59,13 @@ public abstract class GunItem extends GameItem {
     public GunItem(String key, Material material, Component displayName, GunProperties gunProperties, BulletProperties bulletProperties) {
         super(key, material, displayName, buildGunPropertyDescription(bulletProperties), itemMeta ->
                 itemMeta.addAttributeModifier(
-                        Attribute.GENERIC_ATTACK_SPEED,
-                        new AttributeModifier(UUID.randomUUID(), "gun_pullout_speed", -pullOutTicksToAttackSpeed(gunProperties.pullOutTicks()), AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.HAND)
+                        Attribute.ATTACK_SPEED,
+                        new AttributeModifier(
+                                BouncyBulletsPlugin.createKey("gun_pullout_speed"),
+                                -pullOutTicksToAttackSpeed(gunProperties.pullOutTicks()),
+                                AttributeModifier.Operation.ADD_NUMBER,
+                                EquipmentSlotGroup.HAND
+                        )
                 )
         );
 
@@ -121,37 +134,14 @@ public abstract class GunItem extends GameItem {
     }
 
     private void displayAimZoom(Player player) {
-        AttributeInstance movementSpeed = player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+        AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
 
-        assert movementSpeed != null;
-
-        if (movementSpeed.getModifier(AIM_ZOOM_MODIFIER_UUID) != null) {
+        if (movementSpeed.getModifier(AIM_ZOOM_MODIFIER_KEY) != null) {
             stopAiming(player);
         } else {
             startAiming(player, this.gunProperties);
         }
     }
-
-//    private void shootGun(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack) {
-//        if (this.gunProperties.shootDelayTicks() < INTERACT_EVENT_TICK_DELAY) {
-//            long shootDivisions = INTERACT_EVENT_TICK_DELAY / this.gunProperties.shootDelayTicks();
-//
-//            useGun(game, player, gamePlayer.getHud(), itemStack);
-//
-//            for (int i = 1; i < shootDivisions; i++) {
-//                new BukkitRunnable() {
-//                    @Override
-//                    public void run() {
-//                        useGun(game, player, gamePlayer.getHud(), itemStack);
-//                    }
-//                }.runTaskLater(BouncyBulletsPlugin.getInstance(), (long) i * this.gunProperties.shootDelayTicks());
-//            }
-//
-//            return;
-//        }
-//
-//        useGun(game, player, gamePlayer.getHud(), itemStack);
-//    }
 
     protected final void shootGun(BouncyBulletGame game, Player player, BouncyBulletsHUD hud, ItemStack itemStack) {
         GunShootEvent event = new GunShootEvent(this, player, this.bulletProperties);
@@ -183,10 +173,7 @@ public abstract class GunItem extends GameItem {
             return;
 
         int timeToReload = this.gunProperties.reloadTicksPerAmmo() * (this.gunProperties.magazineSize() - ammo);
-        AttributeInstance movementSpeed = Objects.requireNonNull(
-                player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED),
-                "movementSpeed"
-        );
+        AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
 
         movementSpeed.removeModifier(RELOAD_SLOWDOWN_MODIFIER);
         movementSpeed.addTransientModifier(RELOAD_SLOWDOWN_MODIFIER);
@@ -198,7 +185,7 @@ public abstract class GunItem extends GameItem {
     }
 
     protected Sound getReloadSound() {
-        return Sound.sound(org.bukkit.Sound.ITEM_ARMOR_EQUIP_CHAIN.key(), Sound.Source.PLAYER, 1, 1);
+        return Sound.sound(Sounds.ITEM_ARMOR_EQUIP_CHAIN, Sound.Source.PLAYER, 1, 1);
     }
 
     public int getAmmo(ItemStack itemStack) {
@@ -223,13 +210,10 @@ public abstract class GunItem extends GameItem {
     }
 
     public static void startAiming(Player player, GunProperties gunProperties) {
-        AttributeInstance movementSpeed = player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
-
-        assert movementSpeed != null;
+        AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
 
         AttributeModifier zoomModifier = new AttributeModifier(
-                AIM_ZOOM_MODIFIER_UUID,
-                "aim_zoom",
+                AIM_ZOOM_MODIFIER_KEY,
                 -0.15 * gunProperties.scopeMagnifyMultiplier(),
                 AttributeModifier.Operation.ADD_SCALAR
         );
@@ -239,20 +223,16 @@ public abstract class GunItem extends GameItem {
     }
 
     public static void stopAiming(Player player) {
-        AttributeInstance movementSpeed = player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
-
-        assert movementSpeed != null;
+        AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
 
         player.clearTitle();
-        movementSpeed.removeModifier(AIM_ZOOM_MODIFIER_UUID);
+        movementSpeed.removeModifier(AIM_ZOOM_MODIFIER_KEY);
     }
 
     public static boolean isAiming(Player player) {
-        AttributeInstance movementSpeed = player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+        AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
 
-        assert movementSpeed != null;
-
-        return movementSpeed.getModifier(AIM_ZOOM_MODIFIER_UUID) != null;
+        return movementSpeed.getModifier(AIM_ZOOM_MODIFIER_KEY) != null;
     }
 
     private class ReloadTask extends BukkitRunnable {
@@ -275,9 +255,12 @@ public abstract class GunItem extends GameItem {
         @Override
         public void run() {
             if (player.getInventory().getHeldItemSlot() != slot || ticks >= timeToReload) {
-                Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).removeModifier(RELOAD_SLOWDOWN_MODIFIER);
+                AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
+
+                movementSpeed.removeModifier(RELOAD_SLOWDOWN_MODIFIER);
                 player.setCooldown(itemStack.getType(), 0);
                 this.cancel();
+
                 return;
             }
 

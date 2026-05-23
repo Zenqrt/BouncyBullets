@@ -29,9 +29,9 @@ public final class GlowUtils {
     public static List<SynchedEntityData.DataValue<?>> createDataValuesWithGlow(List<SynchedEntityData.DataValue<?>> dataValues) {
         List<SynchedEntityData.DataValue<?>> newDataValues = new ArrayList<>(dataValues);
 
-        EntityDataAccessor<Byte> accessor = ReflectionUtils.getStaticDeclaredField(Entity.class, "ao");
-        var serializer = accessor.getSerializer();
-        int dataSharedFlagsId = accessor.getId();
+        EntityDataAccessor<Byte> accessor = ReflectionUtils.getStaticDeclaredField(Entity.class, "DATA_SHARED_FLAGS_ID");
+        var serializer = accessor.serializer();
+        int dataSharedFlagsId = accessor.id();
 
         for (int i = 0; i < dataValues.size(); i++) {
             SynchedEntityData.DataValue<?> value = dataValues.get(i);
@@ -52,9 +52,9 @@ public final class GlowUtils {
     public static List<SynchedEntityData.DataValue<?>> createDataValuesWithoutGlow(List<SynchedEntityData.DataValue<?>> dataValues) {
         List<SynchedEntityData.DataValue<?>> newDataValues = new ArrayList<>(dataValues);
 
-        EntityDataAccessor<Byte> accessor = ReflectionUtils.getStaticDeclaredField(Entity.class, "ao");
-        var serializer = accessor.getSerializer();
-        int dataSharedFlagsId = accessor.getId();
+        EntityDataAccessor<Byte> accessor = ReflectionUtils.getStaticDeclaredField(Entity.class, "DATA_SHARED_FLAGS_ID");
+        var serializer = accessor.serializer();
+        int dataSharedFlagsId = accessor.id();
 
         for (int i = 0; i < dataValues.size(); i++) {
             SynchedEntityData.DataValue<?> value = dataValues.get(i);

@@ -3,7 +3,7 @@ package dev.zenqrt.bouncybullets.item.items.guns;
 import com.destroystokyo.paper.ParticleBuilder;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
-import net.kyori.adventure.key.Key;
+import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -23,7 +23,7 @@ public final class SpecialBurstRifleGunItem extends BurstBulletGunItem {
 
     @Override
     protected Sound getShootingSound() {
-        return Sound.sound(Key.key("entity.arrow.shoot"), Sound.Source.PLAYER, 1, 2);
+        return Sound.sound(Sounds.ENTITY_ARROW_SHOOT, Sound.Source.PLAYER, 1, 2);
     }
 
     @Override

@@ -5,6 +5,7 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.item.items.abilities.HealerActiveAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
+import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -17,7 +18,6 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 final class HealerPlayerClass implements PlayerClass {
 
@@ -28,20 +28,22 @@ final class HealerPlayerClass implements PlayerClass {
 
     @Override
     public void onStartUse(BouncyBulletGamePlayer gamePlayer) {
-        Player playerEntity = gamePlayer.getPlayer();
-        Objects.requireNonNull(playerEntity.getAttribute(Attribute.GENERIC_MAX_ABSORPTION)).setBaseValue(5);
+        Player player = gamePlayer.getPlayer();
+
+        PlayerUtils.requireNonNullAttribute(player, Attribute.MAX_ABSORPTION)
+                        .setBaseValue(5);
 
         healTasks.add(new BukkitRunnable() {
             @Override
             public void run() {
-                if (playerEntity.getGameMode() != GameMode.ADVENTURE) {
+                if (player.getGameMode() != GameMode.ADVENTURE) {
                     return;
                 }
 
-                double maxHealth = Objects.requireNonNull(playerEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
+                double maxHealth = PlayerUtils.requireNonNullAttribute(player, Attribute.MAX_HEALTH).getValue();
 
-                if (playerEntity.getHealth() < maxHealth) {
-                    playerEntity.setHealth(Math.min(maxHealth, playerEntity.getHealth() + 1));
+                if (player.getHealth() < maxHealth) {
+                    player.setHealth(Math.min(maxHealth, player.getHealth() + 1));
                 }
             }
         }.runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 40));

@@ -4,6 +4,7 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
+import com.github.stefvanschie.inventoryframework.pane.util.Slot;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.loadout.Loadout;
 import dev.zenqrt.bouncybullets.loadout.kit.PlayerClassType;
@@ -36,12 +37,12 @@ public final class ClassSelectGui extends ChestGui {
 
         this.setOnGlobalClick(event -> event.setCancelled(true));
 
-        this.addPane(GuiUtils.createBackgroundPane(getRows()));
+        this.addPane(Slot.fromXY(0, 0), GuiUtils.createBackgroundPane(getRows()));
         displayClasses();
     }
 
     private void displayClasses() {
-        OutlinePane pane = new OutlinePane(1, 1, 7, 1);
+        OutlinePane pane = new OutlinePane(7, 1);
 
         for (PlayerClassType playerClass : PlayerClassType.values()) {
             ItemStack icon = ItemUtils.clone(playerClass.getIcon());
@@ -55,7 +56,7 @@ public final class ClassSelectGui extends ChestGui {
 
                 if (gamePlayer.getLoadout().playerClass() == playerClass.getPlayerClass()) {
                     meta.displayName(Objects.requireNonNull(meta.displayName()).decorate(TextDecoration.BOLD));
-                    meta.addEnchant(Enchantment.DURABILITY, 1, true);
+                    meta.addEnchant(Enchantment.UNBREAKING, 1, true);
                     meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                     lore.add(AdventureUtils.withoutItalics("Selected", NamedTextColor.GREEN));
                 } else {
@@ -85,7 +86,7 @@ public final class ClassSelectGui extends ChestGui {
             }));
         }
 
-        this.addPane(pane);
+        this.addPane(Slot.fromXY(1, 1), pane);
     }
 
     private static List<Component> buildClassInformationLore(PlayerClassType playerClass) {
@@ -117,13 +118,13 @@ public final class ClassSelectGui extends ChestGui {
             this.classType = classType;
 
             this.setOnGlobalClick(event -> event.setCancelled(true));
-            this.addPane(GuiUtils.createBackgroundPane(getRows()));
+            this.addPane(Slot.fromXY(0, 0), GuiUtils.createBackgroundPane(getRows()));
             addBackButton();
             displayInfo();
         }
 
         private void addBackButton() {
-            StaticPane pane = new StaticPane(0, this.getRows() - 1, 1, 1);
+            StaticPane pane = new StaticPane(1, 1);
 
             ItemStack backItem = new ItemStack(Material.ARROW);
             backItem.editMeta(meta -> meta.displayName(AdventureUtils.withoutItalics("Back", NamedTextColor.GREEN)));
@@ -134,11 +135,11 @@ public final class ClassSelectGui extends ChestGui {
                 previousGui.show(event.getWhoClicked());
             }), 0, 0);
 
-            this.addPane(pane);
+            this.addPane(Slot.fromXY(0, this.getRows() - 1), pane);
         }
 
         private void displayInfo() {
-            StaticPane classPane = new StaticPane(4, 0, 1, 1);
+            StaticPane classPane = new StaticPane(1, 1);
 
             ItemStack icon = ItemUtils.clone(classType.getIcon());
             icon.editMeta(meta -> {
@@ -149,7 +150,7 @@ public final class ClassSelectGui extends ChestGui {
             });
             classPane.addItem(new GuiItem(icon), 0, 0);
 
-            OutlinePane itemsPane = new OutlinePane(1, 2, 7, 1);
+            OutlinePane itemsPane = new OutlinePane(7, 1);
             itemsPane.setGap(1);
             itemsPane.align(OutlinePane.Alignment.CENTER);
 
@@ -157,8 +158,8 @@ public final class ClassSelectGui extends ChestGui {
                             .sorted(Map.Entry.comparingByKey())
                             .forEach(entry -> itemsPane.addItem(new GuiItem(entry.getValue().clone(), event -> event.setCancelled(true))));
 
-            this.addPane(classPane);
-            this.addPane(itemsPane);
+            this.addPane(Slot.fromXY(4, 0), classPane);
+            this.addPane(Slot.fromXY(1, 2), itemsPane);
         }
     }
 

@@ -4,17 +4,13 @@ import dev.zenqrt.bouncybullets.event.events.GunShootEvent;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
-import dev.zenqrt.bouncybullets.utils.GlowUtils;
-import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
-import dev.zenqrt.bouncybullets.utils.NMSConverter;
-import dev.zenqrt.bouncybullets.utils.PlayerUtils;
+import dev.zenqrt.bouncybullets.utils.*;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -37,7 +33,7 @@ public final class SniperActiveAbilityItem extends ActiveAbilityItem implements 
     private static final int DAMAGE_MULTIPLIER = 2;
     private static final int ABILITY_DURATION_TICKS = 200;      // 10 seconds
     private static final String GLOW_PACKET_LISTENER_ID = "sniper_active_ability_glow";
-    private static final Sound ACTIVATE_SOUND = Sound.sound(Key.key("block.portal.travel"), Sound.Source.MASTER, 0.5F, 2);
+    private static final Sound ACTIVATE_SOUND = Sound.sound(Sounds.BLOCK_PORTAL_TRAVEL, Sound.Source.MASTER, 0.5F, 2);
 
     private final Set<UUID> abilityActive = new HashSet<>();
 
@@ -105,7 +101,7 @@ public final class SniperActiveAbilityItem extends ActiveAbilityItem implements 
     }
 
     private static void resetAllGlows(BouncyBulletGame game, Player viewer) {
-        List<Packet<ClientGamePacketListener>> dataPackets = new ArrayList<>();
+        List<Packet<? super ClientGamePacketListener>> dataPackets = new ArrayList<>();
 
         for (BouncyBulletGamePlayer gamePlayer : game.getPlayers().values()) {
             if (gamePlayer.getUuid().equals(viewer.getUniqueId()))
@@ -141,14 +137,15 @@ public final class SniperActiveAbilityItem extends ActiveAbilityItem implements 
 
         @Override
         public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-            if (!(msg instanceof ClientboundSetEntityDataPacket dataPacket) || !this.ids.contains(dataPacket.id())) {
+            if (!(msg instanceof ClientboundSetEntityDataPacket(int id, List<SynchedEntityData.DataValue<?>> packedItems))
+                    || !this.ids.contains(id)) {
                 super.write(ctx, msg, promise);
                 return;
             }
 
             ClientboundSetEntityDataPacket modifiedDataPacket = new ClientboundSetEntityDataPacket(
-                    dataPacket.id(),
-                    GlowUtils.createDataValuesWithGlow(dataPacket.packedItems())
+                    id,
+                    GlowUtils.createDataValuesWithGlow(packedItems)
             );
             super.write(ctx, modifiedDataPacket, promise);
         }

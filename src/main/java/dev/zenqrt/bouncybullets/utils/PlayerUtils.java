@@ -33,7 +33,7 @@ public final class PlayerUtils {
     public static @NotNull AttributeInstance requireNonNullAttribute(Player player, Attribute attribute) {
         return Objects.requireNonNull(
                 player.getAttribute(attribute),
-                attribute::name
+                () -> attribute.key().asString()
         );
     }
 }

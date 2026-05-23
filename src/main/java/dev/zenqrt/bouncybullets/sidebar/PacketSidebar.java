@@ -16,6 +16,7 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class PacketSidebar {
@@ -62,7 +63,13 @@ public class PacketSidebar {
 
             ClientboundSetPlayerTeamPacket addTeamPacket = ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team, true);
             ClientboundSetPlayerTeamPacket addEntryPacket = ClientboundSetPlayerTeamPacket.createPlayerPacket(team, entryId, ClientboundSetPlayerTeamPacket.Action.ADD);
-            ClientboundSetScorePacket scorePacket = new ClientboundSetScorePacket(entryId, this.objective.getName(), i, net.minecraft.network.chat.Component.empty(), BlankFormat.INSTANCE);
+            ClientboundSetScorePacket scorePacket = new ClientboundSetScorePacket(
+                    entryId,
+                    this.objective.getName(),
+                    i,
+                    Optional.of(net.minecraft.network.chat.Component.empty()),
+                    Optional.empty()
+            );
 
             player.connection.send(addTeamPacket);
             player.connection.send(addEntryPacket);

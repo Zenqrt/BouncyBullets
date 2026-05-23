@@ -7,6 +7,7 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.utils.ExplosionUtils;
+import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -65,17 +66,17 @@ public final class GrenadeLauncherGunItem extends GunItem {
 
     @Override
     protected Sound getShootingSound() {
-        return Sound.sound(org.bukkit.Sound.ENTITY_GENERIC_EXPLODE, Sound.Source.PLAYER, 1, 2);
+        return Sound.sound(Sounds.ENTITY_GENERIC_EXPLODE, Sound.Source.PLAYER, 1, 2);
     }
 
     @Override
     protected Sound getReloadSound() {
-        return Sound.sound(org.bukkit.Sound.BLOCK_BARREL_CLOSE, Sound.Source.PLAYER, 1, 0.75F);
+        return Sound.sound(Sounds.BLOCK_BARREL_CLOSE, Sound.Source.PLAYER, 1, 0.75F);
     }
 
     private class TNTBounceTask extends BukkitRunnable {
 
-        private static final Sound BOUNCE_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_SLIME_JUMP.key(), Sound.Source.MASTER, 0.5F, 1);
+        private static final Sound BOUNCE_SOUND = Sound.sound(Sounds.ENTITY_SLIME_JUMP, Sound.Source.MASTER, 0.5F, 1);
 
         private final Player source;
         private final TNTPrimed tnt;
@@ -91,7 +92,6 @@ public final class GrenadeLauncherGunItem extends GunItem {
         }
 
         @Override
-        @SuppressWarnings("UnstableApiUsage")
         public void run() {
             if (this.tnt.isDead()) {
                 this.cancel();
@@ -134,7 +134,7 @@ public final class GrenadeLauncherGunItem extends GunItem {
     }
 
     private static ParticleBuilder createTntTrailFirstBounce() {
-        return Particle.SMOKE_NORMAL.builder()
+        return Particle.SMOKE.builder()
                 .extra(0)
                 .count(1)
                 .force(true);

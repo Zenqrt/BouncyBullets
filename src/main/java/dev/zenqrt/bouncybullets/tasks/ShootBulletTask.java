@@ -2,7 +2,7 @@ package dev.zenqrt.bouncybullets.tasks;
 
 import com.destroystokyo.paper.ParticleBuilder;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
-import net.kyori.adventure.key.Key;
+import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.GameMode;
@@ -22,7 +22,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public final class ShootBulletTask extends BukkitRunnable {
 
-    private static final Sound HIT_SOUND = Sound.sound(Key.key("entity.experience_orb.pickup"), Sound.Source.PLAYER, 1, 2);
+    private static final Sound HIT_SOUND = Sound.sound(Sounds.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.PLAYER, 1, 2);
 
     private final Player shooter;
     private final BulletProperties bulletProperties;
@@ -55,7 +55,6 @@ public final class ShootBulletTask extends BukkitRunnable {
     }
 
     @Override
-    @SuppressWarnings("UnstableApiUsage")
     public void run() {
         if (currentTick++ >= 200) {
             this.cancel();
@@ -103,7 +102,7 @@ public final class ShootBulletTask extends BukkitRunnable {
 
                 Block hitBlock = Objects.requireNonNull(result.getHitBlock());
 
-                Particle.BLOCK_CRACK.builder()
+                Particle.BLOCK_CRUMBLE.builder()
                         .location(hitLocation)
                         .allPlayers()
                         .force(true)
@@ -112,7 +111,7 @@ public final class ShootBulletTask extends BukkitRunnable {
                         .data(hitBlock.getBlockData())
                         .spawn();
 
-                Sound hitSound = Sound.sound(hitBlock.getBlockSoundGroup().getBreakSound().key(), Sound.Source.BLOCK, 1, 1);
+                Sound hitSound = Sound.sound(hitBlock.getBlockSoundGroup().getBreakSound(), Sound.Source.BLOCK, 1, 1);
                 hitLocation.getWorld().playSound(hitSound, hitLocation.getX(), hitLocation.getY(), hitLocation.getZ());
 
                 BlockFace blockFace = result.getHitBlockFace();

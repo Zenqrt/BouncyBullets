@@ -1,10 +1,7 @@
 package dev.zenqrt.bouncybullets.item.items.abilities;
 
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
-import dev.zenqrt.bouncybullets.utils.AdventureUtils;
-import dev.zenqrt.bouncybullets.utils.ExplosionUtils;
-import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
-import dev.zenqrt.bouncybullets.utils.SoundUtils;
+import dev.zenqrt.bouncybullets.utils.*;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -31,7 +28,7 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
     private static final double DAMAGE = 15;
     private static final int CHARGING_TICKS = 40;
     private static final double EXPLOSION_RADIUS = 4;
-    private static final Sound CHARGING_SOUND = Sound.sound(org.bukkit.Sound.BLOCK_BEACON_ACTIVATE, Sound.Source.PLAYER, 1, 1);
+    private static final Sound CHARGING_SOUND = Sound.sound(Sounds.BLOCK_BEACON_ACTIVATE, Sound.Source.PLAYER, 1, 1);
 
     private final Map<UUID, ItemStack[]> inventoryContents = new HashMap<>();
     private final List<UUID> isCharging = new ArrayList<>();
@@ -83,7 +80,7 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
         ItemStack chargingItem = new ItemStack(super.material);
         chargingItem.editMeta(meta -> {
             meta.displayName(AdventureUtils.withoutItalics("Charging...", NamedTextColor.GRAY));
-            meta.addEnchant(Enchantment.DURABILITY, 1, true);
+            meta.addEnchant(Enchantment.UNBREAKING, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         });
 
@@ -93,7 +90,7 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
 
     private class ChargingTask extends BukkitRunnable {
 
-        private static final Sound SHOOT_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_GENERIC_EXPLODE.key(), Sound.Source.PLAYER, 1, 1.5F);
+        private static final Sound SHOOT_SOUND = Sound.sound(Key.key("entity.generic.explode"), Sound.Source.PLAYER, 1, 1.5F);
         private static final double BEAM_RADIUS = 1;
 
         private final Player shooter;
@@ -152,7 +149,6 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
             shooter.setCooldown(material, COOLDOWN);
         }
 
-        @SuppressWarnings("UnstableApiUsage")
         private void shoot() {
             Location location = shooter.getEyeLocation();
 

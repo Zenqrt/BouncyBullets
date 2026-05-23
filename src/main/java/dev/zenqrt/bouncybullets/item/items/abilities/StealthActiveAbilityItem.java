@@ -4,13 +4,12 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.loadout.kit.StealthPlayerClass;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
-import net.kyori.adventure.key.Key;
+import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
@@ -20,8 +19,8 @@ import java.util.List;
 public final class StealthActiveAbilityItem extends ActiveAbilityItem {
 
     private static final int COOLDOWN_TICKS = 900;                  // 45 seconds
-    private static final Sound REFILL_SOUND = Sound.sound(org.bukkit.Sound.BLOCK_BREWING_STAND_BREW, Sound.Source.PLAYER, 1, 1);
-    private static final Sound DRINK_SOUND = Sound.sound(Key.key("entity.generic.drink"), Sound.Source.PLAYER, 1, 1);
+    private static final Sound REFILL_SOUND = Sound.sound(Sounds.BLOCK_BREWING_STAND_BREW, Sound.Source.PLAYER, 1, 1);
+    private static final Sound DRINK_SOUND = Sound.sound(Sounds.ENTITY_GENERIC_DRINK, Sound.Source.PLAYER, 1, 1);
 
     public StealthActiveAbilityItem() {
         super("stealth_active_ability",
@@ -37,7 +36,6 @@ public final class StealthActiveAbilityItem extends ActiveAbilityItem {
                 ), meta -> {
                     PotionMeta potionMeta = (PotionMeta) meta;
                     potionMeta.setBasePotionType(PotionType.INVISIBILITY);
-                    potionMeta.addItemFlags(ItemFlag.HIDE_ITEM_SPECIFICS);
                 });
     }
 

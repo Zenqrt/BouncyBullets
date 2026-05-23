@@ -1,6 +1,7 @@
 package dev.zenqrt.bouncybullets.game.games.states;
 
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent;
+import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.event.EventNode;
 import dev.zenqrt.bouncybullets.event.GameEventNodes;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
@@ -15,6 +16,7 @@ import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
 import dev.zenqrt.bouncybullets.sidebar.sidebars.BouncyBulletsSidebar;
 import dev.zenqrt.bouncybullets.utils.NMSConverter;
+import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import dev.zenqrt.bouncybullets.utils.TaskManager;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -49,8 +51,16 @@ import java.util.stream.Collectors;
 public final class BattleGameState extends GameState {
 
     private static final Sound KILL_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.MASTER, 1, 1);
-    private static final AttributeModifier NO_KNOCKBACK_MODIFIER = new AttributeModifier("bouncy-bullets_no_kb", 100, AttributeModifier.Operation.ADD_NUMBER);
-    private static final AttributeModifier GAME_SPEED_MODIFIER = new AttributeModifier("bouncy-bullets_game_speed", 0.04, AttributeModifier.Operation.ADD_NUMBER);
+    private static final AttributeModifier NO_KNOCKBACK_MODIFIER = new AttributeModifier(
+            BouncyBulletsPlugin.createKey("bouncy-bullets_no_kb"),
+            100,
+            AttributeModifier.Operation.ADD_NUMBER
+    );
+    private static final AttributeModifier GAME_SPEED_MODIFIER = new AttributeModifier(
+            BouncyBulletsPlugin.createKey("bouncy-bullets_game_speed"),
+            0.04,
+            AttributeModifier.Operation.ADD_NUMBER
+    );
 
     private final EventNode<PlayerEvent> playerEventNode;
     private final EventNode<EntityEvent> playerEntityEventNode;
@@ -92,7 +102,7 @@ public final class BattleGameState extends GameState {
                 .limit(3)
                 .toList();
 
-        this.players.forEach((uuid, gamePlayer) -> {
+        this.players.forEach((_, gamePlayer) -> {
             Player player = gamePlayer.getPlayer();
 
             setupPlayerAttributes(player);
@@ -128,19 +138,13 @@ public final class BattleGameState extends GameState {
 
         this.taskManager.removeAllTasks();
 
-        this.players.forEach((uuid, gamePlayer) -> {
+        this.players.forEach((_, gamePlayer) -> {
             gamePlayer.getLoadout().playerClass().onStopUse(gamePlayer);
 
             Player player = gamePlayer.getPlayer();
 
-            AttributeInstance knockbackResistance = Objects.requireNonNull(
-                    player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE),
-                    "knockbackResistance"
-            );
-            AttributeInstance movementSpeed = Objects.requireNonNull(
-                    player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED),
-                    "movementSpeed"
-            );
+            AttributeInstance knockbackResistance = PlayerUtils.requireNonNullAttribute(player, Attribute.KNOCKBACK_RESISTANCE);
+            AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
 
             knockbackResistance.removeModifier(NO_KNOCKBACK_MODIFIER);
             movementSpeed.removeModifier(GAME_SPEED_MODIFIER);
@@ -156,7 +160,6 @@ public final class BattleGameState extends GameState {
         });
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private void registerEvents() {
         Set<EventPlayerClass> playerClasses = this.players.values().stream()
                 .map(gamePlayer -> gamePlayer.getLoadout().playerClass())
@@ -168,7 +171,7 @@ public final class BattleGameState extends GameState {
             playerClass.registerEvents(this.game);
         }
 
-        this.players.forEach((uuid, gamePlayer) -> {
+        this.players.forEach((_, gamePlayer) -> {
             PlayerClass playerClass = gamePlayer.getLoadout().playerClass();
             playerClass.onStartUse(gamePlayer);
         });
@@ -275,14 +278,8 @@ public final class BattleGameState extends GameState {
     }
 
     private static void setupPlayerAttributes(Player player) {
-        AttributeInstance knockbackResistance = Objects.requireNonNull(
-                player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE),
-                "knockbackResistance"
-        );
-        AttributeInstance movementSpeed = Objects.requireNonNull(
-                player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED),
-                "movementSpeed"
-        );
+        AttributeInstance knockbackResistance = PlayerUtils.requireNonNullAttribute(player, Attribute.KNOCKBACK_RESISTANCE);
+        AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
 
         knockbackResistance.addTransientModifier(NO_KNOCKBACK_MODIFIER);
         movementSpeed.addTransientModifier(GAME_SPEED_MODIFIER);

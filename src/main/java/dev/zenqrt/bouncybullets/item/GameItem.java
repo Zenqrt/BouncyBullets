@@ -33,7 +33,7 @@ public abstract class GameItem {
         this.material = material;
         this.displayName = displayName;
         this.description = description;
-        this.itemMetaHandler = meta -> {};
+        this.itemMetaHandler = _ -> {};
     }
 
     public GameItem(String key, Material material, Component displayName, List<Component> description, Consumer<ItemMeta> itemMetaHandler) {

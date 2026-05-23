@@ -2,7 +2,9 @@ package dev.zenqrt.bouncybullets.item.items.abilities;
 
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
+import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import dev.zenqrt.bouncybullets.utils.SoundUtils;
+import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -14,13 +16,12 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
-import java.util.Objects;
 
 public final class HealerActiveAbilityItem extends ActiveAbilityItem {
 
     private static final long COOLDOWN = 1200;
-    private static final Sound HEAL_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, Sound.Source.PLAYER, 1, 1.5F);
-    private static final Sound DISAPPROVAL_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_VILLAGER_NO, Sound.Source.PLAYER, 1, 0.75F);
+    private static final Sound HEAL_SOUND = Sound.sound(Sounds.ENTITY_PLAYER_LEVELUP, Sound.Source.PLAYER, 1, 1.5F);
+    private static final Sound DISAPPROVAL_SOUND = Sound.sound(Sounds.ENTITY_VILLAGER_NO, Sound.Source.PLAYER, 1, 0.75F);
 
     public HealerActiveAbilityItem() {
         super("healer_active_ability",
@@ -36,7 +37,7 @@ public final class HealerActiveAbilityItem extends ActiveAbilityItem {
 
     @Override
     public void onUse(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
-        double maxHealth = Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
+        double maxHealth = PlayerUtils.requireNonNullAttribute(player, Attribute.MAX_HEALTH).getValue();
 
         if (player.getHealth() == maxHealth) {
             player.sendMessage(Component.text("Why am I trying to use this right now when I am clearly at full health? Who knows... maybe I am low on brain cells right now.", NamedTextColor.DARK_GRAY));

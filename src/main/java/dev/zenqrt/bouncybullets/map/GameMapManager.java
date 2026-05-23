@@ -85,7 +85,7 @@ public final class GameMapManager {
     }
 
     public void deleteAllGameWorlds() {
-        this.gameWorlds.forEach((gameId, world) -> unloadAndDeleteWorld(world));
+        this.gameWorlds.forEach((_, world) -> unloadAndDeleteWorld(world));
         this.gameWorlds.clear();
     }
 
