@@ -112,10 +112,12 @@ public final class GrenadeLauncherGunItem extends GunItem {
                 double normalDamage = GrenadeLauncherGunItem.super.bulletProperties.maxDamage();
 
                 ExplosionUtils.createExplosion(
-                        tnt.getLocation(),
+                        this.tnt.getLocation(),
                         EXPLOSION_RADIUS,
                         normalDamage * damageMultiplier,
-                        DamageSource.builder(DamageType.MOB_PROJECTILE).withCausingEntity(source).build()
+                        DamageSource.builder(DamageType.MOB_PROJECTILE)
+                                .withDirectEntity(this.tnt)
+                                .withCausingEntity(this.source).build()
                 );
 
                 this.tnt.remove();
@@ -123,13 +125,13 @@ public final class GrenadeLauncherGunItem extends GunItem {
                 return;
             }
 
-            if (tnt.isOnGround() && tnt.getVelocity().getY() <= 0) {
-                currentBounces++;
-                tnt.setVelocity(previousVelocity.multiply(new Vector(0.5, -0.85, 0.5)));
-                tnt.getWorld().playSound(BOUNCE_SOUND, tnt);
+            if (this.tnt.isOnGround() && this.tnt.getVelocity().getY() <= 0) {
+                this.currentBounces++;
+                this.tnt.setVelocity(this.previousVelocity.multiply(new Vector(0.5, -0.85, 0.5)));
+                this.tnt.getWorld().playSound(BOUNCE_SOUND, tnt);
             }
 
-            previousVelocity = tnt.getVelocity();
+            this.previousVelocity = this.tnt.getVelocity();
         }
     }
 

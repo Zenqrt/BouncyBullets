@@ -106,25 +106,25 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
 
         @Override
         public void run() {
-            if (shooter.getGameMode() == GameMode.SPECTATOR || shooter.getInventory().getHeldItemSlot() != itemSlot) {
+            if (this.shooter.getGameMode() == GameMode.SPECTATOR || this.shooter.getInventory().getHeldItemSlot() != itemSlot) {
                 endAbility();
 
                 this.cancel();
                 return;
             }
 
-            if (currentTick >= chargingTicks) {
+            if (this.currentTick >= this.chargingTicks) {
                 shoot();
                 endAbility();
                 this.cancel();
                 return;
             }
 
-            float tickProgress = (float) currentTick / chargingTicks;
+            float tickProgress = (float) this.currentTick / this.chargingTicks;
             int chargeSlot = (int) (4 * tickProgress);
 
-            if (Objects.requireNonNull(shooter.getInventory().getItem(chargeSlot)).getType() != Material.LIME_STAINED_GLASS_PANE)
-                shooter.playSound(
+            if (Objects.requireNonNull(this.shooter.getInventory().getItem(chargeSlot)).getType() != Material.LIME_STAINED_GLASS_PANE)
+                this.shooter.playSound(
                         Sound.sound(
                                 Key.key("block.note_block.hat"),
                                 Sound.Source.PLAYER,
@@ -135,24 +135,28 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
 
             ItemStack chargeItem = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
 
-            shooter.getInventory().setItem(chargeSlot, chargeItem);
-            shooter.getInventory().setItem(8 - chargeSlot, chargeItem);
+            this.shooter.getInventory().setItem(chargeSlot, chargeItem);
+            this.shooter.getInventory().setItem(8 - chargeSlot, chargeItem);
 
-            currentTick++;
+            this.currentTick++;
         }
 
         private void endAbility() {
-            shooter.getInventory().setStorageContents(inventoryContents.get(shooter.getUniqueId()));
-            isCharging.remove(shooter.getUniqueId());
-            inventoryContents.remove(shooter.getUniqueId());
+            UUID uuid = this.shooter.getUniqueId();
 
-            shooter.setCooldown(material, COOLDOWN);
+            this.shooter.getInventory()
+                    .setStorageContents(DemomanActiveAbilityItem.this.inventoryContents.get(uuid));
+
+            DemomanActiveAbilityItem.this.isCharging.remove(uuid);
+            DemomanActiveAbilityItem.this.inventoryContents.remove(uuid);
+
+            this.shooter.setCooldown(DemomanActiveAbilityItem.this.material, COOLDOWN);
         }
 
         private void shoot() {
-            Location location = shooter.getEyeLocation();
+            Location location = this.shooter.getEyeLocation();
 
-            SoundUtils.playSoundFromPlayer(shooter, SHOOT_SOUND);
+            SoundUtils.playSoundFromPlayer(this.shooter, SHOOT_SOUND);
 
             RayTraceResult result = location.getWorld().rayTrace(
                     location,
@@ -173,7 +177,8 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
                     EXPLOSION_RADIUS,
                     DAMAGE,
                     DamageSource.builder(DamageType.MOB_PROJECTILE)
-                            .withCausingEntity(shooter)
+                            .withDirectEntity(this.shooter)
+                            .withCausingEntity(this.shooter)
                             .build()
             );
         }

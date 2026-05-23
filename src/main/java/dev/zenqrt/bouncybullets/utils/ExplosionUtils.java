@@ -10,7 +10,7 @@ import org.bukkit.util.Vector;
 public final class ExplosionUtils {
 
     public static void createExplosion(Location location, double radius, double damage, DamageSource damageSource) {
-        Particle.EXPLOSION.builder()
+        Particle.EXPLOSION_EMITTER.builder()
                 .force(true)
                 .allPlayers()
                 .count(1)
