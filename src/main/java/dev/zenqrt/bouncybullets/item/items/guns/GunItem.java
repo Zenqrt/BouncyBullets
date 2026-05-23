@@ -8,10 +8,12 @@ import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.player.BouncyBulletsHUD;
-import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import dev.zenqrt.bouncybullets.utils.Sounds;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.ItemAttributeModifiers;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -56,17 +58,34 @@ public abstract class GunItem extends GameItem {
     protected final GunProperties gunProperties;
     protected final BulletProperties bulletProperties;
 
-    public GunItem(String key, Material material, Component displayName, GunProperties gunProperties, BulletProperties bulletProperties) {
-        super(key, material, displayName, buildGunPropertyDescription(bulletProperties), itemMeta ->
-                itemMeta.addAttributeModifier(
-                        Attribute.ATTACK_SPEED,
-                        new AttributeModifier(
-                                BouncyBulletsPlugin.createKey("gun_pullout_speed"),
-                                -pullOutTicksToAttackSpeed(gunProperties.pullOutTicks()),
-                                AttributeModifier.Operation.ADD_NUMBER,
-                                EquipmentSlotGroup.HAND
+    @SuppressWarnings("UnstableApiUsage")
+    public GunItem(String key, Material material, Component displayName, GunProperties gunProperties, BulletProperties bulletProperties, DataComponentsBuilder dataComponentsBuilder) {
+        super(
+                key,
+                material,
+                displayName,
+                buildGunPropertyDescription(bulletProperties),
+                dataComponentsBuilder
+                        .addData(
+                                DataComponentTypes.ATTRIBUTE_MODIFIERS,
+                                ItemAttributeModifiers.itemAttributes()
+                                        .addModifier(
+                                                Attribute.ATTACK_SPEED,
+                                                new AttributeModifier(
+                                                        BouncyBulletsPlugin.createKey("gun_pullout_speed"),
+                                                        -pullOutTicksToAttackSpeed(gunProperties.pullOutTicks()),
+                                                        AttributeModifier.Operation.ADD_NUMBER,
+                                                        EquipmentSlotGroup.HAND
+                                                )
+                                        )
+                                        .build()
                         )
-                )
+                        .addData(
+                                DataComponentTypes.TOOLTIP_DISPLAY,
+                                TooltipDisplay.tooltipDisplay()
+                                        .addHiddenComponents(DataComponentTypes.ATTRIBUTE_MODIFIERS)
+                                        .build()
+                        )
         );
 
         this.gunProperties = gunProperties;
@@ -77,19 +96,24 @@ public abstract class GunItem extends GameItem {
         return 4 - 20D / pullOutTicks;
     }
 
-    public GunItem(String key, Material material, String displayName, GunProperties gunProperties, BulletProperties bulletProperties) {
+    public GunItem(String key, Material material, String displayName, GunProperties gunProperties, BulletProperties bulletProperties, DataComponentsBuilder dataComponentsBuilder) {
         this(
                 key,
                 material,
-                AdventureUtils.withoutItalics(displayName, NamedTextColor.YELLOW)
+                Component.text(displayName, NamedTextColor.YELLOW)
                         .append(
                                 Component.text(" (", NamedTextColor.GRAY)
                                         .append(Component.keybind("key.swapOffhand"))
                                         .append(Component.text(" to reload)"))
                         ),
                 gunProperties,
-                bulletProperties
+                bulletProperties,
+                dataComponentsBuilder
         );
+    }
+
+    public GunItem(String key, Material material, String displayName, GunProperties gunProperties, BulletProperties bulletProperties) {
+        this(key, material, displayName, gunProperties, bulletProperties, dataComponentsBuilder());
     }
 
     protected abstract void useGun(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack);

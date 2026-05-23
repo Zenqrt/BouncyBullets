@@ -5,13 +5,15 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.loadout.kit.StealthPlayerClass;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import dev.zenqrt.bouncybullets.utils.Sounds;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.PotionContents;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
 
 import java.util.List;
@@ -22,8 +24,10 @@ public final class StealthActiveAbilityItem extends ActiveAbilityItem {
     private static final Sound REFILL_SOUND = Sound.sound(Sounds.BLOCK_BREWING_STAND_BREW, Sound.Source.PLAYER, 1, 1);
     private static final Sound DRINK_SOUND = Sound.sound(Sounds.ENTITY_GENERIC_DRINK, Sound.Source.PLAYER, 1, 1);
 
+    @SuppressWarnings("UnstableApiUsage")
     public StealthActiveAbilityItem() {
-        super("stealth_active_ability",
+        super(
+                "stealth_active_ability",
                 Material.POTION,
                 "Invisibility Cloak",
                 MiniMessageUtils.wordWrapLore(
@@ -33,10 +37,21 @@ public final class StealthActiveAbilityItem extends ActiveAbilityItem {
                                 "<dark_gray>Cooldown: <green>" + (COOLDOWN_TICKS / 20) + "s"
                         ),
                         30
-                ), meta -> {
-                    PotionMeta potionMeta = (PotionMeta) meta;
-                    potionMeta.setBasePotionType(PotionType.INVISIBILITY);
-                });
+                ),
+                dataComponentsBuilder()
+                        .addData(
+                                DataComponentTypes.POTION_CONTENTS,
+                                PotionContents.potionContents()
+                                        .potion(PotionType.INVISIBILITY)
+                                        .build()
+                        )
+                        .addData(
+                                DataComponentTypes.TOOLTIP_DISPLAY,
+                                TooltipDisplay.tooltipDisplay()
+                                        .addHiddenComponents(DataComponentTypes.POTION_CONTENTS)
+                                        .build()
+                        )
+        );
     }
 
     @Override

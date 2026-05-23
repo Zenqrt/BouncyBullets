@@ -12,6 +12,8 @@ import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.GuiUtils;
 import dev.zenqrt.bouncybullets.utils.ItemUtils;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -41,12 +43,21 @@ public final class ClassSelectGui extends ChestGui {
         displayClasses();
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private void displayClasses() {
         OutlinePane pane = new OutlinePane(7, 1);
 
         for (PlayerClassType playerClass : PlayerClassType.values()) {
             ItemStack icon = ItemUtils.clone(playerClass.getIcon());
 
+            icon.setData(
+                    DataComponentTypes.TOOLTIP_DISPLAY,
+                    TooltipDisplay.tooltipDisplay()
+                            .addHiddenComponents(
+                                    DataComponentTypes.POTION_CONTENTS
+                            )
+                            .build()
+            );
             icon.editMeta(meta -> {
                 meta.displayName(AdventureUtils.withoutItalics(playerClass.getPlayerClass().getName(), NamedTextColor.GREEN));
 
@@ -138,10 +149,19 @@ public final class ClassSelectGui extends ChestGui {
             this.addPane(Slot.fromXY(0, this.getRows() - 1), pane);
         }
 
+        @SuppressWarnings("UnstableApiUsage")
         private void displayInfo() {
             StaticPane classPane = new StaticPane(1, 1);
 
             ItemStack icon = ItemUtils.clone(classType.getIcon());
+            icon.setData(
+                    DataComponentTypes.TOOLTIP_DISPLAY,
+                    TooltipDisplay.tooltipDisplay()
+                            .addHiddenComponents(
+                                    DataComponentTypes.POTION_CONTENTS
+                            )
+                            .build()
+            );
             icon.editMeta(meta -> {
                 meta.displayName(AdventureUtils.withoutItalics(classType.getPlayerClass().getName(), NamedTextColor.GREEN));
                 meta.lore(buildClassInformationLore(classType));
