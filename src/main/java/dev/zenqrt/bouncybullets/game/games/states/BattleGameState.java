@@ -32,6 +32,7 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -62,6 +63,7 @@ public final class BattleGameState extends GameState {
             AttributeModifier.Operation.ADD_NUMBER
     );
 
+    private final EventNode<Event> stateEventNode;
     private final EventNode<PlayerEvent> playerEventNode;
     private final EventNode<EntityEvent> playerEntityEventNode;
 
@@ -80,6 +82,10 @@ public final class BattleGameState extends GameState {
 
         this.playerEventNode = GameEventNodes.filteredPlayerEvents(game);
         this.playerEntityEventNode = GameEventNodes.filteredEntityEvents(game);
+
+        this.stateEventNode = EventNode.create();
+        this.stateEventNode.addChild(this.playerEventNode);
+        this.stateEventNode.addChild(this.playerEntityEventNode);
     }
 
     @Override
@@ -133,9 +139,7 @@ public final class BattleGameState extends GameState {
     protected void onStateEnd() {
         super.onStateEnd();
 
-        this.playerEventNode.unregisterAllListeners();
-        this.playerEntityEventNode.unregisterAllListeners();
-
+        this.stateEventNode.unregisterAllListeners();
         this.taskManager.removeAllTasks();
 
         this.players.forEach((_, gamePlayer) -> {
@@ -168,7 +172,9 @@ public final class BattleGameState extends GameState {
                 .collect(Collectors.toSet());
 
         for (EventPlayerClass playerClass : playerClasses) {
-            playerClass.registerEvents(this.game);
+            EventNode<Event> classEventNode = playerClass.registerEvents(this.game);
+
+            this.stateEventNode.addChild(classEventNode);
         }
 
         this.players.forEach((_, gamePlayer) -> {

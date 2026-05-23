@@ -1,5 +1,6 @@
 package dev.zenqrt.bouncybullets.loadout.kit;
 
+import dev.zenqrt.bouncybullets.event.EventNode;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
@@ -17,6 +18,7 @@ import org.bukkit.Material;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -32,7 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public final class StealthPlayerClass extends EventPlayerClass {
+public final class StealthPlayerClass implements EventPlayerClass {
 
     private static final int INVIS_CHARGE_TICKS = 100;      // 5 seconds
     private static final int COMBAT_TIMER_SECONDS = 8;
@@ -87,9 +89,10 @@ public final class StealthPlayerClass extends EventPlayerClass {
     }
 
     @Override
-    @SuppressWarnings("UnstableApiUsage")
-    public void registerEvents(BouncyBulletGame game) {
-        this.eventNode.registerListener(PaperEventListener.builder(PlayerToggleSneakEvent.class)
+    public EventNode<Event> registerEvents(BouncyBulletGame game) {
+        EventNode<Event> eventNode = EventNode.create();
+
+        eventNode.registerListener(PaperEventListener.builder(PlayerToggleSneakEvent.class)
                 .filter(event -> isPlayerClass(game, event.getPlayer(), this))
                 .handler(event -> {
                     Player player = event.getPlayer();
@@ -110,7 +113,7 @@ public final class StealthPlayerClass extends EventPlayerClass {
                 })
                 .build()
         );
-        this.eventNode.registerListener(PaperEventListener.builder(PlayerToggleSprintEvent.class)
+        eventNode.registerListener(PaperEventListener.builder(PlayerToggleSprintEvent.class)
                 .filter(event -> isPlayerClass(game, event.getPlayer(), this))
                 .filter(PlayerToggleSprintEvent::isSprinting)
                 .handler(event -> {
@@ -124,7 +127,7 @@ public final class StealthPlayerClass extends EventPlayerClass {
                 })
                 .build()
         );
-        this.eventNode.registerListener(PaperEventListener.builder(EntityDamageEvent.class, EventPriority.MONITOR)
+        eventNode.registerListener(PaperEventListener.builder(EntityDamageEvent.class, EventPriority.MONITOR)
                 .filter(event -> !event.isCancelled())
                 .filter(event -> event.getEntity() instanceof Player player && isPlayerClass(game, player, this))
                 .handler(event -> {
@@ -141,7 +144,7 @@ public final class StealthPlayerClass extends EventPlayerClass {
                 })
                 .build()
         );
-        this.eventNode.registerListener(PaperEventListener.builder(EntityDamageByEntityEvent.class, EventPriority.MONITOR)
+        eventNode.registerListener(PaperEventListener.builder(EntityDamageByEntityEvent.class, EventPriority.MONITOR)
                 .filter(event -> !event.isCancelled())
                 .filter(event -> event.getDamageSource().getDamageType() == DamageType.MOB_PROJECTILE)
                 .filter(event -> event.getDamager() instanceof Player player && isPlayerClass(game, player, this))
@@ -159,11 +162,13 @@ public final class StealthPlayerClass extends EventPlayerClass {
                 })
                 .build()
         );
-        this.eventNode.registerListener(PaperEventListener.builder(PlayerDeathEvent.class, EventPriority.MONITOR)
+        eventNode.registerListener(PaperEventListener.builder(PlayerDeathEvent.class, EventPriority.MONITOR)
                 .filter(event -> isPlayerClass(game, event.getPlayer(), this))
                 .handler(event -> tryRemoveCombatTimer(event.getPlayer().getUniqueId(), true))
                 .build()
         );
+
+        return eventNode;
     }
 
     private void applyCombatTimer(UUID uuid, BouncyBulletGame game) {

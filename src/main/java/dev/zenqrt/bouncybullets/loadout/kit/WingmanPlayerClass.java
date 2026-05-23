@@ -1,5 +1,6 @@
 package dev.zenqrt.bouncybullets.loadout.kit;
 
+import dev.zenqrt.bouncybullets.event.EventNode;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.event.events.GunShootEvent;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
@@ -12,6 +13,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -23,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public final class WingmanPlayerClass extends EventPlayerClass {
+public final class WingmanPlayerClass implements EventPlayerClass {
 
     private static final GunItem PRIMARY_GUN = GameItems.TWIN_PISTOL;
     private static final ActiveAbilityItem ACTIVE_ABILITY = GameItems.WINGMAN_ACTIVE_ABILITY;
@@ -34,8 +36,10 @@ public final class WingmanPlayerClass extends EventPlayerClass {
     private final Map<UUID, BukkitTask> doubleJumpTasks = new HashMap<>();
 
     @Override
-    public void registerEvents(BouncyBulletGame game) {
-        this.eventNode.registerListener(PaperEventListener.builder(PlayerToggleFlightEvent.class)
+    public EventNode<Event> registerEvents(BouncyBulletGame game) {
+        EventNode<Event> eventNode = EventNode.create();
+
+        eventNode.registerListener(PaperEventListener.builder(PlayerToggleFlightEvent.class)
                 .filter(event -> isPlayerClass(game, event.getPlayer(), this))
                 .filter(PlayerToggleFlightEvent::isFlying)
                 .handler(event -> {
@@ -67,7 +71,7 @@ public final class WingmanPlayerClass extends EventPlayerClass {
                 })
                 .build()
         );
-        this.eventNode.registerListener(PaperEventListener.builder(GunShootEvent.class)
+        eventNode.registerListener(PaperEventListener.builder(GunShootEvent.class)
                 .filter(event -> isPlayerClass(game, event.getShooter(), this))
                 .filter(event -> event.getShooter().isGliding())
                 .handler(event -> {
@@ -79,6 +83,8 @@ public final class WingmanPlayerClass extends EventPlayerClass {
                     event.setBulletProperties(modified);
                 }).build()
         );
+
+        return eventNode;
     }
 
     @Override
