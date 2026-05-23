@@ -20,7 +20,6 @@ import java.util.List;
 public final class StealthActiveAbilityItem extends ActiveAbilityItem {
 
     private static final int COOLDOWN_TICKS = 900;                  // 45 seconds
-    private static final int INVISIBILITY_DURATION_TICKS = 100;     // 5 seconds
     private static final Sound REFILL_SOUND = Sound.sound(org.bukkit.Sound.BLOCK_BREWING_STAND_BREW, Sound.Source.PLAYER, 1, 1);
     private static final Sound DRINK_SOUND = Sound.sound(Key.key("entity.generic.drink"), Sound.Source.PLAYER, 1, 1);
 
@@ -30,8 +29,7 @@ public final class StealthActiveAbilityItem extends ActiveAbilityItem {
                 "Invisibility Cloak",
                 MiniMessageUtils.wordWrapLore(
                         List.of(
-                                "<gray>Upon right click, become invisible for <green>" + (INVISIBILITY_DURATION_TICKS / 20) + "s</green> seconds.",
-
+                                "<gray>Instantly turn invisible without the stealth bar.",
                                 "",
                                 "<dark_gray>Cooldown: <green>" + (COOLDOWN_TICKS / 20) + "s"
                         ),
@@ -52,12 +50,6 @@ public final class StealthActiveAbilityItem extends ActiveAbilityItem {
 
         gamePlayer.hide();
         player.playSound(DRINK_SOUND);
-
-        Bukkit.getScheduler().runTaskLater(
-                game.getPlugin(),
-                gamePlayer::reveal,
-                INVISIBILITY_DURATION_TICKS
-        );
 
         ItemStack usedItem = new ItemStack(Material.GLASS_BOTTLE);
         usedItem.setItemMeta(itemStack.getItemMeta());
