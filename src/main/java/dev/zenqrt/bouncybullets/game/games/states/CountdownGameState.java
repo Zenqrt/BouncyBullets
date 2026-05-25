@@ -49,6 +49,7 @@ public final class CountdownGameState extends GameState {
     @Override
     protected void onStateEnd() {
         this.countdownTask.cancel();
+        this.playerEventNode.unregisterAllListeners();
     }
 
     private class CountdownTask extends BukkitRunnable {

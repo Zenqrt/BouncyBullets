@@ -38,7 +38,6 @@ public final class PregameGameState extends GameStateSequence {
     }
 
     private void registerEvents() {
-
         this.playerEventNode.registerListener(PaperEventListener.builder(PlayerDropItemEvent.class)
                 .handler(event -> event.setCancelled(true))
                 .build());

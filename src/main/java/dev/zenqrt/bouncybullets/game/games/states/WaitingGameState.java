@@ -30,16 +30,20 @@ public final class WaitingGameState extends GameState {
     private void registerEvents() {
         this.playerEventNode.registerListener(PaperEventListener.builder(PlayerJoinGameEvent.class)
                 .filter(event -> event.getGame().getId() == pregameState.game.getId())
-                .handler(event -> {
+                .handler(_ -> {
                     if (this.players.size() >= minPlayerCount) {
                         pregameState.switchNextState();
                     }
                 }).build());
-        System.out.println("Registered listeners");
     }
 
     @Override
     protected void onStateStart() {
         registerEvents();
+    }
+
+    @Override
+    protected void onStateEnd() {
+        this.playerEventNode.unregisterAllListeners();
     }
 }

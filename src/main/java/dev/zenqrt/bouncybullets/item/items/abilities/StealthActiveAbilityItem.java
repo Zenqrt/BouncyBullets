@@ -2,6 +2,7 @@ package dev.zenqrt.bouncybullets.item.items.abilities;
 
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
+import dev.zenqrt.bouncybullets.game.games.states.BattleGameState;
 import dev.zenqrt.bouncybullets.loadout.kit.StealthPlayerClass;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import dev.zenqrt.bouncybullets.utils.Sounds;
@@ -55,6 +56,7 @@ public final class StealthActiveAbilityItem extends ActiveAbilityItem {
     }
 
     @Override
+    @SuppressWarnings("UnstableApiUsage")
     public void onUse(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
         BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
 
@@ -63,19 +65,16 @@ public final class StealthActiveAbilityItem extends ActiveAbilityItem {
 
         gamePlayer.hide();
         player.playSound(DRINK_SOUND);
-
-        ItemStack usedItem = new ItemStack(Material.GLASS_BOTTLE);
-        usedItem.setItemMeta(itemStack.getItemMeta());
-
-        player.getInventory().setItemInMainHand(usedItem);
-        player.setCooldown(Material.GLASS_BOTTLE, COOLDOWN_TICKS);
-
-        int slotInteracted = event.getPlayer().getInventory().getHeldItemSlot();
+        itemStack.setData(DataComponentTypes.ITEM_MODEL, Material.GLASS_BOTTLE.key());
+        player.setCooldown(Material.POTION, COOLDOWN_TICKS);
 
         Bukkit.getScheduler().runTaskLater(
                 game.getPlugin(),
                 () -> {
-                    player.getInventory().setItem(slotInteracted, itemStack.clone());
+                    if (!(game.getGameState() instanceof BattleGameState))
+                        return;
+
+                    itemStack.setData(DataComponentTypes.ITEM_MODEL, super.material.key());
                     player.playSound(REFILL_SOUND, Sound.Emitter.self());
                 },
                 COOLDOWN_TICKS
