@@ -37,6 +37,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.PlayerInventory;
@@ -112,8 +113,10 @@ public final class BattleGameState extends GameState {
         this.players.forEach((_, gamePlayer) -> {
             Player player = gamePlayer.getPlayer();
 
+            player.getInventory().clear();
+
             setupPlayerAttributes(player);
-            setupPlayerInventory(player, gamePlayer.getLoadout());
+            setupPlayerInventory(player.getInventory(), gamePlayer.getLoadout());
 
             team.addPlayer(player);
 
@@ -209,6 +212,7 @@ public final class BattleGameState extends GameState {
                     Player player = event.getPlayer();
 
                     player.setGameMode(GameMode.SPECTATOR);
+//                    player.getInventory().clear();
                     player.showTitle(Title.title(Component.text("YOU DIED!", NamedTextColor.RED).decorate(TextDecoration.BOLD), Component.empty(),
                             Title.Times.times(Duration.ZERO, Duration.ofSeconds(5), Duration.ZERO)));
                     player.clearActivePotionEffects();
@@ -250,6 +254,10 @@ public final class BattleGameState extends GameState {
                 .build());
         this.stateEventNode.registerListener(PaperEventListener.builder(InventoryClickEvent.class)
                 .filter(event -> this.players.containsKey(event.getWhoClicked().getUniqueId()))
+                .handler(event -> event.setCancelled(true))
+                .build());
+        this.stateEventNode.registerListener(PaperEventListener.builder(PlayerDropItemEvent.class)
+                .filter(event -> this.game.hasPlayer(event.getPlayer().getUniqueId()))
                 .handler(event -> event.setCancelled(true))
                 .build());
     }
@@ -297,10 +305,7 @@ public final class BattleGameState extends GameState {
         movementSpeed.addTransientModifier(GAME_SPEED_MODIFIER);
     }
 
-    private static void setupPlayerInventory(Player player, Loadout loadout) {
-        PlayerInventory inventory = player.getInventory();
-        inventory.clear();
-
+    private static void setupPlayerInventory(PlayerInventory inventory, Loadout loadout) {
         loadout.giveItems(inventory);
     }
 
@@ -351,7 +356,7 @@ public final class BattleGameState extends GameState {
             if (--this.timeLeft == 0) {
                 this.cancel();
 
-                setupPlayerInventory(player, this.gamePlayer.getLoadout());
+//                setupPlayerInventory(player.getInventory(), this.gamePlayer.getLoadout());
 
                 player.setGameMode(GameMode.ADVENTURE);
                 player.teleport(chooseBestSpawnLocation());

@@ -18,6 +18,12 @@ public record Loadout(PlayerClass playerClass) {
         ItemStack leggings = setupArmorPiece(this.playerClass.getArmorEquipment().get(EquipmentSlot.LEGS));
         ItemStack boots = setupArmorPiece(this.playerClass.getArmorEquipment().get(EquipmentSlot.FEET));
 
+//        ItemStack[] armorContents = {
+//                helmet,
+//                chestplate,
+//                leggings,
+//                boots
+//        };
         inventory.setHelmet(helmet);
         inventory.setChestplate(chestplate);
         inventory.setLeggings(leggings);
