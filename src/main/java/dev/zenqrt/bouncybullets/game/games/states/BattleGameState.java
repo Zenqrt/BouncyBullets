@@ -5,6 +5,7 @@ import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.event.EventNode;
 import dev.zenqrt.bouncybullets.event.GameEventNodes;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
+import dev.zenqrt.bouncybullets.event.events.PlayerQuitGameEvent;
 import dev.zenqrt.bouncybullets.game.base.GameState;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
@@ -194,6 +195,10 @@ public final class BattleGameState extends GameState {
             playerClass.onStartUse(gamePlayer);
         });
 
+        this.playerEventNode.registerListener(PaperEventListener.builder(PlayerQuitGameEvent.class)
+                .handler(event -> tryRemoveSidebar(event.getPlayer()))
+                .build()
+        );
         this.playerEventNode.registerListener(PaperEventListener.builder(PlayerTeleportEvent.class)
                 .filter(event -> event.getCause() == PlayerTeleportEvent.TeleportCause.SPECTATE)
                 .handler(event ->  {
@@ -264,6 +269,15 @@ public final class BattleGameState extends GameState {
                 .filter(event -> this.game.hasPlayer(event.getPlayer().getUniqueId()))
                 .handler(event -> event.setCancelled(true))
                 .build());
+    }
+
+    private void tryRemoveSidebar(Player player) {
+        BouncyBulletsSidebar sidebar = this.sidebarMap.get(player.getUniqueId());
+
+        if (sidebar == null)
+            return;
+
+        sidebar.removeViewer(NMSConverter.serverPlayer(player));
     }
 
     private void updateSidebar(UUID uuid, Consumer<BouncyBulletsSidebar> updateHandler) {
