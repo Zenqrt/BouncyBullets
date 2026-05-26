@@ -29,7 +29,7 @@ public abstract class BulletGunItem extends GunItem {
                 player.getEyeLocation(),
                 player.getEyeLocation().getDirection().normalize(),
                 bulletProperties,
-                GunItem.isAiming(player) ? this.gunProperties.recoilRangeFocused() : this.gunProperties.recoilRange(),
+                GunItem.isAiming(player) ? this.gunProperties.spreadRangeFocused() : this.gunProperties.spreadRange(),
                 getBulletParticleBuilder()
         ).runTaskTimer(game.getPlugin(), 0, 1);
     }
