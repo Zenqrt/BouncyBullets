@@ -4,7 +4,7 @@ import com.destroystokyo.paper.ParticleBuilder;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
-import net.kyori.adventure.key.Key;
+import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -27,14 +27,14 @@ public final class TwinPistolGunItem extends BulletGunItem {
 
     @Override
     protected Sound getShootingSound() {
-        return Sound.sound(Key.key("entity.iron_golem.hurt"), Sound.Source.PLAYER, 1, 2);
+        return Sound.sound(Sounds.ENTITY_IRON_GOLEM_HURT, Sound.Source.PLAYER, 1, 2);
     }
 
     @Override
     public void onHeld(BouncyBulletGame game, Player player, ItemStack itemStack, ItemStack previousItemStack) {
         ItemStack twinItem = new ItemStack(super.material);
         twinItem.editMeta(itemMeta -> {
-            itemMeta.addItemFlags(ItemFlag.HIDE_ITEM_SPECIFICS, ItemFlag.HIDE_ATTRIBUTES);
+            itemMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             itemMeta.displayName(itemStack.getItemMeta().displayName());
         });
 

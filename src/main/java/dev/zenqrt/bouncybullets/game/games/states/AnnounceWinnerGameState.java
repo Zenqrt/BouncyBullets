@@ -58,10 +58,10 @@ public final class AnnounceWinnerGameState extends GameState {
 
         this.players.sendMessage(leaderboard);
 
-        players.showTitle(Title.title(
+        this.players.showTitle(Title.title(
                 Component.text("The winner is...", NamedTextColor.AQUA),
                 Component.text(winnerName, NamedTextColor.YELLOW)));
-        players.sendMessage(
+        this.players.sendMessage(
                 Component.empty()
                         .append(Component.text("\nWinner: ", NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
                         .append(Component.text(winnerName, NamedTextColor.WHITE))

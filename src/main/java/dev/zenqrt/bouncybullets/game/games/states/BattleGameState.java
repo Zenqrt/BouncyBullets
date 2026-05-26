@@ -1,12 +1,15 @@
 package dev.zenqrt.bouncybullets.game.games.states;
 
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent;
+import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.event.EventNode;
 import dev.zenqrt.bouncybullets.event.GameEventNodes;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
+import dev.zenqrt.bouncybullets.event.events.PlayerQuitGameEvent;
 import dev.zenqrt.bouncybullets.game.base.GameState;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
+import dev.zenqrt.bouncybullets.item.items.abilities.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
 import dev.zenqrt.bouncybullets.loadout.Loadout;
 import dev.zenqrt.bouncybullets.loadout.kit.EventPlayerClass;
@@ -15,6 +18,7 @@ import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
 import dev.zenqrt.bouncybullets.sidebar.sidebars.BouncyBulletsSidebar;
 import dev.zenqrt.bouncybullets.utils.NMSConverter;
+import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import dev.zenqrt.bouncybullets.utils.TaskManager;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -30,11 +34,15 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
@@ -49,9 +57,18 @@ import java.util.stream.Collectors;
 public final class BattleGameState extends GameState {
 
     private static final Sound KILL_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.MASTER, 1, 1);
-    private static final AttributeModifier NO_KNOCKBACK_MODIFIER = new AttributeModifier("bouncy-bullets_no_kb", 100, AttributeModifier.Operation.ADD_NUMBER);
-    private static final AttributeModifier GAME_SPEED_MODIFIER = new AttributeModifier("bouncy-bullets_game_speed", 0.04, AttributeModifier.Operation.ADD_NUMBER);
+    private static final AttributeModifier NO_KNOCKBACK_MODIFIER = new AttributeModifier(
+            BouncyBulletsPlugin.createKey("bouncy-bullets_no_kb"),
+            100,
+            AttributeModifier.Operation.ADD_NUMBER
+    );
+    private static final AttributeModifier GAME_SPEED_MODIFIER = new AttributeModifier(
+            BouncyBulletsPlugin.createKey("bouncy-bullets_game_speed"),
+            0.04,
+            AttributeModifier.Operation.ADD_NUMBER
+    );
 
+    private final EventNode<Event> stateEventNode;
     private final EventNode<PlayerEvent> playerEventNode;
     private final EventNode<EntityEvent> playerEntityEventNode;
 
@@ -70,6 +87,10 @@ public final class BattleGameState extends GameState {
 
         this.playerEventNode = GameEventNodes.filteredPlayerEvents(game);
         this.playerEntityEventNode = GameEventNodes.filteredEntityEvents(game);
+
+        this.stateEventNode = EventNode.create();
+        this.stateEventNode.addChild(this.playerEventNode);
+        this.stateEventNode.addChild(this.playerEntityEventNode);
     }
 
     @Override
@@ -92,11 +113,13 @@ public final class BattleGameState extends GameState {
                 .limit(3)
                 .toList();
 
-        this.players.forEach((uuid, gamePlayer) -> {
+        this.players.forEach((_, gamePlayer) -> {
             Player player = gamePlayer.getPlayer();
 
+            player.getInventory().clear();
+
             setupPlayerAttributes(player);
-            setupPlayerInventory(player, gamePlayer.getLoadout());
+            setupPlayerInventory(player.getInventory(), gamePlayer.getLoadout());
 
             team.addPlayer(player);
 
@@ -107,6 +130,8 @@ public final class BattleGameState extends GameState {
 
             Location randomSpawn = gameMap.spawnLocations().get(ThreadLocalRandom.current().nextInt(gameMap.spawnLocations().size())).toLocation(gameMap.world());
             player.teleport(randomSpawn);
+
+            gamePlayer.setAlive(true);
         });
 
         this.taskManager.runTaskTimer(
@@ -123,24 +148,17 @@ public final class BattleGameState extends GameState {
     protected void onStateEnd() {
         super.onStateEnd();
 
-        this.playerEventNode.unregisterAllListeners();
-        this.playerEntityEventNode.unregisterAllListeners();
-
+        this.stateEventNode.unregisterAllListeners();
         this.taskManager.removeAllTasks();
 
-        this.players.forEach((uuid, gamePlayer) -> {
+        this.players.forEach((_, gamePlayer) -> {
             gamePlayer.getLoadout().playerClass().onStopUse(gamePlayer);
+            gamePlayer.setAlive(false);
 
             Player player = gamePlayer.getPlayer();
 
-            AttributeInstance knockbackResistance = Objects.requireNonNull(
-                    player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE),
-                    "knockbackResistance"
-            );
-            AttributeInstance movementSpeed = Objects.requireNonNull(
-                    player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED),
-                    "movementSpeed"
-            );
+            AttributeInstance knockbackResistance = PlayerUtils.requireNonNullAttribute(player, Attribute.KNOCKBACK_RESISTANCE);
+            AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
 
             knockbackResistance.removeModifier(NO_KNOCKBACK_MODIFIER);
             movementSpeed.removeModifier(GAME_SPEED_MODIFIER);
@@ -149,6 +167,9 @@ public final class BattleGameState extends GameState {
             player.setGameMode(GameMode.SPECTATOR);
             player.clearActivePotionEffects();
 
+            for (ActiveAbilityItem ability : gamePlayer.getLoadout().playerClass().getActiveAbilities())
+                player.setCooldown(ability.getMaterial(), 0);
+
             this.sidebarMap.forEach((ignored, sidebar) -> sidebar.removeAllViewers());
             this.sidebarMap.clear();
 
@@ -156,7 +177,6 @@ public final class BattleGameState extends GameState {
         });
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private void registerEvents() {
         Set<EventPlayerClass> playerClasses = this.players.values().stream()
                 .map(gamePlayer -> gamePlayer.getLoadout().playerClass())
@@ -165,14 +185,20 @@ public final class BattleGameState extends GameState {
                 .collect(Collectors.toSet());
 
         for (EventPlayerClass playerClass : playerClasses) {
-            playerClass.registerEvents(this.game);
+            EventNode<Event> classEventNode = playerClass.registerEvents(this.game);
+
+            this.stateEventNode.addChild(classEventNode);
         }
 
-        this.players.forEach((uuid, gamePlayer) -> {
+        this.players.forEach((_, gamePlayer) -> {
             PlayerClass playerClass = gamePlayer.getLoadout().playerClass();
             playerClass.onStartUse(gamePlayer);
         });
 
+        this.playerEventNode.registerListener(PaperEventListener.builder(PlayerQuitGameEvent.class)
+                .handler(event -> tryRemoveSidebar(event.getPlayer()))
+                .build()
+        );
         this.playerEventNode.registerListener(PaperEventListener.builder(PlayerTeleportEvent.class)
                 .filter(event -> event.getCause() == PlayerTeleportEvent.TeleportCause.SPECTATE)
                 .handler(event ->  {
@@ -205,7 +231,7 @@ public final class BattleGameState extends GameState {
                     if (lastDamageEvent != null) {
                         if (lastDamageEvent.getDamageSource().getCausingEntity() instanceof Player killer && players.containsKey(killer.getUniqueId())) {
                             if (killer != player) {
-                                BouncyBulletGamePlayer killerGamePlayer = this.game.findPlayer(killer.getUniqueId());
+                                BouncyBulletGamePlayer killerGamePlayer = this.game.findPlayerOrThrow(killer.getUniqueId());
 
                                 killerGamePlayer.addKill();
                                 updateSidebar(
@@ -217,15 +243,17 @@ public final class BattleGameState extends GameState {
 
                             player.setSpectatorTarget(killer);
                             killer.playSound(KILL_SOUND, Sound.Emitter.self());
-                            players.sendMessage(Component.text(player.getName() + " \uD83D\uDD2B " + killer.getName(), NamedTextColor.RED));
+                            this.players.sendMessage(Component.text(player.getName() + " \uD83D\uDD2B " + killer.getName(), NamedTextColor.RED));
                         }
                     }
 
                     if (GunItem.isAiming(player))
                         GunItem.stopAiming(player);
 
-                    BouncyBulletGamePlayer gamePlayer = this.game.findPlayer(player.getUniqueId());
+                    BouncyBulletGamePlayer gamePlayer = this.game.findPlayerOrThrow(player.getUniqueId());
+
                     gamePlayer.addDeath();
+                    gamePlayer.setAlive(false);
 
                     this.taskManager.runTaskTimer(
                             new DeathSpectatorTask(gamePlayer, 5),
@@ -233,10 +261,23 @@ public final class BattleGameState extends GameState {
                     );
                 })
                 .build());
-//        this.eventNode.registerListener(PaperEventListener.builder(InventoryClickEvent.class)
-//                .filter(event -> players.containsKey(event.getWhoClicked().getUniqueId()))
-//                .handler(event -> event.setCancelled(true))
-//                .build());
+        this.stateEventNode.registerListener(PaperEventListener.builder(InventoryClickEvent.class)
+                .filter(event -> this.players.containsKey(event.getWhoClicked().getUniqueId()))
+                .handler(event -> event.setCancelled(true))
+                .build());
+        this.stateEventNode.registerListener(PaperEventListener.builder(PlayerDropItemEvent.class)
+                .filter(event -> this.game.hasPlayer(event.getPlayer().getUniqueId()))
+                .handler(event -> event.setCancelled(true))
+                .build());
+    }
+
+    private void tryRemoveSidebar(Player player) {
+        BouncyBulletsSidebar sidebar = this.sidebarMap.get(player.getUniqueId());
+
+        if (sidebar == null)
+            return;
+
+        sidebar.removeViewer(NMSConverter.serverPlayer(player));
     }
 
     private void updateSidebar(UUID uuid, Consumer<BouncyBulletsSidebar> updateHandler) {
@@ -275,23 +316,14 @@ public final class BattleGameState extends GameState {
     }
 
     private static void setupPlayerAttributes(Player player) {
-        AttributeInstance knockbackResistance = Objects.requireNonNull(
-                player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE),
-                "knockbackResistance"
-        );
-        AttributeInstance movementSpeed = Objects.requireNonNull(
-                player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED),
-                "movementSpeed"
-        );
+        AttributeInstance knockbackResistance = PlayerUtils.requireNonNullAttribute(player, Attribute.KNOCKBACK_RESISTANCE);
+        AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
 
         knockbackResistance.addTransientModifier(NO_KNOCKBACK_MODIFIER);
         movementSpeed.addTransientModifier(GAME_SPEED_MODIFIER);
     }
 
-    private static void setupPlayerInventory(Player player, Loadout loadout) {
-        PlayerInventory inventory = player.getInventory();
-        inventory.clear();
-
+    private static void setupPlayerInventory(PlayerInventory inventory, Loadout loadout) {
         loadout.giveItems(inventory);
     }
 
@@ -337,22 +369,33 @@ public final class BattleGameState extends GameState {
 
         @Override
         public void run() {
-            Player player = gamePlayer.getPlayer();
+            Player player = this.gamePlayer.getPlayer();
 
-            if (--timeLeft == 0) {
+            if (--this.timeLeft == 0) {
                 this.cancel();
 
-                setupPlayerInventory(player, gamePlayer.getLoadout());
+                resupplyGuns(player.getInventory(), this.gamePlayer.getLoadout().playerClass());
 
                 player.setGameMode(GameMode.ADVENTURE);
                 player.teleport(chooseBestSpawnLocation());
                 player.clearTitle();
 
-                gamePlayer.getLoadout().playerClass().onRespawn(gamePlayer);
+                this.gamePlayer.setAlive(true);
+                this.gamePlayer.getLoadout().playerClass().onRespawn(this.gamePlayer);
                 return;
             }
 
-            player.sendTitlePart(TitlePart.SUBTITLE, Component.text("Respawning in " + timeLeft + "..."));
+            player.sendTitlePart(TitlePart.SUBTITLE, Component.text("Respawning in " + this.timeLeft + "..."));
+        }
+
+        private static void resupplyGuns(PlayerInventory inventory, PlayerClass playerClass) {
+            List<GunItem> guns = playerClass.getGuns();
+
+            for (int i = 0; i < guns.size(); i++) {
+                ItemStack gunItemStack = guns.get(i).buildItemStack();
+
+                inventory.setItem(i, gunItemStack);
+            }
         }
     }
 }

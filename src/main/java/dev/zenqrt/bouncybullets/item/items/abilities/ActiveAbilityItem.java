@@ -9,31 +9,24 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 public abstract class ActiveAbilityItem extends GameItem {
 
-    public ActiveAbilityItem(String key, Material material, String displayName, List<Component> description, Consumer<ItemMeta> itemMetaHandler) {
+    public ActiveAbilityItem(String key, Material material, String displayName, List<Component> description, DataComponentsBuilder builder) {
         super(
                 key,
                 material,
                 AdventureUtils.withoutItalics(displayName, NamedTextColor.LIGHT_PURPLE)
                         .append(Component.text(" (Right Click)", NamedTextColor.GRAY)),
                 description,
-                itemMetaHandler
+                builder
         );
     }
 
     public ActiveAbilityItem(String key, Material material, String displayName, List<Component> description) {
-        super(
-                key,
-                material,
-                AdventureUtils.withoutItalics(displayName, NamedTextColor.LIGHT_PURPLE)
-                        .append(Component.text(" (Right Click)", NamedTextColor.GRAY)),
-                description);
+        this(key, material, displayName, description, dataComponentsBuilder());
     }
 
     public abstract void onUse(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event);

@@ -14,16 +14,16 @@ public final class GamePlayerList extends HashMap<UUID, BouncyBulletGamePlayer> 
 
     @Override
     public void sendMessage(@NotNull Component message) {
-        this.forEach((uuid, player) -> player.getPlayer().sendMessage(message));
+        this.forEach((_, player) -> player.getPlayer().sendMessage(message));
     }
 
     @Override
     public void playSound(@NotNull Sound sound, Sound.Emitter emitter) {
-        this.forEach((uuid, player) -> player.getPlayer().playSound(sound, emitter));
+        this.forEach((_, player) -> player.getPlayer().playSound(sound, emitter));
     }
 
     @Override
     public void showTitle(@NotNull Title title) {
-        this.forEach((uuid, player) -> player.getPlayer().showTitle(title));
+        this.forEach((_, player) -> player.getPlayer().showTitle(title));
     }
 }

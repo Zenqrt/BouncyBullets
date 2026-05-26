@@ -3,7 +3,6 @@ package dev.zenqrt.bouncybullets.loadout.kit;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -27,8 +26,7 @@ public enum PlayerClassType {
                     "<gray>After emerging from being invisible, gain <aqua>Speed II <gray>for <green>5s<gray>."
     )),
     HEALER(new HealerPlayerClass(), Material.SPLASH_POTION, meta -> {
-        ((PotionMeta) meta).setBasePotionType(PotionType.INSTANT_HEAL);
-        meta.addItemFlags(ItemFlag.HIDE_ITEM_SPECIFICS);
+        ((PotionMeta) meta).setBasePotionType(PotionType.HEALING);
     },
             List.of(
                     Component.text("BB-Pistol", NamedTextColor.GRAY),
@@ -102,7 +100,7 @@ public enum PlayerClassType {
     }
 
     PlayerClassType(PlayerClass playerClass, Material material, List<Component> itemContents, List<String> description) {
-        this(playerClass, material, meta -> {}, itemContents, description);
+        this(playerClass, material, _ -> {}, itemContents, description);
     }
 
     public PlayerClass getPlayerClass() {

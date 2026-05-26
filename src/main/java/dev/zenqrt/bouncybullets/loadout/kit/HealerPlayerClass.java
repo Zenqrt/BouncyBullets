@@ -3,48 +3,48 @@ package dev.zenqrt.bouncybullets.loadout.kit;
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.item.GameItems;
-import dev.zenqrt.bouncybullets.item.items.abilities.HealerActiveAbilityItem;
+import dev.zenqrt.bouncybullets.item.items.abilities.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
-import org.bukkit.GameMode;
+import dev.zenqrt.bouncybullets.utils.PlayerUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 final class HealerPlayerClass implements PlayerClass {
-
-    private static final GunItem PRIMARY_GUN = GameItems.PISTOL;
-    private static final HealerActiveAbilityItem ACTIVE_ABILITY = GameItems.HEALER_ACTIVE_ABILITY;
 
     private final List<BukkitTask> healTasks = new ArrayList<>();
 
     @Override
     public void onStartUse(BouncyBulletGamePlayer gamePlayer) {
-        Player playerEntity = gamePlayer.getPlayer();
-        Objects.requireNonNull(playerEntity.getAttribute(Attribute.GENERIC_MAX_ABSORPTION)).setBaseValue(5);
+        Player player = gamePlayer.getPlayer();
 
-        healTasks.add(new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (playerEntity.getGameMode() != GameMode.ADVENTURE) {
-                    return;
-                }
+        PlayerUtils.requireNonNullAttribute(player, Attribute.MAX_ABSORPTION)
+                        .setBaseValue(5);
 
-                double maxHealth = Objects.requireNonNull(playerEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
+        this.healTasks.add(
+                Bukkit.getScheduler().runTaskTimer(
+                        BouncyBulletsPlugin.getInstance(),
+                        () -> {
+                            if (gamePlayer.isDead())
+                                return;
 
-                if (playerEntity.getHealth() < maxHealth) {
-                    playerEntity.setHealth(Math.min(maxHealth, playerEntity.getHealth() + 1));
-                }
-            }
-        }.runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 40));
+                            double maxHealth = PlayerUtils.requireNonNullAttribute(player, Attribute.MAX_HEALTH).getValue();
+
+                            if (player.getHealth() < maxHealth) {
+                                player.setHealth(Math.min(maxHealth, player.getHealth() + 1));
+                            }
+                        },
+                        0, 40
+                )
+        );
     }
 
     @Override
@@ -59,10 +59,16 @@ final class HealerPlayerClass implements PlayerClass {
     }
 
     @Override
-    public Map<Integer, ItemStack> getItems() {
-        return Map.of(
-                0, PRIMARY_GUN.buildItemStack(),
-                1, ACTIVE_ABILITY.buildItemStack()
+    public List<GunItem> getGuns() {
+        return List.of(
+                GameItems.PISTOL
+        );
+    }
+
+    @Override
+    public List<ActiveAbilityItem> getActiveAbilities() {
+        return List.of(
+                GameItems.HEALER_ACTIVE_ABILITY
         );
     }
 

@@ -6,6 +6,7 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.GameSettings;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.GameItems;
+import dev.zenqrt.bouncybullets.lobby.LobbyManager;
 import dev.zenqrt.bouncybullets.map.GameMap;
 import dev.zenqrt.bouncybullets.map.GameMapManager;
 import dev.zenqrt.bouncybullets.utils.Messages;
@@ -24,14 +25,16 @@ import revxrsal.commands.exception.CommandErrorException;
 @Command({"bouncybullets", "bb"})
 public final class BouncyBulletsCommand {
 
+    private final LobbyManager lobbyManager;
     private final ServerConfig config;
     private final GameMapManager mapManager;
     private final GameManager gameManager;
 
-    public BouncyBulletsCommand(GameManager gameManager, GameMapManager mapManager, ServerConfig config) {
+    public BouncyBulletsCommand(GameManager gameManager, GameMapManager mapManager, ServerConfig config, LobbyManager lobbyManager) {
         this.gameManager = gameManager;
         this.mapManager = mapManager;
         this.config = config;
+        this.lobbyManager = lobbyManager;
     }
 
     @Subcommand("setlobby")
@@ -50,7 +53,8 @@ public final class BouncyBulletsCommand {
     public void onLobby(
             Player executor
     ) {
-        executor.teleport(this.config.getLobbySpawn());
+        this.lobbyManager.sendToLobby(executor);
+        this.gameManager.tryLeaveGame(executor.getUniqueId());
     }
 
     @Subcommand("give item")

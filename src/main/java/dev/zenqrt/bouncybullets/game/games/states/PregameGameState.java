@@ -6,6 +6,7 @@ import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.event.events.PlayerJoinGameEvent;
 import dev.zenqrt.bouncybullets.game.base.GameStateSequence;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -37,7 +38,6 @@ public final class PregameGameState extends GameStateSequence {
     }
 
     private void registerEvents() {
-
         this.playerEventNode.registerListener(PaperEventListener.builder(PlayerDropItemEvent.class)
                 .handler(event -> event.setCancelled(true))
                 .build());
@@ -56,7 +56,7 @@ public final class PregameGameState extends GameStateSequence {
     protected void onStateStart() {
         registerEvents();
 
-        players.forEach(((uuid, gamePlayer) -> setupPlayer(gamePlayer.getPlayer())));
+        players.forEach(((_, gamePlayer) -> setupPlayer(gamePlayer.getPlayer())));
 
         super.onStateStart();
     }
@@ -82,13 +82,17 @@ public final class PregameGameState extends GameStateSequence {
 
     @Override
     protected void onLastStateFinished() {
-        game.switchNextState();
+        this.game.switchNextState();
     }
 
     @Override
     protected void onStateEnd() {
         super.onStateEnd();
-        playerEventNode.unregisterAllListeners();
+        this.playerEventNode.unregisterAllListeners();
+
+        for (BouncyBulletGamePlayer gamePlayer : this.players.values()) {
+            gamePlayer.getPlayer().closeInventory();
+        }
     }
 
     @Override

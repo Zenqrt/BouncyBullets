@@ -1,6 +1,7 @@
 package dev.zenqrt.bouncybullets.loadout.kit;
 
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
+import dev.zenqrt.bouncybullets.event.EventNode;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.event.events.GunShootEvent;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
@@ -14,38 +15,38 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 // TODO: Change active ability to marking player and dealing more damage to them for a short period of time
 // TODO: Ability: Make every player glowing and the next shot does twice as much damage
-final class SniperPlayerClass extends EventPlayerClass {
-
-    private static final GunItem PRIMARY_GUN = GameItems.SNIPER_RIFLE;
-    private static final GunItem SECONDARY_GUN = GameItems.PISTOL;
-    private static final ActiveAbilityItem ACTIVE_ABILITY = GameItems.SNIPER_ACTIVE_ABILITY;
+final class SniperPlayerClass implements EventPlayerClass {
 
     private final Map<UUID, Long> lastMoved = new HashMap<>();
     private final Map<UUID, BukkitTask> chargeTasks = new HashMap<>();
 
     @Override
-    public void registerEvents(BouncyBulletGame game) {
-        this.eventNode.registerListener(PaperEventListener.builder(PlayerMoveEvent.class)
+    public EventNode<Event> registerEvents(BouncyBulletGame game) {
+        EventNode<Event> eventNode = EventNode.create();
+
+        eventNode.registerListener(PaperEventListener.builder(PlayerMoveEvent.class)
                 .filter(PlayerMoveEvent::hasExplicitlyChangedPosition)
                 .filter(event -> !event.hasChangedOrientation())
                 .handler(event -> lastMoved.put(event.getPlayer().getUniqueId(), System.currentTimeMillis()))
                 .build());
-        this.eventNode.registerListener(PaperEventListener.builder(GunShootEvent.class)
+        eventNode.registerListener(PaperEventListener.builder(GunShootEvent.class)
                 .filter(event -> event.getGunItem() == GameItems.SNIPER_RIFLE)
                 .handler(event -> {
                     Player player = event.getShooter();
-                    BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
+                    BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
 
                     if (gamePlayer.getLoadout().playerClass() != this)
                         return;
@@ -59,6 +60,8 @@ final class SniperPlayerClass extends EventPlayerClass {
                     this.lastMoved.put(player.getUniqueId(), System.currentTimeMillis());
                 })
                 .build());
+
+        return eventNode;
     }
 
     @Override
@@ -103,11 +106,17 @@ final class SniperPlayerClass extends EventPlayerClass {
     }
 
     @Override
-    public Map<Integer, ItemStack> getItems() {
-        return Map.of(
-                0, PRIMARY_GUN.buildItemStack(),
-                1, SECONDARY_GUN.buildItemStack(),
-                2, ACTIVE_ABILITY.buildItemStack()
+    public List<GunItem> getGuns() {
+        return List.of(
+                GameItems.SNIPER_RIFLE,
+                GameItems.PISTOL
+        );
+    }
+
+    @Override
+    public List<ActiveAbilityItem> getActiveAbilities() {
+        return List.of(
+                GameItems.SNIPER_ACTIVE_ABILITY
         );
     }
 

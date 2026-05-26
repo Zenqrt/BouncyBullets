@@ -1,10 +1,8 @@
 package dev.zenqrt.bouncybullets.item.items.abilities;
 
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
-import dev.zenqrt.bouncybullets.utils.AdventureUtils;
-import dev.zenqrt.bouncybullets.utils.ExplosionUtils;
-import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
-import dev.zenqrt.bouncybullets.utils.SoundUtils;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
+import dev.zenqrt.bouncybullets.utils.*;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -31,7 +29,7 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
     private static final double DAMAGE = 15;
     private static final int CHARGING_TICKS = 40;
     private static final double EXPLOSION_RADIUS = 4;
-    private static final Sound CHARGING_SOUND = Sound.sound(org.bukkit.Sound.BLOCK_BEACON_ACTIVATE, Sound.Source.PLAYER, 1, 1);
+    private static final Sound CHARGING_SOUND = Sound.sound(Sounds.BLOCK_BEACON_ACTIVATE, Sound.Source.PLAYER, 1, 1);
 
     private final Map<UUID, ItemStack[]> inventoryContents = new HashMap<>();
     private final List<UUID> isCharging = new ArrayList<>();
@@ -58,7 +56,6 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
         this.isCharging.add(uuid);
 
         PlayerInventory inventory = player.getInventory();
-
         this.inventoryContents.put(uuid, inventory.getStorageContents());
 
         clearStorage(inventory);
@@ -66,7 +63,9 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
 
         SoundUtils.playSoundFromPlayer(player, CHARGING_SOUND);
 
-        new ChargingTask(player, 4, CHARGING_TICKS).runTaskTimer(game.getPlugin(), 0, 1);
+        BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(uuid);
+
+        new ChargingTask(gamePlayer, player, 4, CHARGING_TICKS).runTaskTimer(game.getPlugin(), 0, 1);
     }
 
     private static void clearStorage(PlayerInventory inventory) {
@@ -83,7 +82,7 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
         ItemStack chargingItem = new ItemStack(super.material);
         chargingItem.editMeta(meta -> {
             meta.displayName(AdventureUtils.withoutItalics("Charging...", NamedTextColor.GRAY));
-            meta.addEnchant(Enchantment.DURABILITY, 1, true);
+            meta.addEnchant(Enchantment.UNBREAKING, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         });
 
@@ -93,15 +92,17 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
 
     private class ChargingTask extends BukkitRunnable {
 
-        private static final Sound SHOOT_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_GENERIC_EXPLODE.key(), Sound.Source.PLAYER, 1, 1.5F);
+        private static final Sound SHOOT_SOUND = Sound.sound(Key.key("entity.generic.explode"), Sound.Source.PLAYER, 1, 1.5F);
         private static final double BEAM_RADIUS = 1;
 
+        private final BouncyBulletGamePlayer gamePlayer;
         private final Player shooter;
         private final int itemSlot;
         private final int chargingTicks;
         private int currentTick;
 
-        ChargingTask(Player shooter, int itemSlot, int chargingTicks) {
+        ChargingTask(BouncyBulletGamePlayer gamePlayer, Player shooter, int itemSlot, int chargingTicks) {
+            this.gamePlayer = gamePlayer;
             this.shooter = shooter;
             this.itemSlot = itemSlot;
             this.chargingTicks = chargingTicks;
@@ -109,25 +110,25 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
 
         @Override
         public void run() {
-            if (shooter.getGameMode() == GameMode.SPECTATOR || shooter.getInventory().getHeldItemSlot() != itemSlot) {
+            if (this.gamePlayer.isDead() || this.shooter.getInventory().getHeldItemSlot() != itemSlot) {
                 endAbility();
 
                 this.cancel();
                 return;
             }
 
-            if (currentTick >= chargingTicks) {
+            if (this.currentTick >= this.chargingTicks) {
                 shoot();
                 endAbility();
                 this.cancel();
                 return;
             }
 
-            float tickProgress = (float) currentTick / chargingTicks;
+            float tickProgress = (float) this.currentTick / this.chargingTicks;
             int chargeSlot = (int) (4 * tickProgress);
 
-            if (Objects.requireNonNull(shooter.getInventory().getItem(chargeSlot)).getType() != Material.LIME_STAINED_GLASS_PANE)
-                shooter.playSound(
+            if (Objects.requireNonNull(this.shooter.getInventory().getItem(chargeSlot)).getType() != Material.LIME_STAINED_GLASS_PANE)
+                this.shooter.playSound(
                         Sound.sound(
                                 Key.key("block.note_block.hat"),
                                 Sound.Source.PLAYER,
@@ -138,25 +139,28 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
 
             ItemStack chargeItem = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
 
-            shooter.getInventory().setItem(chargeSlot, chargeItem);
-            shooter.getInventory().setItem(8 - chargeSlot, chargeItem);
+            this.shooter.getInventory().setItem(chargeSlot, chargeItem);
+            this.shooter.getInventory().setItem(8 - chargeSlot, chargeItem);
 
-            currentTick++;
+            this.currentTick++;
         }
 
         private void endAbility() {
-            shooter.getInventory().setStorageContents(inventoryContents.get(shooter.getUniqueId()));
-            isCharging.remove(shooter.getUniqueId());
-            inventoryContents.remove(shooter.getUniqueId());
+            UUID uuid = this.shooter.getUniqueId();
 
-            shooter.setCooldown(material, COOLDOWN);
+            this.shooter.getInventory()
+                    .setStorageContents(DemomanActiveAbilityItem.this.inventoryContents.get(uuid));
+
+            DemomanActiveAbilityItem.this.isCharging.remove(uuid);
+            DemomanActiveAbilityItem.this.inventoryContents.remove(uuid);
+
+            this.shooter.setCooldown(DemomanActiveAbilityItem.this.material, COOLDOWN);
         }
 
-        @SuppressWarnings("UnstableApiUsage")
         private void shoot() {
-            Location location = shooter.getEyeLocation();
+            Location location = this.shooter.getEyeLocation();
 
-            SoundUtils.playSoundFromPlayer(shooter, SHOOT_SOUND);
+            SoundUtils.playSoundFromPlayer(this.shooter, SHOOT_SOUND);
 
             RayTraceResult result = location.getWorld().rayTrace(
                     location,
@@ -177,7 +181,8 @@ public final class DemomanActiveAbilityItem extends ActiveAbilityItem {
                     EXPLOSION_RADIUS,
                     DAMAGE,
                     DamageSource.builder(DamageType.MOB_PROJECTILE)
-                            .withCausingEntity(shooter)
+                            .withDirectEntity(this.shooter)
+                            .withCausingEntity(this.shooter)
                             .build()
             );
         }

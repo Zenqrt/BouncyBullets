@@ -1,8 +1,9 @@
 package dev.zenqrt.bouncybullets.item.items.abilities;
 
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
-import net.kyori.adventure.key.Key;
+import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -23,9 +24,9 @@ public final class HeavyActiveAbilityItem extends ActiveAbilityItem implements L
     private static final int COOLDOWN_TICKS = 1800;                 // 90 seconds
     private static final int ABILITY_DURATION_TICKS = 300;          // 15 seconds
     private static final float DEFLECT_CHANCE = 0.9F;
-    private static final Sound ACTIVATE_SOUND = Sound.sound(Key.key("entity.zombie_villager.cure"), Sound.Source.PLAYER, 1, 0.75F);
-    private static final Sound DEACTIVATE_SOUND = Sound.sound(Key.key("block.beacon.deactivate"), Sound.Source.PLAYER, 1, 0.8F);
-    private static final Sound DEFLECT_SOUND = Sound.sound(Key.key("entity.zombie.attack_iron_door"), Sound.Source.PLAYER, 1, 2);
+    private static final Sound ACTIVATE_SOUND = Sound.sound(Sounds.ENTITY_ZOMBIE_VILLAGER_CURE, Sound.Source.PLAYER, 1, 0.75F);
+    private static final Sound DEACTIVATE_SOUND = Sound.sound(Sounds.BLOCK_BEACON_AMBIENT, Sound.Source.PLAYER, 1, 0.8F);
+    private static final Sound DEFLECT_SOUND = Sound.sound(Sounds.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, Sound.Source.PLAYER, 1, 2);
 
     private final Set<UUID> abilityActive = new HashSet<>();
 
@@ -63,21 +64,30 @@ public final class HeavyActiveAbilityItem extends ActiveAbilityItem implements L
 
     @Override
     public void onUse(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
-        this.abilityActive.add(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+
+        this.abilityActive.add(uuid);
 
         addGlowToArmor(player.getInventory());
         player.getWorld().playSound(ACTIVATE_SOUND, player);
 
+        BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(uuid);
+
         Bukkit.getScheduler().runTaskLater(
                 game.getPlugin(),
                 () -> {
-                    this.abilityActive.remove(player.getUniqueId());
+                    if (gamePlayer.isDead())
+                        return;
+
+                    this.abilityActive.remove(uuid);
 
                     removeGlowFromArmor(player.getInventory());
                     player.getWorld().playSound(DEACTIVATE_SOUND, player);
                 },
                 ABILITY_DURATION_TICKS
         );
+
+        player.setCooldown(super.material, COOLDOWN_TICKS);
     }
 
     private static void addGlowToArmor(PlayerInventory inventory) {
@@ -85,7 +95,7 @@ public final class HeavyActiveAbilityItem extends ActiveAbilityItem implements L
             if (armorItem == null)
                 continue;
 
-            armorItem.editMeta(meta -> meta.addEnchant(Enchantment.DURABILITY, 1, false));
+            armorItem.editMeta(meta -> meta.addEnchant(Enchantment.UNBREAKING, 1, false));
         }
     }
 
@@ -94,7 +104,7 @@ public final class HeavyActiveAbilityItem extends ActiveAbilityItem implements L
             if (armorItem == null)
                 continue;
 
-            armorItem.editMeta(meta -> meta.removeEnchant(Enchantment.DURABILITY));
+            armorItem.editMeta(meta -> meta.removeEnchant(Enchantment.UNBREAKING));
         }
     }
 

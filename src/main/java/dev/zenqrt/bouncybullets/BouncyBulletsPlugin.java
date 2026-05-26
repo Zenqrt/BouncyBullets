@@ -16,8 +16,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import revxrsal.commands.Lamp;
 import revxrsal.commands.bukkit.BukkitLamp;
@@ -26,8 +26,6 @@ import revxrsal.commands.bukkit.actor.BukkitCommandActor;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Objects;
-import java.util.function.BiConsumer;
 
 public final class BouncyBulletsPlugin extends JavaPlugin {
 
@@ -58,20 +56,19 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
 
         Lamp<BukkitCommandActor> lamp = BukkitLamp.builder(this).build();
         lamp.register(
-                new BouncyBulletsCommand(gameManager, mapManager, serverConfig)
+                new BouncyBulletsCommand(gameManager, mapManager, serverConfig, lobbyManager)
         );
 
-        Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(gameManager), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(gameManager, lobbyManager, serverConfig), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListeners(), this);
         Bukkit.getPluginManager().registerEvents(new GameItemListeners(gameManager), this);
         Bukkit.getPluginManager().registerEvents(new GunListeners(gameManager), this);
         Bukkit.getPluginManager().registerEvents(GameItems.SNIPER_ACTIVE_ABILITY, this);
         Bukkit.getPluginManager().registerEvents(GameItems.HEAVY_ACTIVE_ABILITY, this);
-
-        registerCommand("backup", (player, args) -> {
+        registerCommand("backup", (source, _) -> {
             Bukkit.broadcast(Component.text("Saving backup of the world...").decorate(TextDecoration.ITALIC));
 
-            World world = player.getWorld();
+            World world = source.getLocation().getWorld();
             world.save();
 
             try {
@@ -95,11 +92,8 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
         return instance;
     }
 
-    private void registerCommand(String name, BiConsumer<Player, String[]> commandHandler) {
-        Objects.requireNonNull(getCommand(name)).setExecutor((sender, cmd, label, args) -> {
-            commandHandler.accept((Player) sender, args);
-            return true;
-        });
+    public static NamespacedKey createKey(String id) {
+        return NamespacedKey.fromString(id, instance);
     }
 
 }

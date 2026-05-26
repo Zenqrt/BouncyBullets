@@ -7,6 +7,7 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.utils.ExplosionUtils;
+import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -38,7 +39,9 @@ public final class GrenadeLauncherGunItem extends GunItem {
         tnt.setFuseTicks(Integer.MAX_VALUE);
         tnt.setVelocity(eyeLocation.getDirection().normalize().multiply(bulletProperties.speed()));
 
-        new TNTBounceTask(player, tnt, bulletProperties.numberOfBounces()).runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 1);
+        BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
+
+        new TNTBounceTask(gamePlayer, player, tnt, bulletProperties.numberOfBounces()).runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 1);
     }
 
     @Override
@@ -65,25 +68,27 @@ public final class GrenadeLauncherGunItem extends GunItem {
 
     @Override
     protected Sound getShootingSound() {
-        return Sound.sound(org.bukkit.Sound.ENTITY_GENERIC_EXPLODE, Sound.Source.PLAYER, 1, 2);
+        return Sound.sound(Sounds.ENTITY_GENERIC_EXPLODE, Sound.Source.PLAYER, 1, 2);
     }
 
     @Override
     protected Sound getReloadSound() {
-        return Sound.sound(org.bukkit.Sound.BLOCK_BARREL_CLOSE, Sound.Source.PLAYER, 1, 0.75F);
+        return Sound.sound(Sounds.BLOCK_BARREL_CLOSE, Sound.Source.PLAYER, 1, 0.75F);
     }
 
     private class TNTBounceTask extends BukkitRunnable {
 
-        private static final Sound BOUNCE_SOUND = Sound.sound(org.bukkit.Sound.ENTITY_SLIME_JUMP.key(), Sound.Source.MASTER, 0.5F, 1);
+        private static final Sound BOUNCE_SOUND = Sound.sound(Sounds.ENTITY_SLIME_JUMP, Sound.Source.MASTER, 0.5F, 1);
 
+        private final BouncyBulletGamePlayer gamePlayer;
         private final Player source;
         private final TNTPrimed tnt;
         private final int maxBounces;
         private int currentBounces;
         private Vector previousVelocity;
 
-        TNTBounceTask(Player source, TNTPrimed tnt, int maxBounces) {
+        TNTBounceTask(BouncyBulletGamePlayer gamePlayer, Player source, TNTPrimed tnt, int maxBounces) {
+            this.gamePlayer = gamePlayer;
             this.source = source;
             this.tnt = tnt;
             this.maxBounces = maxBounces;
@@ -91,9 +96,8 @@ public final class GrenadeLauncherGunItem extends GunItem {
         }
 
         @Override
-        @SuppressWarnings("UnstableApiUsage")
         public void run() {
-            if (this.tnt.isDead()) {
+            if (this.tnt.isDead() || this.gamePlayer.isDead()) {
                 this.cancel();
                 return;
             }
@@ -112,10 +116,12 @@ public final class GrenadeLauncherGunItem extends GunItem {
                 double normalDamage = GrenadeLauncherGunItem.super.bulletProperties.maxDamage();
 
                 ExplosionUtils.createExplosion(
-                        tnt.getLocation(),
+                        this.tnt.getLocation(),
                         EXPLOSION_RADIUS,
                         normalDamage * damageMultiplier,
-                        DamageSource.builder(DamageType.MOB_PROJECTILE).withCausingEntity(source).build()
+                        DamageSource.builder(DamageType.MOB_PROJECTILE)
+                                .withDirectEntity(this.tnt)
+                                .withCausingEntity(this.source).build()
                 );
 
                 this.tnt.remove();
@@ -123,18 +129,18 @@ public final class GrenadeLauncherGunItem extends GunItem {
                 return;
             }
 
-            if (tnt.isOnGround() && tnt.getVelocity().getY() <= 0) {
-                currentBounces++;
-                tnt.setVelocity(previousVelocity.multiply(new Vector(0.5, -0.85, 0.5)));
-                tnt.getWorld().playSound(BOUNCE_SOUND, tnt);
+            if (this.tnt.isOnGround() && this.tnt.getVelocity().getY() <= 0) {
+                this.currentBounces++;
+                this.tnt.setVelocity(this.previousVelocity.multiply(new Vector(0.5, -0.85, 0.5)));
+                this.tnt.getWorld().playSound(BOUNCE_SOUND, tnt);
             }
 
-            previousVelocity = tnt.getVelocity();
+            this.previousVelocity = this.tnt.getVelocity();
         }
     }
 
     private static ParticleBuilder createTntTrailFirstBounce() {
-        return Particle.SMOKE_NORMAL.builder()
+        return Particle.SMOKE.builder()
                 .extra(0)
                 .count(1)
                 .force(true);

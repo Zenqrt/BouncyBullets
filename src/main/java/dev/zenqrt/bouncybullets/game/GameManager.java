@@ -10,6 +10,7 @@ import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
 import dev.zenqrt.bouncybullets.map.GameMap;
 import dev.zenqrt.bouncybullets.map.GameMapManager;
 import org.bukkit.Bukkit;
+import org.bukkit.GameRules;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -39,6 +40,8 @@ public final class GameManager {
         int gameId = this.nextGameId.incrementAndGet();
 
         World gameWorld = this.mapManager.createGameWorld(gameId, map);
+        gameWorld.setGameRule(GameRules.LOCATOR_BAR, false);
+
         FreeForAllActiveGameMap activeMap = new FreeForAllActiveGameMap(gameWorld, map.configuration());
 
         BouncyBulletGame game = new BouncyBulletGame(gameId, this.plugin, settings, activeMap, this, this.lobbyManager);

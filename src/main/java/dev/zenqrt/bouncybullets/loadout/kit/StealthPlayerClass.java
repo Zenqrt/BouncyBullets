@@ -1,5 +1,6 @@
 package dev.zenqrt.bouncybullets.loadout.kit;
 
+import dev.zenqrt.bouncybullets.event.EventNode;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
@@ -17,6 +18,7 @@ import org.bukkit.Material;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -29,20 +31,17 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public final class StealthPlayerClass extends EventPlayerClass {
+public final class StealthPlayerClass implements EventPlayerClass {
 
     private static final int INVIS_CHARGE_TICKS = 100;      // 5 seconds
     private static final int COMBAT_TIMER_SECONDS = 8;
     private static final Sound HIDE_SOUND = Sound.sound(Key.key("entity.generic.drink"), Sound.Source.PLAYER, 0.5F, 1);
     private static final Sound REVEAL_SOUND = Sound.sound(Key.key("block.lava.extinguish"), Sound.Source.PLAYER, 0.5F, 2);
     private static final Sound CHARGE_DENIED_SOUND = Sound.sound(Key.key("entity.villager.no"), Sound.Source.MASTER, 1, 1.25F);
-
-    private static final GunItem PRIMARY_GUN = GameItems.SMG;
-    private static final GunItem SECONDARY_GUN = GameItems.SILENCED_PISTOL;
-    private static final ActiveAbilityItem ACTIVE_ABILITY = GameItems.STEALTH_ACTIVE_ABILITY;
 
     private final Map<UUID, InvisibilityChargeTask> invisChargeTasks = new HashMap<>();
     private final Map<UUID, CombatTimerTask> combatTimerTasks = new HashMap<>();
@@ -53,11 +52,17 @@ public final class StealthPlayerClass extends EventPlayerClass {
     }
 
     @Override
-    public Map<Integer, ItemStack> getItems() {
-        return Map.of(
-                0, PRIMARY_GUN.buildItemStack(),
-                1, SECONDARY_GUN.buildItemStack(),
-                2, ACTIVE_ABILITY.buildItemStack()
+    public List<GunItem> getGuns() {
+        return List.of(
+                GameItems.SMG,
+                GameItems.SILENCED_PISTOL
+        );
+    }
+
+    @Override
+    public List<ActiveAbilityItem> getActiveAbilities() {
+        return List.of(
+                GameItems.STEALTH_ACTIVE_ABILITY
         );
     }
 
@@ -87,16 +92,17 @@ public final class StealthPlayerClass extends EventPlayerClass {
     }
 
     @Override
-    @SuppressWarnings("UnstableApiUsage")
-    public void registerEvents(BouncyBulletGame game) {
-        this.eventNode.registerListener(PaperEventListener.builder(PlayerToggleSneakEvent.class)
+    public EventNode<Event> registerEvents(BouncyBulletGame game) {
+        EventNode<Event> eventNode = EventNode.create();
+
+        eventNode.registerListener(PaperEventListener.builder(PlayerToggleSneakEvent.class)
                 .filter(event -> isPlayerClass(game, event.getPlayer(), this))
                 .handler(event -> {
                     Player player = event.getPlayer();
                     UUID uuid = player.getUniqueId();
-                    BouncyBulletGamePlayer gamePlayer = game.findPlayer(uuid);
+                    BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(uuid);
 
-                    if (event.isSneaking() && canGoInvisible(gamePlayer)) {
+                    if (event.isSneaking() && canGoInvisible(gamePlayer) && gamePlayer.isAlive()) {
                         if (this.combatTimerTasks.containsKey(uuid) || player.isSprinting()) {
                             player.sendMessage(Component.text("You are currently in combat!", NamedTextColor.RED));
                             player.playSound(CHARGE_DENIED_SOUND, Sound.Emitter.self());
@@ -110,12 +116,12 @@ public final class StealthPlayerClass extends EventPlayerClass {
                 })
                 .build()
         );
-        this.eventNode.registerListener(PaperEventListener.builder(PlayerToggleSprintEvent.class)
+        eventNode.registerListener(PaperEventListener.builder(PlayerToggleSprintEvent.class)
                 .filter(event -> isPlayerClass(game, event.getPlayer(), this))
                 .filter(PlayerToggleSprintEvent::isSprinting)
                 .handler(event -> {
                     Player player = event.getPlayer();
-                    BouncyBulletGamePlayer gamePlayer = game.findPlayer(player.getUniqueId());
+                    BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
 
                     if (!gamePlayer.isInvisible())
                         return;
@@ -124,13 +130,13 @@ public final class StealthPlayerClass extends EventPlayerClass {
                 })
                 .build()
         );
-        this.eventNode.registerListener(PaperEventListener.builder(EntityDamageEvent.class, EventPriority.MONITOR)
+        eventNode.registerListener(PaperEventListener.builder(EntityDamageEvent.class, EventPriority.MONITOR)
                 .filter(event -> !event.isCancelled())
                 .filter(event -> event.getEntity() instanceof Player player && isPlayerClass(game, player, this))
                 .handler(event -> {
                     Player player = (Player) event.getEntity();
                     UUID uuid = player.getUniqueId();
-                    BouncyBulletGamePlayer gamePlayer = game.findPlayer(uuid);
+                    BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(uuid);
 
                     applyCombatTimer(uuid, game);
 
@@ -141,14 +147,14 @@ public final class StealthPlayerClass extends EventPlayerClass {
                 })
                 .build()
         );
-        this.eventNode.registerListener(PaperEventListener.builder(EntityDamageByEntityEvent.class, EventPriority.MONITOR)
+        eventNode.registerListener(PaperEventListener.builder(EntityDamageByEntityEvent.class, EventPriority.MONITOR)
                 .filter(event -> !event.isCancelled())
                 .filter(event -> event.getDamageSource().getDamageType() == DamageType.MOB_PROJECTILE)
                 .filter(event -> event.getDamager() instanceof Player player && isPlayerClass(game, player, this))
                 .handler(event -> {
                     Player player = (Player) event.getDamager();
                     UUID uuid = player.getUniqueId();
-                    BouncyBulletGamePlayer gamePlayer = game.findPlayer(uuid);
+                    BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(uuid);
 
                     applyCombatTimer(uuid, game);
 
@@ -159,15 +165,17 @@ public final class StealthPlayerClass extends EventPlayerClass {
                 })
                 .build()
         );
-        this.eventNode.registerListener(PaperEventListener.builder(PlayerDeathEvent.class, EventPriority.MONITOR)
+        eventNode.registerListener(PaperEventListener.builder(PlayerDeathEvent.class, EventPriority.MONITOR)
                 .filter(event -> isPlayerClass(game, event.getPlayer(), this))
                 .handler(event -> tryRemoveCombatTimer(event.getPlayer().getUniqueId(), true))
                 .build()
         );
+
+        return eventNode;
     }
 
     private void applyCombatTimer(UUID uuid, BouncyBulletGame game) {
-        BouncyBulletGamePlayer gamePlayer = game.findPlayer(uuid);
+        BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(uuid);
 
         tryRemoveCombatTimer(uuid, false);
 

@@ -2,10 +2,11 @@ package dev.zenqrt.bouncybullets.item.items.abilities;
 
 import com.destroystokyo.paper.ParticleBuilder;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.tasks.ShootBulletTask;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
-import net.kyori.adventure.key.Key;
+import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -20,7 +21,7 @@ import java.util.List;
 
 public final class WingmanActiveAbilityItem extends ActiveAbilityItem {
 
-    private static final int COOLDOWN_TICKS = 1200;
+    private static final int COOLDOWN_TICKS = 600;      // 30 seconds
     private static final BulletProperties BULLET_PROPERTIES = new BulletProperties(
             0,
             300,
@@ -31,7 +32,7 @@ public final class WingmanActiveAbilityItem extends ActiveAbilityItem {
             20,
             5
     );
-    private static final Sound SHOOT_SOUND = Sound.sound(Key.key("entity.iron_golem.hurt"), Sound.Source.PLAYER, 1, 2);
+    private static final Sound SHOOT_SOUND = Sound.sound(Sounds.ENTITY_IRON_GOLEM_HURT, Sound.Source.PLAYER, 1, 2);
 
     public WingmanActiveAbilityItem() {
         super(
@@ -51,7 +52,9 @@ public final class WingmanActiveAbilityItem extends ActiveAbilityItem {
 
     @Override
     public void onUse(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
-        new ShootingTask(game.getPlugin(), player)
+        BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
+
+        new ShootingTask(game.getPlugin(), gamePlayer, player)
                 .runTaskTimer(game.getPlugin(), 0, 0);
 
         player.setCooldown(super.material, COOLDOWN_TICKS);
@@ -69,10 +72,12 @@ public final class WingmanActiveAbilityItem extends ActiveAbilityItem {
         private static final int SHOTS_PER_ITERATION = 4;
         private double thetaOffset;
         private final Player shooter;
+        private final BouncyBulletGamePlayer gamePlayer;
         private final Plugin plugin;
 
-        ShootingTask(Plugin plugin, Player shooter) {
+        ShootingTask(Plugin plugin, BouncyBulletGamePlayer gamePlayer, Player shooter) {
             this.plugin = plugin;
+            this.gamePlayer = gamePlayer;
             this.shooter = shooter;
             this.thetaOffset = 0;
         }
@@ -97,7 +102,7 @@ public final class WingmanActiveAbilityItem extends ActiveAbilityItem {
                         createBulletTrail()
                 ).runTaskTimer(this.plugin, 1, 1);
 
-                if (this.thetaOffset >= 2 * Math.PI) {
+                if (this.thetaOffset >= 2 * Math.PI || this.gamePlayer.isDead()) {
                     this.cancel();
                     return;
                 }

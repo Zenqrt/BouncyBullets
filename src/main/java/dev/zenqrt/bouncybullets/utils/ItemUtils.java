@@ -1,5 +1,6 @@
 package dev.zenqrt.bouncybullets.utils;
 
+import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -23,8 +24,8 @@ public final class ItemUtils {
     public static ItemStack removeArmor(ItemStack itemStack) {
         itemStack.editMeta(
                 meta -> meta.addAttributeModifier(
-                        Attribute.GENERIC_ARMOR,
-                        new AttributeModifier("remove_armor", 0, AttributeModifier.Operation.ADD_NUMBER)
+                        Attribute.ARMOR,
+                        new AttributeModifier(BouncyBulletsPlugin.createKey("remove_armor"), 0, AttributeModifier.Operation.ADD_NUMBER)
                 )
         );
 
