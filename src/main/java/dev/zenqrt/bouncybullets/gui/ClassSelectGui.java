@@ -6,6 +6,8 @@ import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.github.stefvanschie.inventoryframework.pane.util.Slot;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
+import dev.zenqrt.bouncybullets.item.items.abilities.ActiveAbilityItem;
+import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
 import dev.zenqrt.bouncybullets.loadout.Loadout;
 import dev.zenqrt.bouncybullets.loadout.kit.PlayerClassType;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
@@ -25,7 +27,6 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public final class ClassSelectGui extends ChestGui {
@@ -174,9 +175,13 @@ public final class ClassSelectGui extends ChestGui {
             itemsPane.setGap(1);
             itemsPane.align(OutlinePane.Alignment.CENTER);
 
-            this.classType.getPlayerClass().getItems().entrySet().stream()
-                            .sorted(Map.Entry.comparingByKey())
-                            .forEach(entry -> itemsPane.addItem(new GuiItem(entry.getValue().clone(), event -> event.setCancelled(true))));
+            for (GunItem gun : this.classType.getPlayerClass().getGuns()) {
+                itemsPane.addItem(new GuiItem(gun.buildItemStack(), event -> event.setCancelled(true)));
+            }
+
+            for (ActiveAbilityItem ability : this.classType.getPlayerClass().getActiveAbilities()) {
+                itemsPane.addItem(new GuiItem(ability.buildItemStack(), event -> event.setCancelled(true)));
+            }
 
             this.addPane(Slot.fromXY(4, 0), classPane);
             this.addPane(Slot.fromXY(1, 2), itemsPane);

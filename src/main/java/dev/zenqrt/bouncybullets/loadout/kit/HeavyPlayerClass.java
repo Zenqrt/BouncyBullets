@@ -14,12 +14,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.List;
 import java.util.Map;
 
 public final class HeavyPlayerClass implements PlayerClass {
 
-    private static final GunItem PRIMARY_GUN = GameItems.MINIGUN;
-    private static final ActiveAbilityItem ACTIVE_ABILITY = GameItems.HEAVY_ACTIVE_ABILITY;
     private static final AttributeModifier HEALTH_BUFF_MODIFIER = new AttributeModifier(
             BouncyBulletsPlugin.createKey("heavy_health_buff"),
             20,
@@ -37,10 +36,16 @@ public final class HeavyPlayerClass implements PlayerClass {
     }
 
     @Override
-    public Map<Integer, ItemStack> getItems() {
-        return Map.of(
-                0, PRIMARY_GUN.buildItemStack(),
-                1, ACTIVE_ABILITY.buildItemStack()
+    public List<GunItem> getGuns() {
+        return List.of(
+                GameItems.MINIGUN
+        );
+    }
+
+    @Override
+    public List<ActiveAbilityItem> getActiveAbilities() {
+        return List.of(
+                GameItems.HEAVY_ACTIVE_ABILITY
         );
     }
 

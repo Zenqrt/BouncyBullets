@@ -40,6 +40,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
@@ -212,7 +213,6 @@ public final class BattleGameState extends GameState {
                     Player player = event.getPlayer();
 
                     player.setGameMode(GameMode.SPECTATOR);
-//                    player.getInventory().clear();
                     player.showTitle(Title.title(Component.text("YOU DIED!", NamedTextColor.RED).decorate(TextDecoration.BOLD), Component.empty(),
                             Title.Times.times(Duration.ZERO, Duration.ofSeconds(5), Duration.ZERO)));
                     player.clearActivePotionEffects();
@@ -234,7 +234,7 @@ public final class BattleGameState extends GameState {
 
                             player.setSpectatorTarget(killer);
                             killer.playSound(KILL_SOUND, Sound.Emitter.self());
-                            players.sendMessage(Component.text(player.getName() + " \uD83D\uDD2B " + killer.getName(), NamedTextColor.RED));
+                            this.players.sendMessage(Component.text(player.getName() + " \uD83D\uDD2B " + killer.getName(), NamedTextColor.RED));
                         }
                     }
 
@@ -356,7 +356,7 @@ public final class BattleGameState extends GameState {
             if (--this.timeLeft == 0) {
                 this.cancel();
 
-//                setupPlayerInventory(player.getInventory(), this.gamePlayer.getLoadout());
+                resupplyGuns(player.getInventory(), this.gamePlayer.getLoadout().playerClass());
 
                 player.setGameMode(GameMode.ADVENTURE);
                 player.teleport(chooseBestSpawnLocation());
@@ -368,6 +368,16 @@ public final class BattleGameState extends GameState {
             }
 
             player.sendTitlePart(TitlePart.SUBTITLE, Component.text("Respawning in " + this.timeLeft + "..."));
+        }
+
+        private static void resupplyGuns(PlayerInventory inventory, PlayerClass playerClass) {
+            List<GunItem> guns = playerClass.getGuns();
+
+            for (int i = 0; i < guns.size(); i++) {
+                ItemStack gunItemStack = guns.get(i).buildItemStack();
+
+                inventory.setItem(i, gunItemStack);
+            }
         }
     }
 }

@@ -31,6 +31,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -42,10 +43,6 @@ public final class StealthPlayerClass implements EventPlayerClass {
     private static final Sound REVEAL_SOUND = Sound.sound(Key.key("block.lava.extinguish"), Sound.Source.PLAYER, 0.5F, 2);
     private static final Sound CHARGE_DENIED_SOUND = Sound.sound(Key.key("entity.villager.no"), Sound.Source.MASTER, 1, 1.25F);
 
-    private static final GunItem PRIMARY_GUN = GameItems.SMG;
-    private static final GunItem SECONDARY_GUN = GameItems.SILENCED_PISTOL;
-    private static final ActiveAbilityItem ACTIVE_ABILITY = GameItems.STEALTH_ACTIVE_ABILITY;
-
     private final Map<UUID, InvisibilityChargeTask> invisChargeTasks = new HashMap<>();
     private final Map<UUID, CombatTimerTask> combatTimerTasks = new HashMap<>();
 
@@ -55,11 +52,17 @@ public final class StealthPlayerClass implements EventPlayerClass {
     }
 
     @Override
-    public Map<Integer, ItemStack> getItems() {
-        return Map.of(
-                0, PRIMARY_GUN.buildItemStack(),
-                1, SECONDARY_GUN.buildItemStack(),
-                2, ACTIVE_ABILITY.buildItemStack()
+    public List<GunItem> getGuns() {
+        return List.of(
+                GameItems.SMG,
+                GameItems.SILENCED_PISTOL
+        );
+    }
+
+    @Override
+    public List<ActiveAbilityItem> getActiveAbilities() {
+        return List.of(
+                GameItems.STEALTH_ACTIVE_ABILITY
         );
     }
 

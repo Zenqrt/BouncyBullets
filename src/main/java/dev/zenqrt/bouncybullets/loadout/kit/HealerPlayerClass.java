@@ -3,7 +3,7 @@ package dev.zenqrt.bouncybullets.loadout.kit;
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.item.GameItems;
-import dev.zenqrt.bouncybullets.item.items.abilities.HealerActiveAbilityItem;
+import dev.zenqrt.bouncybullets.item.items.abilities.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import org.bukkit.Bukkit;
@@ -19,9 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 final class HealerPlayerClass implements PlayerClass {
-
-    private static final GunItem PRIMARY_GUN = GameItems.PISTOL;
-    private static final HealerActiveAbilityItem ACTIVE_ABILITY = GameItems.HEALER_ACTIVE_ABILITY;
 
     private final List<BukkitTask> healTasks = new ArrayList<>();
 
@@ -62,10 +59,16 @@ final class HealerPlayerClass implements PlayerClass {
     }
 
     @Override
-    public Map<Integer, ItemStack> getItems() {
-        return Map.of(
-                0, PRIMARY_GUN.buildItemStack(),
-                1, ACTIVE_ABILITY.buildItemStack()
+    public List<GunItem> getGuns() {
+        return List.of(
+                GameItems.PISTOL
+        );
+    }
+
+    @Override
+    public List<ActiveAbilityItem> getActiveAbilities() {
+        return List.of(
+                GameItems.HEALER_ACTIVE_ABILITY
         );
     }
 

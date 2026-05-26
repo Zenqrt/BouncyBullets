@@ -22,16 +22,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 // TODO: Change active ability to marking player and dealing more damage to them for a short period of time
 // TODO: Ability: Make every player glowing and the next shot does twice as much damage
 final class SniperPlayerClass implements EventPlayerClass {
-
-    private static final GunItem PRIMARY_GUN = GameItems.SNIPER_RIFLE;
-    private static final GunItem SECONDARY_GUN = GameItems.PISTOL;
-    private static final ActiveAbilityItem ACTIVE_ABILITY = GameItems.SNIPER_ACTIVE_ABILITY;
 
     private final Map<UUID, Long> lastMoved = new HashMap<>();
     private final Map<UUID, BukkitTask> chargeTasks = new HashMap<>();
@@ -109,11 +106,17 @@ final class SniperPlayerClass implements EventPlayerClass {
     }
 
     @Override
-    public Map<Integer, ItemStack> getItems() {
-        return Map.of(
-                0, PRIMARY_GUN.buildItemStack(),
-                1, SECONDARY_GUN.buildItemStack(),
-                2, ACTIVE_ABILITY.buildItemStack()
+    public List<GunItem> getGuns() {
+        return List.of(
+                GameItems.SNIPER_RIFLE,
+                GameItems.PISTOL
+        );
+    }
+
+    @Override
+    public List<ActiveAbilityItem> getActiveAbilities() {
+        return List.of(
+                GameItems.SNIPER_ACTIVE_ABILITY
         );
     }
 

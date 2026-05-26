@@ -1,5 +1,7 @@
 package dev.zenqrt.bouncybullets.loadout;
 
+import dev.zenqrt.bouncybullets.item.items.abilities.ActiveAbilityItem;
+import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
 import dev.zenqrt.bouncybullets.loadout.kit.PlayerClass;
 import dev.zenqrt.bouncybullets.utils.ItemUtils;
 import org.bukkit.inventory.EquipmentSlot;
@@ -11,19 +13,23 @@ import org.jetbrains.annotations.Nullable;
 public record Loadout(PlayerClass playerClass) {
 
     public void giveItems(PlayerInventory inventory) {
-        this.playerClass.getItems().forEach(inventory::setItem);
+        for (GunItem gun : this.playerClass.getGuns()) {
+            ItemStack itemStack = gun.buildItemStack();
+
+            inventory.addItem(itemStack);
+        }
+
+        for (ActiveAbilityItem ability : this.playerClass.getActiveAbilities()) {
+            ItemStack itemStack = ability.buildItemStack();
+
+            inventory.addItem(itemStack);
+        }
 
         ItemStack helmet = setupArmorPiece(this.playerClass.getArmorEquipment().get(EquipmentSlot.HEAD));
         ItemStack chestplate = setupArmorPiece(this.playerClass.getArmorEquipment().get(EquipmentSlot.CHEST));
         ItemStack leggings = setupArmorPiece(this.playerClass.getArmorEquipment().get(EquipmentSlot.LEGS));
         ItemStack boots = setupArmorPiece(this.playerClass.getArmorEquipment().get(EquipmentSlot.FEET));
 
-//        ItemStack[] armorContents = {
-//                helmet,
-//                chestplate,
-//                leggings,
-//                boots
-//        };
         inventory.setHelmet(helmet);
         inventory.setChestplate(chestplate);
         inventory.setLeggings(leggings);

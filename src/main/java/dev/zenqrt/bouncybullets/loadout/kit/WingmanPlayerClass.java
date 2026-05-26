@@ -22,18 +22,45 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public final class WingmanPlayerClass implements EventPlayerClass {
 
-    private static final GunItem PRIMARY_GUN = GameItems.TWIN_PISTOL;
-    private static final ActiveAbilityItem ACTIVE_ABILITY = GameItems.WINGMAN_ACTIVE_ABILITY;
-
     private static final Sound DOUBLE_JUMP_SOUND = Sound.sound(Key.key("entity.bat.takeoff"), Sound.Source.MASTER, 1, 1.25F);
     private static final int DOUBLE_JUMP_COOLDOWN_TICKS = 100;          // 5 seconds
 
     private final Map<UUID, BukkitTask> doubleJumpTasks = new HashMap<>();
+
+    @Override
+    public String getName() {
+        return "Wingman";
+    }
+
+    @Override
+    public List<GunItem> getGuns() {
+        return List.of(
+                GameItems.TWIN_PISTOL
+        );
+    }
+
+    @Override
+    public List<ActiveAbilityItem> getActiveAbilities() {
+        return List.of(
+                GameItems.WINGMAN_ACTIVE_ABILITY
+        );
+    }
+
+    @Override
+    public Map<EquipmentSlot, ItemStack> getArmorEquipment() {
+        return Map.of(
+                EquipmentSlot.HEAD, new ItemStack(Material.NETHERITE_HELMET),
+                EquipmentSlot.CHEST, new ItemStack(Material.ELYTRA),
+                EquipmentSlot.LEGS, new ItemStack(Material.CHAINMAIL_LEGGINGS),
+                EquipmentSlot.FEET, new ItemStack(Material.DIAMOND_BOOTS)
+        );
+    }
 
     @Override
     public EventNode<Event> registerEvents(BouncyBulletGame game) {
@@ -116,29 +143,6 @@ public final class WingmanPlayerClass implements EventPlayerClass {
 
         if (leftoverTask != null)
             leftoverTask.cancel();
-    }
-
-    @Override
-    public String getName() {
-        return "Wingman";
-    }
-
-    @Override
-    public Map<Integer, ItemStack> getItems() {
-        return Map.of(
-                0, PRIMARY_GUN.buildItemStack(),
-                1, ACTIVE_ABILITY.buildItemStack()
-        );
-    }
-
-    @Override
-    public Map<EquipmentSlot, ItemStack> getArmorEquipment() {
-        return Map.of(
-                EquipmentSlot.HEAD, new ItemStack(Material.NETHERITE_HELMET),
-                EquipmentSlot.CHEST, new ItemStack(Material.ELYTRA),
-                EquipmentSlot.LEGS, new ItemStack(Material.CHAINMAIL_LEGGINGS),
-                EquipmentSlot.FEET, new ItemStack(Material.DIAMOND_BOOTS)
-        );
     }
 
     private class DoubleJumpCooldownTask extends BukkitRunnable {
