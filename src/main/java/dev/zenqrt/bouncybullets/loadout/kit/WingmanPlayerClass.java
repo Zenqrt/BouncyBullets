@@ -155,7 +155,7 @@ public final class WingmanPlayerClass implements EventPlayerClass {
 
         @Override
         public void run() {
-            if (this.ticks >= levelInterval) {
+            if (this.ticks >= this.levelInterval) {
                 this.ticks = 0;
 
                 int newLevel = this.player.getLevel() + 1;
@@ -166,15 +166,15 @@ public final class WingmanPlayerClass implements EventPlayerClass {
 
                 if (newLevel >= 5) {
                     this.cancel();
-                    WingmanPlayerClass.this.doubleJumpTasks.remove(player.getUniqueId());
+                    WingmanPlayerClass.this.doubleJumpTasks.remove(this.player.getUniqueId());
                 }
 
                 return;
             }
 
-            float lerp = (float) ticks / levelInterval;
+            float progress = (float) this.ticks / this.levelInterval;
 
-            this.player.setExp(Math.min(0.99F, lerp));
+            this.player.setExp(Math.min(1, progress));
             this.ticks++;
         }
     }

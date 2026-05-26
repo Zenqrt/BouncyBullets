@@ -21,7 +21,7 @@ import java.util.List;
 
 public final class WingmanActiveAbilityItem extends ActiveAbilityItem {
 
-    private static final int COOLDOWN_TICKS = 1200;
+    private static final int COOLDOWN_TICKS = 600;      // 30 seconds
     private static final BulletProperties BULLET_PROPERTIES = new BulletProperties(
             0,
             300,

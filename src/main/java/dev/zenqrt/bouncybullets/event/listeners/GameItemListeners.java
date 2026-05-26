@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Optional;
@@ -25,6 +26,9 @@ public final class GameItemListeners implements Listener {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND)
+            return;
+
         Player player = event.getPlayer();
         Optional<BouncyBulletGame> gameOptional = this.gameManager.findPlayerGame(player.getUniqueId());
 

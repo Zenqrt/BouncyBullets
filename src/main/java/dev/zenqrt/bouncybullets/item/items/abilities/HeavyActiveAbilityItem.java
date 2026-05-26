@@ -86,6 +86,8 @@ public final class HeavyActiveAbilityItem extends ActiveAbilityItem implements L
                 },
                 ABILITY_DURATION_TICKS
         );
+
+        player.setCooldown(super.material, COOLDOWN_TICKS);
     }
 
     private static void addGlowToArmor(PlayerInventory inventory) {
