@@ -37,7 +37,7 @@ public final class GameItems {
     );
     public static final MinigunGunItem MINIGUN = registerGun(
             new MinigunGunItem(
-                    new GunProperties(10, 1, 0.05, 0.03, 100, 2, 1),
+                    new GunProperties(10, 1, 0.08, 0.05, 100, 2, 1),
                     new BulletProperties(2, 350, -0.2F, 0.25, 1, 0.2F, 20, 2.5)
             )
     );
