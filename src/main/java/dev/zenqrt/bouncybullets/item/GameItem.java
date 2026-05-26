@@ -81,6 +81,10 @@ public abstract class GameItem {
         return itemStack;
     }
 
+    public Material getMaterial() {
+        return material;
+    }
+
     public String getKey() {
         return key;
     }

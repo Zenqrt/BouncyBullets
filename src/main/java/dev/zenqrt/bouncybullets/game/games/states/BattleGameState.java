@@ -8,6 +8,7 @@ import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.game.base.GameState;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
+import dev.zenqrt.bouncybullets.item.items.abilities.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
 import dev.zenqrt.bouncybullets.loadout.Loadout;
 import dev.zenqrt.bouncybullets.loadout.kit.EventPlayerClass;
@@ -164,6 +165,9 @@ public final class BattleGameState extends GameState {
             player.getInventory().clear();
             player.setGameMode(GameMode.SPECTATOR);
             player.clearActivePotionEffects();
+
+            for (ActiveAbilityItem ability : gamePlayer.getLoadout().playerClass().getActiveAbilities())
+                player.setCooldown(ability.getMaterial(), 0);
 
             this.sidebarMap.forEach((ignored, sidebar) -> sidebar.removeAllViewers());
             this.sidebarMap.clear();
