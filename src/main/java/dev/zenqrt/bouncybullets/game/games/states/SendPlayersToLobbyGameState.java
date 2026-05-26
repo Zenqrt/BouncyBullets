@@ -7,8 +7,6 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.lobby.LobbyManager;
 import org.bukkit.entity.Player;
 
-import java.util.List;
-
 public final class SendPlayersToLobbyGameState extends GameState {
 
     private final LobbyManager lobbyManager;
@@ -23,11 +21,9 @@ public final class SendPlayersToLobbyGameState extends GameState {
 
     @Override
     protected void onStateStart() {
-        List<Player> players = this.game.getPlayers().values().stream()
-                .map(BouncyBulletGamePlayer::getPlayer)
-                .toList();
+        for (BouncyBulletGamePlayer gamePlayer : this.game.getPlayers().values()) {
+            Player player = gamePlayer.getPlayer();
 
-        for (Player player : players) {
             this.lobbyManager.sendToLobby(player);
             this.gameManager.leaveGame(player, this.game);
         }
