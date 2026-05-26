@@ -1,5 +1,6 @@
 package dev.zenqrt.bouncybullets.loadout.kit;
 
+import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.event.EventNode;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.event.events.GunShootEvent;
@@ -17,6 +18,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
@@ -90,11 +92,7 @@ public final class WingmanPlayerClass implements EventPlayerClass {
                     if (previousTask != null)
                         previousTask.cancel();
 
-                    this.doubleJumpTasks.put(
-                            player.getUniqueId(),
-                            new DoubleJumpCooldownTask(player, DOUBLE_JUMP_COOLDOWN_TICKS)
-                                    .runTaskTimer(game.getPlugin(), 0, 1)
-                    );
+                    startDoubleJumpCharge(game.getPlugin(), player);
                 })
                 .build()
         );
@@ -114,6 +112,14 @@ public final class WingmanPlayerClass implements EventPlayerClass {
         return eventNode;
     }
 
+    private void startDoubleJumpCharge(Plugin plugin, Player player) {
+        this.doubleJumpTasks.put(
+                player.getUniqueId(),
+                new DoubleJumpCooldownTask(player, DOUBLE_JUMP_COOLDOWN_TICKS)
+                        .runTaskTimer(plugin, 0, 1)
+        );
+    }
+
     @Override
     public void onRespawn(BouncyBulletGamePlayer gamePlayer) {
         Player player = gamePlayer.getPlayer();
@@ -126,9 +132,13 @@ public final class WingmanPlayerClass implements EventPlayerClass {
 
     @Override
     public void onStartUse(BouncyBulletGamePlayer gamePlayer) {
-        gamePlayer.getPlayer().setAllowFlight(true);
-        gamePlayer.getPlayer().setLevel(0);
-        gamePlayer.getPlayer().setExp(0);
+        Player player = gamePlayer.getPlayer();
+
+        player.setAllowFlight(false);
+        player.setExp(0);
+        player.setLevel(0);
+
+        startDoubleJumpCharge(BouncyBulletsPlugin.getInstance(), player);
     }
 
     @Override
