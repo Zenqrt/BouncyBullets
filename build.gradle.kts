@@ -33,6 +33,9 @@ dependencies {
 
     implementation("com.github.stefvanschie.inventoryframework:IF:0.12.0")
 
+    implementation(platform("org.mongodb:mongodb-driver-bom:5.7.0"))
+    implementation("org.mongodb:mongodb-driver-sync")
+
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
