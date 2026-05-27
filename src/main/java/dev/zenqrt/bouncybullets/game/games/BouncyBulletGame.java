@@ -11,7 +11,6 @@ import dev.zenqrt.bouncybullets.game.games.states.PregameGameState;
 import dev.zenqrt.bouncybullets.game.games.states.SendPlayersToLobbyGameState;
 import dev.zenqrt.bouncybullets.loadout.Loadout;
 import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
-import dev.zenqrt.bouncybullets.player.GamePlayerList;
 import dev.zenqrt.bouncybullets.player.PlayerSessionManager;
 import dev.zenqrt.bouncybullets.stats.PlayerStatsManager;
 import net.kyori.adventure.text.Component;

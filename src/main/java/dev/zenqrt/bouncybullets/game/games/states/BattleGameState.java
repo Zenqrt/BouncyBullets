@@ -15,7 +15,7 @@ import dev.zenqrt.bouncybullets.loadout.Loadout;
 import dev.zenqrt.bouncybullets.loadout.kit.EventPlayerClass;
 import dev.zenqrt.bouncybullets.loadout.kit.PlayerClass;
 import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
-import dev.zenqrt.bouncybullets.player.GamePlayerList;
+import dev.zenqrt.bouncybullets.game.games.GamePlayerList;
 import dev.zenqrt.bouncybullets.sidebar.sidebars.GameSidebar;
 import dev.zenqrt.bouncybullets.stats.PlayerStatsManager;
 import dev.zenqrt.bouncybullets.utils.NMSConverter;

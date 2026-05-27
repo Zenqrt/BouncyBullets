@@ -1,6 +1,5 @@
-package dev.zenqrt.bouncybullets.player;
+package dev.zenqrt.bouncybullets.game.games;
 
-import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
