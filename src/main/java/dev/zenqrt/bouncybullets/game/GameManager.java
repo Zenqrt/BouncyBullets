@@ -12,10 +12,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameRules;
 import org.bukkit.World;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public final class GameManager {
 
@@ -36,7 +35,7 @@ public final class GameManager {
         World gameWorld = this.mapManager.createGameWorld(gameId, map);
         gameWorld.setGameRule(GameRules.LOCATOR_BAR, false);
 
-        FreeForAllActiveGameMap activeMap = new FreeForAllActiveGameMap(gameWorld, map.configuration());
+        FreeForAllActiveGameMap activeMap = new FreeForAllActiveGameMap(map, gameWorld, map.configuration());
 
         BouncyBulletGame game = new BouncyBulletGame(gameId, this.plugin, settings, activeMap, this, sessionManager, statsManager);
         this.games.put(gameId, game);
@@ -64,5 +63,11 @@ public final class GameManager {
         BouncyBulletGame game = this.games.get(gameId);
 
         return game == null ? Optional.empty() : Optional.of(game);
+    }
+
+    public Set<BouncyBulletGame> getAvailableGames() {
+        return this.games.values().stream()
+                .filter(BouncyBulletGame::canPlayersJoin)
+                .collect(Collectors.toSet());
     }
 }

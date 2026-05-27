@@ -4,6 +4,7 @@ import dev.zenqrt.bouncybullets.config.ServerConfig;
 import dev.zenqrt.bouncybullets.game.GameManager;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.GameSettings;
+import dev.zenqrt.bouncybullets.gui.GameSelectGui;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.map.GameMap;
@@ -15,32 +16,46 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import revxrsal.commands.annotation.Command;
 import revxrsal.commands.annotation.Named;
 import revxrsal.commands.annotation.Subcommand;
 import revxrsal.commands.bukkit.actor.BukkitCommandActor;
+import revxrsal.commands.bukkit.annotation.CommandPermission;
 import revxrsal.commands.exception.CommandErrorException;
 
 @Command({"bouncybullets", "bb"})
 public final class BouncyBulletsCommand {
 
+    private final GameSelectGui gameSelectGui;
     private final PlayerStatsManager statsManager;
     private final PlayerSessionManager sessionManager;
     private final ServerConfig config;
     private final GameMapManager mapManager;
     private final GameManager gameManager;
 
-    public BouncyBulletsCommand(GameManager gameManager, GameMapManager mapManager, ServerConfig config, PlayerSessionManager sessionManager, PlayerStatsManager statsManager) {
+    public BouncyBulletsCommand(Plugin plugin, GameManager gameManager, GameMapManager mapManager, ServerConfig config, PlayerSessionManager sessionManager, PlayerStatsManager statsManager) {
         this.gameManager = gameManager;
         this.mapManager = mapManager;
         this.config = config;
         this.sessionManager = sessionManager;
         this.statsManager = statsManager;
+
+        this.gameSelectGui = new GameSelectGui(gameManager, sessionManager);
+
+        Bukkit.getScheduler().runTaskTimer(
+                plugin,
+                this.gameSelectGui::updateGamesList,
+                0,
+                100     // 5 seconds
+        );
     }
 
     @Subcommand("setlobby")
+    @CommandPermission("bouncybullets.command.setlobby")
     public void onSetLobby(
             Player executor
     ) {
@@ -60,6 +75,7 @@ public final class BouncyBulletsCommand {
     }
 
     @Subcommand("give item")
+    @CommandPermission("bouncybullets.command.game.give")
     public void onGiveItem(
             Player executor,
             String gameItemId
@@ -74,6 +90,7 @@ public final class BouncyBulletsCommand {
     }
 
     @Subcommand("game create")
+    @CommandPermission("bouncybullets.command.game.create")
     public void onGameCreate(
             Player executor,
             @Named("map") String mapId,
@@ -101,26 +118,16 @@ public final class BouncyBulletsCommand {
 
     @Subcommand("game join")
     public void onGameJoin(
-            Player executor,
-            @Named("game_id") int gameId
+            Player executor
     ) {
         if (this.sessionManager.isInGame(executor.getUniqueId()))
-            throw new CommandErrorException("You are already in a game!");
+            throw new CommandErrorException("You cannot run that here!");
 
-        Messages.sendCommandInfo(executor, "Finding game...");
-
-        BouncyBulletGame game = this.gameManager.findGame(gameId)
-                .orElseThrow(() -> new CommandErrorException("Could not find game with id " + gameId));
-
-        Messages.sendCommandInfo(executor, "Joining game...");
-
-        if (!game.canPlayersJoin())
-            throw new CommandErrorException("This game isn't accepting players right now!");
-
-        this.sessionManager.joinGame(executor, game);
+        this.gameSelectGui.show(executor);
     }
 
     @Subcommand("game state next")
+    @CommandPermission("bouncybullets.command.game.state")
     public void onGameStateNext(
             Player executor
     ) {
@@ -132,6 +139,7 @@ public final class BouncyBulletsCommand {
     }
 
     @Subcommand("map reload")
+    @CommandPermission("bouncybullets.command.map.reload")
     public void onMapReload(
             BukkitCommandActor actor
     ) {
@@ -144,6 +152,7 @@ public final class BouncyBulletsCommand {
     }
 
     @Subcommand("map list")
+    @CommandPermission("bouncybullets.command.map.list")
     public void onMapList(
             BukkitCommandActor actor
     ) {

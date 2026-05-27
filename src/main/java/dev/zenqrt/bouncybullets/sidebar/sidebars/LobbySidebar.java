@@ -27,8 +27,8 @@ public final class LobbySidebar extends PacketSidebar {
 
         this.addLine("footer", Component.text("Dev server", NamedTextColor.DARK_GRAY).decorate(TextDecoration.ITALIC));
         this.addEmptyLine();
-        this.addLine("how_to_play_2", Component.text("/bb autojoin", NamedTextColor.GOLD));
-        this.addLine("how_to_play_1", Component.text("To play, run ", NamedTextColor.GRAY));
+        this.addLine("how_to_play_2", Component.text("/bb game join", NamedTextColor.GOLD));
+        this.addLine("how_to_play_1", Component.text("To play, run:", NamedTextColor.GRAY));
         this.addEmptyLine();
         this.addLine("win_loss_ratio", winLossRatioText(stats.getTotalWinLossRatio()));
         this.addLine("kill_death_ratio", killDeathRatioText(stats.getTotalKillDeathRatio()));
