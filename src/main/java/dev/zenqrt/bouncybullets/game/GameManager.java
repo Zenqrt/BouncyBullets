@@ -9,6 +9,7 @@ import dev.zenqrt.bouncybullets.lobby.LobbyManager;
 import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
 import dev.zenqrt.bouncybullets.map.GameMap;
 import dev.zenqrt.bouncybullets.map.GameMapManager;
+import dev.zenqrt.bouncybullets.stats.PlayerStatsManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRules;
 import org.bukkit.World;
@@ -24,16 +25,18 @@ public final class GameManager {
 
     private final Map<Integer, BouncyBulletGame> games = new HashMap<>();
     private final Map<UUID, BouncyBulletGame> playerGames = new HashMap<>();
+    private final PlayerStatsManager statsManager;
     private final LobbyManager lobbyManager;
     private final GameMapManager mapManager;
     private final BouncyBulletsPlugin plugin;
     private final AtomicInteger nextGameId;
 
-    public GameManager(BouncyBulletsPlugin plugin, GameMapManager mapManager, LobbyManager lobbyManager) {
+    public GameManager(BouncyBulletsPlugin plugin, GameMapManager mapManager, LobbyManager lobbyManager, PlayerStatsManager statsManager) {
         this.nextGameId = new AtomicInteger(0);
         this.plugin = plugin;
         this.mapManager = mapManager;
         this.lobbyManager = lobbyManager;
+        this.statsManager = statsManager;
     }
 
     public BouncyBulletGame createGame(GameSettings settings, GameMap map) {
@@ -44,7 +47,7 @@ public final class GameManager {
 
         FreeForAllActiveGameMap activeMap = new FreeForAllActiveGameMap(gameWorld, map.configuration());
 
-        BouncyBulletGame game = new BouncyBulletGame(gameId, this.plugin, settings, activeMap, this, this.lobbyManager);
+        BouncyBulletGame game = new BouncyBulletGame(gameId, this.plugin, settings, activeMap, this, this.lobbyManager, this.statsManager);
         this.games.put(gameId, game);
 
         return game;
@@ -73,7 +76,7 @@ public final class GameManager {
     }
 
     public void joinGame(Player player, BouncyBulletGame game) {
-        game.insertPlayer(player, new Loadout(PlayerClassType.STEALTH.getPlayerClass()));
+        game.insertPlayer(player, new Loadout(PlayerClassType.STEALTH));
         this.playerGames.put(player.getUniqueId(), game);
     }
 

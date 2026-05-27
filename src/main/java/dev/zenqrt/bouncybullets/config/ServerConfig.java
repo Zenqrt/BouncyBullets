@@ -9,6 +9,7 @@ import java.io.IOException;
 public final class ServerConfig {
 
     private Location lobbySpawn;
+
     private final YamlConfiguration config;
     private final File configFile;
 

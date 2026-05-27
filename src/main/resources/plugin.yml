@@ -4,13 +4,3 @@ main: dev.zenqrt.bouncybullets.BouncyBulletsPlugin
 api-version: '1.20'
 authors: [Walmqrt]
 description: A first person shooter minigame based on the main mechanic of bullets bouncing off of surfaces.
-commands:
-  freeze:
-    description: Freezes the current game state.
-  backup:
-    description: Creates a backup of the current world.
-  tpgameworld:
-    description: Teleports to the game world.
-  glow:
-    description: Gives the player a glowing effect.
-

@@ -48,7 +48,7 @@ final class SniperPlayerClass implements EventPlayerClass {
                     Player player = event.getShooter();
                     BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
 
-                    if (gamePlayer.getLoadout().playerClass() != this)
+                    if (gamePlayer.getLoadout().classType().getPlayerClass() != this)
                         return;
 
                     BulletProperties bulletProperties = event.getBulletProperties();

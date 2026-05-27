@@ -48,8 +48,8 @@ public final class ClassSelectGui extends ChestGui {
     private void displayClasses() {
         OutlinePane pane = new OutlinePane(7, 1);
 
-        for (PlayerClassType playerClass : PlayerClassType.values()) {
-            ItemStack icon = ItemUtils.clone(playerClass.getIcon());
+        for (PlayerClassType classType : PlayerClassType.values()) {
+            ItemStack icon = ItemUtils.clone(classType.getIcon());
 
             icon.setData(
                     DataComponentTypes.TOOLTIP_DISPLAY,
@@ -60,13 +60,13 @@ public final class ClassSelectGui extends ChestGui {
                             .build()
             );
             icon.editMeta(meta -> {
-                meta.displayName(AdventureUtils.withoutItalics(playerClass.getPlayerClass().getName(), NamedTextColor.GREEN));
+                meta.displayName(AdventureUtils.withoutItalics(classType.getPlayerClass().getName(), NamedTextColor.GREEN));
 
-                List<Component> lore = buildClassInformationLore(playerClass);
+                List<Component> lore = buildClassInformationLore(classType);
 
                 lore.add(Component.empty());
 
-                if (gamePlayer.getLoadout().playerClass() == playerClass.getPlayerClass()) {
+                if (this.gamePlayer.getLoadout().classType() == classType) {
                     meta.displayName(Objects.requireNonNull(meta.displayName()).decorate(TextDecoration.BOLD));
                     meta.addEnchant(Enchantment.UNBREAKING, 1, true);
                     meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -84,16 +84,16 @@ public final class ClassSelectGui extends ChestGui {
                 event.setCancelled(true);
 
                 if (event.isLeftClick()) {
-                    this.gamePlayer.setLoadout(new Loadout(playerClass.getPlayerClass()));
+                    this.gamePlayer.setLoadout(new Loadout(classType));
 
                     Player player = this.gamePlayer.getPlayer();
 
                     player.closeInventory();
                     player.sendMessage(Component.text("You have selected the ", NamedTextColor.GREEN)
-                            .append(Component.text(playerClass.getPlayerClass().getName(), NamedTextColor.YELLOW))
+                            .append(Component.text(classType.getPlayerClass().getName(), NamedTextColor.YELLOW))
                             .append(Component.text(" class!", NamedTextColor.GREEN)));
                 } else {
-                    new ClassInfoGui(this, playerClass).show(event.getWhoClicked());
+                    new ClassInfoGui(this, classType).show(event.getWhoClicked());
                 }
             }));
         }

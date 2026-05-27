@@ -4,6 +4,7 @@ import dev.zenqrt.bouncybullets.game.base.GameState;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
+import dev.zenqrt.bouncybullets.stats.PlayerStatsManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -18,32 +19,39 @@ import java.util.List;
 public final class AnnounceWinnerGameState extends GameState {
 
     private final int admirationTicks;
-    private final GamePlayerList players;
+    private final PlayerStatsManager statsManager;
     private final BouncyBulletGame game;
 
-    public AnnounceWinnerGameState(BouncyBulletGame game, GamePlayerList players, int admirationTicks) {
+    public AnnounceWinnerGameState(BouncyBulletGame game, PlayerStatsManager statsManager, int admirationTicks) {
         this.game = game;
-        this.players = players;
+        this.statsManager = statsManager;
         this.admirationTicks = admirationTicks;
     }
 
     @Override
     protected void onStateStart() {
-        String winnerName = getWinner().getPlayer().getName();
+        GamePlayerList players = this.game.getPlayers();
 
         List<Component> topKillersLines = new ArrayList<>();
-        List<BouncyBulletGamePlayer> topKillers = this.players.values().stream()
+        List<BouncyBulletGamePlayer> topKillers = players.values().stream()
                 .sorted(Comparator.comparingInt(BouncyBulletGamePlayer::getKills).reversed())
                 .toList();
 
-        for (int i = 0; i < topKillers.size(); i++) {
+        BouncyBulletGamePlayer winner = topKillers.getFirst();
+        String winnerName = winner.getPlayer().getName();
+
+        this.statsManager.recordWin(winner);
+        topKillersLines.add(
+                createPlacementText(1, winner)
+        );
+
+        for (int i = 1; i < topKillers.size(); i++) {
             BouncyBulletGamePlayer gamePlayer = topKillers.get(i);
 
+            this.statsManager.recordLoss(gamePlayer);
+
             topKillersLines.add(
-                    Component.text((i + 1) + ". ", NamedTextColor.WHITE)
-                            .append(Component.text(gamePlayer.getPlayer().getName(), NamedTextColor.AQUA))
-                            .append(Component.text(" - ", NamedTextColor.GRAY))
-                            .append(Component.text(gamePlayer.getKills(), NamedTextColor.YELLOW))
+                    createPlacementText(i + 1, gamePlayer)
             );
         }
 
@@ -56,12 +64,12 @@ public final class AnnounceWinnerGameState extends GameState {
                         topKillersLines
                 );
 
-        this.players.sendMessage(leaderboard);
+        players.sendMessage(leaderboard);
 
-        this.players.showTitle(Title.title(
+        players.showTitle(Title.title(
                 Component.text("The winner is...", NamedTextColor.AQUA),
                 Component.text(winnerName, NamedTextColor.YELLOW)));
-        this.players.sendMessage(
+        players.sendMessage(
                 Component.empty()
                         .append(Component.text("\nWinner: ", NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
                         .append(Component.text(winnerName, NamedTextColor.WHITE))
@@ -70,13 +78,15 @@ public final class AnnounceWinnerGameState extends GameState {
         Bukkit.getScheduler().runTaskLater(
                 this.game.getPlugin(),
                 this.game::switchNextState,
-                admirationTicks
+                this.admirationTicks
         );
     }
 
-    private BouncyBulletGamePlayer getWinner() {
-        return players.values().stream()
-                .max(Comparator.comparing(BouncyBulletGamePlayer::getKills))
-                .orElse(null);
+    private static Component createPlacementText(int placement, BouncyBulletGamePlayer gamePlayer) {
+        return Component.text(placement + ". ", NamedTextColor.WHITE)
+                .append(Component.text(gamePlayer.getPlayer().getName(), NamedTextColor.AQUA))
+                .append(Component.text(" - ", NamedTextColor.GRAY))
+                .append(Component.text(gamePlayer.getKills(), NamedTextColor.YELLOW));
     }
+
 }

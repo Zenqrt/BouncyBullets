@@ -3,6 +3,7 @@ package dev.zenqrt.bouncybullets.loadout;
 import dev.zenqrt.bouncybullets.item.items.abilities.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
 import dev.zenqrt.bouncybullets.loadout.kit.PlayerClass;
+import dev.zenqrt.bouncybullets.loadout.kit.PlayerClassType;
 import dev.zenqrt.bouncybullets.utils.ItemUtils;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
@@ -10,25 +11,31 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.Nullable;
 
-public record Loadout(PlayerClass playerClass) {
+import java.util.Map;
+
+public record Loadout(PlayerClassType classType) {
 
     public void giveItems(PlayerInventory inventory) {
-        for (GunItem gun : this.playerClass.getGuns()) {
+        PlayerClass playerClass = this.classType.getPlayerClass();
+
+        for (GunItem gun : playerClass.getGuns()) {
             ItemStack itemStack = gun.buildItemStack();
 
             inventory.addItem(itemStack);
         }
 
-        for (ActiveAbilityItem ability : this.playerClass.getActiveAbilities()) {
+        for (ActiveAbilityItem ability : playerClass.getActiveAbilities()) {
             ItemStack itemStack = ability.buildItemStack();
 
             inventory.addItem(itemStack);
         }
 
-        ItemStack helmet = setupArmorPiece(this.playerClass.getArmorEquipment().get(EquipmentSlot.HEAD));
-        ItemStack chestplate = setupArmorPiece(this.playerClass.getArmorEquipment().get(EquipmentSlot.CHEST));
-        ItemStack leggings = setupArmorPiece(this.playerClass.getArmorEquipment().get(EquipmentSlot.LEGS));
-        ItemStack boots = setupArmorPiece(this.playerClass.getArmorEquipment().get(EquipmentSlot.FEET));
+        Map<EquipmentSlot, ItemStack> armor = playerClass.getArmorEquipment();
+
+        ItemStack helmet = setupArmorPiece(armor.get(EquipmentSlot.HEAD));
+        ItemStack chestplate = setupArmorPiece(armor.get(EquipmentSlot.CHEST));
+        ItemStack leggings = setupArmorPiece(armor.get(EquipmentSlot.LEGS));
+        ItemStack boots = setupArmorPiece(armor.get(EquipmentSlot.FEET));
 
         inventory.setHelmet(helmet);
         inventory.setChestplate(chestplate);

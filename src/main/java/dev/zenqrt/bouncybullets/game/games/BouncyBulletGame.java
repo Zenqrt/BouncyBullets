@@ -13,6 +13,7 @@ import dev.zenqrt.bouncybullets.loadout.Loadout;
 import dev.zenqrt.bouncybullets.lobby.LobbyManager;
 import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
+import dev.zenqrt.bouncybullets.stats.PlayerStatsManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -30,7 +31,7 @@ public final class BouncyBulletGame extends Game {
     private final GameSettings gameSettings;
     private final BouncyBulletsPlugin plugin;
 
-    public BouncyBulletGame(int id, BouncyBulletsPlugin plugin, GameSettings gameSettings, FreeForAllActiveGameMap gameMap, GameManager gameManager, LobbyManager lobbyManager) {
+    public BouncyBulletGame(int id, BouncyBulletsPlugin plugin, GameSettings gameSettings, FreeForAllActiveGameMap gameMap, GameManager gameManager, LobbyManager lobbyManager, PlayerStatsManager statsManager) {
         super(id);
 
         this.plugin = plugin;
@@ -41,8 +42,8 @@ public final class BouncyBulletGame extends Game {
 
         this.states = List.of(
                 new PregameGameState(this, this.players),
-                new BattleGameState(this, this.players, gameMap),
-                new AnnounceWinnerGameState(this, this.players, 200),  // 10 seconds
+                new BattleGameState(this, statsManager, this.players, gameMap),
+                new AnnounceWinnerGameState(this, statsManager, 200),  // 10 seconds
                 new SendPlayersToLobbyGameState(this, gameManager, lobbyManager)
         );
     }
