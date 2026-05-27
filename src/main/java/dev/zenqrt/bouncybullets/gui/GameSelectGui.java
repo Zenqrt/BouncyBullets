@@ -45,7 +45,7 @@ public final class GameSelectGui extends ChestGui {
             GuiItem guiItem = new GuiItem(
                     createGameItemStack(game),
                     event -> {
-                        if (!(event.getWhoClicked() instanceof Player player))
+                        if (!(event.getWhoClicked() instanceof Player player) || !game.canPlayersJoin())
                             return;
 
                         this.sessionManager.joinGame(player, game);
