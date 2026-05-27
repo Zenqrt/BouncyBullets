@@ -41,6 +41,10 @@ public final class PlayerStatsManager {
         this.statsDirty.clear();
     }
 
+    public boolean hasNoDirty() {
+        return this.statsDirty.isEmpty();
+    }
+
     public CompletableFuture<Void> loadStatsAsync(UUID uuid) {
         return this.repository.load(uuid)
                 .thenAccept(optionalStats ->
@@ -54,7 +58,7 @@ public final class PlayerStatsManager {
 
     private PlayerStats createNew(UUID uuid) {
         markDirty(uuid);
-        
+
         return new PlayerStats();
     }
 

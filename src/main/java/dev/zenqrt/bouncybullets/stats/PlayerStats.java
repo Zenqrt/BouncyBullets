@@ -63,10 +63,16 @@ public final class PlayerStats {
     }
 
     public float getTotalKillDeathRatio() {
+        if (this.totalDeaths <= 0)
+            return this.totalKills;
+
         return (float) this.totalKills / this.totalDeaths;
     }
 
     public float getTotalWinLossRatio() {
+        if (this.totalLosses <= 0)
+            return this.totalWins;
+
         return (float) this.totalWins / this.totalLosses;
     }
 

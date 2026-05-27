@@ -16,7 +16,7 @@ import dev.zenqrt.bouncybullets.loadout.kit.EventPlayerClass;
 import dev.zenqrt.bouncybullets.loadout.kit.PlayerClass;
 import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
 import dev.zenqrt.bouncybullets.player.GamePlayerList;
-import dev.zenqrt.bouncybullets.sidebar.sidebars.BouncyBulletsSidebar;
+import dev.zenqrt.bouncybullets.sidebar.sidebars.GameSidebar;
 import dev.zenqrt.bouncybullets.stats.PlayerStatsManager;
 import dev.zenqrt.bouncybullets.utils.NMSConverter;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
@@ -73,7 +73,7 @@ public final class BattleGameState extends GameState {
     private final EventNode<PlayerEvent> playerEventNode;
     private final EventNode<EntityEvent> playerEntityEventNode;
 
-    private final Map<UUID, BouncyBulletsSidebar> sidebarMap = new HashMap<>();
+    private final Map<UUID, GameSidebar> sidebarMap = new HashMap<>();
 
     private final TaskManager taskManager;
     private final BouncyBulletGame game;
@@ -126,7 +126,7 @@ public final class BattleGameState extends GameState {
 
             team.addPlayer(player);
 
-            BouncyBulletsSidebar sidebar = new BouncyBulletsSidebar(this.game.getGameSettings().gameTime(), initialTopPlayers);
+            GameSidebar sidebar = new GameSidebar(this.game.getGameSettings().gameTime(), initialTopPlayers);
             sidebar.addViewer(NMSConverter.serverPlayer(player));
 
             this.sidebarMap.put(player.getUniqueId(), sidebar);
@@ -281,7 +281,7 @@ public final class BattleGameState extends GameState {
     }
 
     private void tryRemoveSidebar(Player player) {
-        BouncyBulletsSidebar sidebar = this.sidebarMap.get(player.getUniqueId());
+        GameSidebar sidebar = this.sidebarMap.get(player.getUniqueId());
 
         if (sidebar == null)
             return;
@@ -289,8 +289,8 @@ public final class BattleGameState extends GameState {
         sidebar.removeViewer(NMSConverter.serverPlayer(player));
     }
 
-    private void updateSidebar(UUID uuid, Consumer<BouncyBulletsSidebar> updateHandler) {
-        BouncyBulletsSidebar sidebar = this.sidebarMap.get(uuid);
+    private void updateSidebar(UUID uuid, Consumer<GameSidebar> updateHandler) {
+        GameSidebar sidebar = this.sidebarMap.get(uuid);
         updateHandler.accept(sidebar);
     }
 
@@ -301,7 +301,7 @@ public final class BattleGameState extends GameState {
                 .limit(3)
                 .toList();
 
-        for (BouncyBulletsSidebar sidebar : this.sidebarMap.values()) {
+        for (GameSidebar sidebar : this.sidebarMap.values()) {
             for (int i = topKillers.size() - 1; i >= 0; i--) {
                 BouncyBulletGamePlayer gamePlayer = topKillers.get(i);
 
@@ -350,7 +350,7 @@ public final class BattleGameState extends GameState {
                 BattleGameState.this.game.switchNextState();
             }
 
-            for (BouncyBulletsSidebar sidebar : BattleGameState.this.sidebarMap.values()) {
+            for (GameSidebar sidebar : BattleGameState.this.sidebarMap.values()) {
                 sidebar.setGameTime(this.timeLeft);
             }
         }

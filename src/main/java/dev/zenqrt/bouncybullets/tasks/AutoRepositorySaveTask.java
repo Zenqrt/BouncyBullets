@@ -16,6 +16,9 @@ public final class AutoRepositorySaveTask implements Runnable {
 
     @Override
     public void run() {
+        if (this.statsManager.hasNoDirty())
+            return;
+
         this.logger.info("Saving dirty-marked player stats...");
 
         this.statsManager.saveDirty();

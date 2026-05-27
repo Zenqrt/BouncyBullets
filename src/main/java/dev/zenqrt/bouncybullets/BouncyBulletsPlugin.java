@@ -9,8 +9,9 @@ import dev.zenqrt.bouncybullets.event.listeners.PlayerJoinListeners;
 import dev.zenqrt.bouncybullets.event.listeners.PlayerListeners;
 import dev.zenqrt.bouncybullets.game.GameManager;
 import dev.zenqrt.bouncybullets.item.GameItems;
-import dev.zenqrt.bouncybullets.lobby.LobbyManager;
+import dev.zenqrt.bouncybullets.lobby.LobbyInstance;
 import dev.zenqrt.bouncybullets.map.GameMapManager;
+import dev.zenqrt.bouncybullets.player.PlayerSessionManager;
 import dev.zenqrt.bouncybullets.stats.PlayerStatsManager;
 import dev.zenqrt.bouncybullets.stats.database.JSONPlayerStatsRepository;
 import dev.zenqrt.bouncybullets.stats.database.PlayerStatsRepository;
@@ -48,19 +49,21 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
         this.mapManager = new GameMapManager(this, new File(getDataFolder(), "maps"));
         this.mapManager.loadGameMaps();
 
-        LobbyManager lobbyManager = new LobbyManager(serverConfig);
-        GameManager gameManager = new GameManager(this, this.mapManager, lobbyManager, this.statsManager);
+        LobbyInstance lobby = new LobbyInstance(serverConfig.getLobbySpawn());
+
+        GameManager gameManager = new GameManager(this, this.mapManager);
+        PlayerSessionManager sessionManager = new PlayerSessionManager(lobby, this.statsManager);
 
         Lamp<BukkitCommandActor> lamp = BukkitLamp.builder(this).build();
         lamp.register(
-                new BouncyBulletsCommand(gameManager, this.mapManager, serverConfig, lobbyManager),
+                new BouncyBulletsCommand(gameManager, this.mapManager, serverConfig, sessionManager, this.statsManager),
                 new BackupCommand(this)
         );
 
-        Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(this.statsManager, gameManager, lobbyManager, serverConfig), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(lobby, this.statsManager, sessionManager), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListeners(), this);
-        Bukkit.getPluginManager().registerEvents(new GameItemListeners(gameManager), this);
-        Bukkit.getPluginManager().registerEvents(new GunListeners(gameManager), this);
+        Bukkit.getPluginManager().registerEvents(new GameItemListeners(sessionManager), this);
+        Bukkit.getPluginManager().registerEvents(new GunListeners(sessionManager), this);
         Bukkit.getPluginManager().registerEvents(GameItems.SNIPER_ACTIVE_ABILITY, this);
         Bukkit.getPluginManager().registerEvents(GameItems.HEAVY_ACTIVE_ABILITY, this);
 

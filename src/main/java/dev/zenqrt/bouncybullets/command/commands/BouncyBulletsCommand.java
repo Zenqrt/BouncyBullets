@@ -6,9 +6,10 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.GameSettings;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.GameItems;
-import dev.zenqrt.bouncybullets.lobby.LobbyManager;
 import dev.zenqrt.bouncybullets.map.GameMap;
 import dev.zenqrt.bouncybullets.map.GameMapManager;
+import dev.zenqrt.bouncybullets.player.PlayerSessionManager;
+import dev.zenqrt.bouncybullets.stats.PlayerStatsManager;
 import dev.zenqrt.bouncybullets.utils.Messages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -25,16 +26,18 @@ import revxrsal.commands.exception.CommandErrorException;
 @Command({"bouncybullets", "bb"})
 public final class BouncyBulletsCommand {
 
-    private final LobbyManager lobbyManager;
+    private final PlayerStatsManager statsManager;
+    private final PlayerSessionManager sessionManager;
     private final ServerConfig config;
     private final GameMapManager mapManager;
     private final GameManager gameManager;
 
-    public BouncyBulletsCommand(GameManager gameManager, GameMapManager mapManager, ServerConfig config, LobbyManager lobbyManager) {
+    public BouncyBulletsCommand(GameManager gameManager, GameMapManager mapManager, ServerConfig config, PlayerSessionManager sessionManager, PlayerStatsManager statsManager) {
         this.gameManager = gameManager;
         this.mapManager = mapManager;
         this.config = config;
-        this.lobbyManager = lobbyManager;
+        this.sessionManager = sessionManager;
+        this.statsManager = statsManager;
     }
 
     @Subcommand("setlobby")
@@ -53,8 +56,7 @@ public final class BouncyBulletsCommand {
     public void onLobby(
             Player executor
     ) {
-        this.lobbyManager.sendToLobby(executor);
-        this.gameManager.tryLeaveGame(executor.getUniqueId());
+        this.sessionManager.joinLobby(executor, true);
     }
 
     @Subcommand("give item")
@@ -85,7 +87,7 @@ public final class BouncyBulletsCommand {
         GameMap map = this.mapManager.findGameMap(mapId)
                 .orElseThrow(() -> new CommandErrorException("Could not find map '" + mapId + "'"));
 
-        BouncyBulletGame game = this.gameManager.createGame(settings, map);
+        BouncyBulletGame game = this.gameManager.createGame(settings, map, this.sessionManager, this.statsManager);
         game.start();
 
         Messages.sendCommandSuccess(executor, "Created game with id " + game.getId());
@@ -94,7 +96,7 @@ public final class BouncyBulletsCommand {
             return;
 
         Messages.sendCommandInfo(executor, "Joining game...");
-        this.gameManager.joinGame(executor, game);
+        this.sessionManager.joinGame(executor, game);
     }
 
     @Subcommand("game join")
@@ -102,7 +104,7 @@ public final class BouncyBulletsCommand {
             Player executor,
             @Named("game_id") int gameId
     ) {
-        if (this.gameManager.isInGame(executor.getUniqueId()))
+        if (this.sessionManager.isInGame(executor.getUniqueId()))
             throw new CommandErrorException("You are already in a game!");
 
         Messages.sendCommandInfo(executor, "Finding game...");
@@ -111,14 +113,18 @@ public final class BouncyBulletsCommand {
                 .orElseThrow(() -> new CommandErrorException("Could not find game with id " + gameId));
 
         Messages.sendCommandInfo(executor, "Joining game...");
-        this.gameManager.joinGame(executor, game);
+
+        if (!game.canPlayersJoin())
+            throw new CommandErrorException("This game isn't accepting players right now!");
+
+        this.sessionManager.joinGame(executor, game);
     }
 
     @Subcommand("game state next")
     public void onGameStateNext(
             Player executor
     ) {
-        BouncyBulletGame game = this.gameManager.findPlayerGame(executor.getUniqueId())
+        BouncyBulletGame game = this.sessionManager.findGameSession(executor.getUniqueId())
                 .orElseThrow(() -> new CommandErrorException("You are not in a game!"));
 
         Messages.sendCommandInfo(executor, "Switching to next state...");
