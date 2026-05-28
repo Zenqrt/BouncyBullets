@@ -10,6 +10,7 @@ import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.map.GameMap;
 import dev.zenqrt.bouncybullets.map.GameMapManager;
 import dev.zenqrt.bouncybullets.player.PlayerSessionManager;
+import dev.zenqrt.bouncybullets.stats.PlayerStats;
 import dev.zenqrt.bouncybullets.stats.PlayerStatsManager;
 import dev.zenqrt.bouncybullets.utils.Messages;
 import net.kyori.adventure.text.Component;
@@ -26,6 +27,8 @@ import revxrsal.commands.annotation.Subcommand;
 import revxrsal.commands.bukkit.actor.BukkitCommandActor;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
 import revxrsal.commands.exception.CommandErrorException;
+
+import java.util.List;
 
 @Command({"bouncybullets", "bb"})
 public final class BouncyBulletsCommand {
@@ -170,5 +173,36 @@ public final class BouncyBulletsCommand {
                 );
 
         actor.sender().sendMessage(list);
+    }
+
+    @Subcommand("stats")
+    public void onStats(
+            BukkitCommandActor actor
+    ) {
+        PlayerStats stats = this.statsManager.getStatsOrThrow(actor.uniqueId());
+
+        Component details =
+                Component.join(
+                        JoinConfiguration.builder()
+                                .prefix(Component.text("Your Stats:\n", NamedTextColor.GOLD)
+                                        .decorate(TextDecoration.BOLD))
+                                .separator(Component.newline())
+                                .build(),
+                        List.of(
+                                createStatText("Games played", stats.getGamesPlayed()),
+                                createStatText("Total kills", stats.getTotalKills()),
+                                createStatText("Total deaths", stats.getTotalDeaths()),
+                                createStatText("Total wins", stats.getTotalWins()),
+                                createStatText("Total losses", stats.getTotalLosses())
+                        )
+                );
+
+        actor.sender().sendMessage(details);
+    }
+
+    private static Component createStatText(String stat, Object value) {
+        return Component.text("  " + stat + ": ", NamedTextColor.WHITE)
+                .append(Component.text(value.toString(), NamedTextColor.GREEN));
+
     }
 }
