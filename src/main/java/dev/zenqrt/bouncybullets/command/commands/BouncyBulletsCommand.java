@@ -5,6 +5,7 @@ import dev.zenqrt.bouncybullets.game.GameManager;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.GameSettings;
 import dev.zenqrt.bouncybullets.gui.GameSelectGui;
+import dev.zenqrt.bouncybullets.gui.PlayerStatsGui;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.map.GameMap;
@@ -25,8 +26,6 @@ import revxrsal.commands.annotation.Subcommand;
 import revxrsal.commands.bukkit.actor.BukkitCommandActor;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
 import revxrsal.commands.exception.CommandErrorException;
-
-import java.util.List;
 
 @Command({"bouncybullets", "bb"})
 public final class BouncyBulletsCommand {
@@ -166,32 +165,11 @@ public final class BouncyBulletsCommand {
 
     @Subcommand("stats")
     public void onStats(
-            BukkitCommandActor actor
+            Player executor
     ) {
-        PlayerStats stats = this.statsManager.getStatsOrThrow(actor.uniqueId());
+        PlayerStats stats = this.statsManager.getStatsOrThrow(executor.getUniqueId());
 
-        Component details =
-                Component.join(
-                        JoinConfiguration.builder()
-                                .prefix(Component.text("Your Stats:\n", NamedTextColor.GOLD)
-                                        .decorate(TextDecoration.BOLD))
-                                .separator(Component.newline())
-                                .build(),
-                        List.of(
-                                createStatText("Games played", stats.getGamesPlayed()),
-                                createStatText("Total kills", stats.getTotalKills()),
-                                createStatText("Total deaths", stats.getTotalDeaths()),
-                                createStatText("Total wins", stats.getTotalWins()),
-                                createStatText("Total losses", stats.getTotalLosses())
-                        )
-                );
-
-        actor.sender().sendMessage(details);
-    }
-
-    private static Component createStatText(String stat, Object value) {
-        return Component.text("  " + stat + ": ", NamedTextColor.WHITE)
-                .append(Component.text(value.toString(), NamedTextColor.GREEN));
-
+        new PlayerStatsGui(executor.getName(), stats)
+                .show(executor);
     }
 }

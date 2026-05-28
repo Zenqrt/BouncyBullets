@@ -1,10 +1,14 @@
 package dev.zenqrt.bouncybullets.utils;
 
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
+import com.github.stefvanschie.inventoryframework.gui.type.util.Gui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.Pane;
+import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -24,6 +28,27 @@ public final class GuiUtils {
         );
 
         pane.addItem(new GuiItem(background));
+
+        return pane;
+    }
+
+    public static Pane createBackButtonPane(Gui lastGui) {
+        StaticPane pane = new StaticPane(9, 1);
+
+        ItemStack backItemStack = ItemUtils.createWithItemName(
+                Material.ARROW,
+                Component.text("Back", NamedTextColor.GRAY)
+        );
+
+        GuiItem back = new GuiItem(
+                backItemStack,
+                event -> {
+                    event.setCancelled(true);
+                    lastGui.show(event.getWhoClicked());
+                }
+        );
+
+        pane.addItem(back, 0, 0);
 
         return pane;
     }

@@ -2,15 +2,13 @@ package dev.zenqrt.bouncybullets.sidebar.sidebars;
 
 import dev.zenqrt.bouncybullets.sidebar.PacketSidebar;
 import dev.zenqrt.bouncybullets.stats.PlayerStats;
+import dev.zenqrt.bouncybullets.utils.DecimalFormats;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
-import java.text.DecimalFormat;
-
 public final class LobbySidebar extends PacketSidebar {
 
-    private static final DecimalFormat SHORT_DECIMAL_FORMAT = new DecimalFormat("0.00");
     /*
     BOUNCY BULLETS
     ----------------
@@ -40,12 +38,12 @@ public final class LobbySidebar extends PacketSidebar {
 
     private static Component winLossRatioText(float winLossRatio) {
         return Component.text("WLR: ", NamedTextColor.WHITE)
-                .append(Component.text(SHORT_DECIMAL_FORMAT.format(winLossRatio), NamedTextColor.AQUA));
+                .append(Component.text(DecimalFormats.SHORT_DECIMAL_FORMAT_2.format(winLossRatio), NamedTextColor.AQUA));
     }
 
     private static Component killDeathRatioText(float killDeathRatio) {
         return Component.text("KDR: ", NamedTextColor.WHITE)
-                .append(Component.text(SHORT_DECIMAL_FORMAT.format(killDeathRatio), NamedTextColor.RED));
+                .append(Component.text(DecimalFormats.SHORT_DECIMAL_FORMAT_2.format(killDeathRatio), NamedTextColor.RED));
     }
 
     private static Component totalWinsText(int totalWins) {

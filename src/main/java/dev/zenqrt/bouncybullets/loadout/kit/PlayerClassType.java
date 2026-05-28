@@ -25,9 +25,7 @@ public enum PlayerClassType {
                     "<gold>Passive Ability: <aqua>Surprise Attack",
                     "<gray>After emerging from being invisible, gain <aqua>Speed II <gray>for <green>5s<gray>."
     )),
-    HEALER(new HealerPlayerClass(), Material.SPLASH_POTION, meta -> {
-        ((PotionMeta) meta).setBasePotionType(PotionType.HEALING);
-    },
+    HEALER(new HealerPlayerClass(), Material.SPLASH_POTION, meta -> ((PotionMeta) meta).setBasePotionType(PotionType.HEALING),
             List.of(
                     Component.text("BB-Pistol", NamedTextColor.GRAY),
                     Component.text("Miracle", NamedTextColor.LIGHT_PURPLE)
@@ -84,6 +82,8 @@ public enum PlayerClassType {
 //            List.of()
 //    )
     ;
+
+    public static final PlayerClassType[] VALUES = PlayerClassType.values();
 
     private final PlayerClass playerClass;
     private final ItemStack icon;
