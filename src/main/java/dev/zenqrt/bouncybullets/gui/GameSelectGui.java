@@ -34,11 +34,11 @@ public final class GameSelectGui extends ChestGui implements Listener {
     private final GameManager gameManager;
 
     public GameSelectGui(GameManager gameManager, PlayerSessionManager sessionManager) {
-        super(4, "Available Games");
+        super(5, "Available Games");
 
         this.gameManager = gameManager;
         this.sessionManager = sessionManager;
-        this.gamesListPane = new OutlinePane(7, 2);
+        this.gamesListPane = new OutlinePane(7, 3);
 
         this.setOnGlobalClick(event -> event.setCancelled(true));
         this.addPane(Slot.fromXY(0, 0), GuiUtils.createBackgroundPane(getRows()));
@@ -52,7 +52,7 @@ public final class GameSelectGui extends ChestGui implements Listener {
     }
 
     private static OutlinePane createBlankBackgroundPane() {
-        OutlinePane pane = new OutlinePane(7, 2, Pane.Priority.LOW);
+        OutlinePane pane = new OutlinePane(7, 3, Pane.Priority.LOW);
 
         pane.addItem(
                 new GuiItem(new ItemStack(Material.AIR))
