@@ -1,4 +1,14 @@
 #########################
+# Game Configuration
+#########################
+game:
+  maintain_available: 2   # Number of games to keep available for players to join
+  default_settings:
+    min_players: 4
+    max_players: 12
+    game_time: 300    # seconds
+
+#########################
 # Database Configuration
 #########################
 
