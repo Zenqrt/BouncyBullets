@@ -135,6 +135,8 @@ public final class BattleGameState extends GameState {
             player.teleport(randomSpawn);
 
             gamePlayer.setAlive(true);
+
+            this.statsManager.recordGamePlayed(gamePlayer);
         });
 
         this.taskManager.runTaskTimer(

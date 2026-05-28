@@ -133,8 +133,12 @@ public final class PlayerStatsManager {
     }
 
     public void recordGamePlayed(BouncyBulletGamePlayer gamePlayer) {
+        recordGamePlayed(gamePlayer.getUuid());
+    }
+
+    public void recordGamePlayed(UUID uuid) {
         recordStats(
-                gamePlayer.getUuid(),
+                uuid,
                 PlayerStats::addGamesPlayed
         );
     }
