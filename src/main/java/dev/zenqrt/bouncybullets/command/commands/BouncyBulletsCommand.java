@@ -17,7 +17,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -33,28 +32,18 @@ import java.util.List;
 @Command({"bouncybullets", "bb"})
 public final class BouncyBulletsCommand {
 
-    private final GameSelectGui gameSelectGui;
     private final PlayerStatsManager statsManager;
     private final PlayerSessionManager sessionManager;
     private final ServerConfig config;
     private final GameMapManager mapManager;
     private final GameManager gameManager;
 
-    public BouncyBulletsCommand(Plugin plugin, GameManager gameManager, GameMapManager mapManager, ServerConfig config, PlayerSessionManager sessionManager, PlayerStatsManager statsManager) {
+    public BouncyBulletsCommand(GameManager gameManager, GameMapManager mapManager, ServerConfig config, PlayerSessionManager sessionManager, PlayerStatsManager statsManager) {
         this.gameManager = gameManager;
         this.mapManager = mapManager;
         this.config = config;
         this.sessionManager = sessionManager;
         this.statsManager = statsManager;
-
-        this.gameSelectGui = new GameSelectGui(gameManager, sessionManager);
-
-        Bukkit.getScheduler().runTaskTimer(
-                plugin,
-                this.gameSelectGui::updateGamesList,
-                0,
-                100     // 5 seconds
-        );
     }
 
     @Subcommand("setlobby")
@@ -126,7 +115,8 @@ public final class BouncyBulletsCommand {
         if (this.sessionManager.isInGame(executor.getUniqueId()))
             throw new CommandErrorException("You cannot run that here!");
 
-        this.gameSelectGui.show(executor);
+        new GameSelectGui(this.gameManager, this.sessionManager)
+                .show(executor);
     }
 
     @Subcommand("game state next")

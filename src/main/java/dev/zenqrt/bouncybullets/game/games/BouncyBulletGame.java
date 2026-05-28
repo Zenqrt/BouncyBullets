@@ -1,6 +1,7 @@
 package dev.zenqrt.bouncybullets.game.games;
 
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
+import dev.zenqrt.bouncybullets.event.events.GameStateSwitchEvent;
 import dev.zenqrt.bouncybullets.event.events.PlayerJoinGameEvent;
 import dev.zenqrt.bouncybullets.event.events.PlayerQuitGameEvent;
 import dev.zenqrt.bouncybullets.game.GameManager;
@@ -60,6 +61,13 @@ public final class BouncyBulletGame extends Game {
         this.gameManager.deleteGame(this);
     }
 
+    @Override
+    public void switchNextState() {
+        super.switchNextState();
+
+        GameStateSwitchEvent event = new GameStateSwitchEvent(this, this.getGameState());
+        Bukkit.getPluginManager().callEvent(event);
+    }
 
     public void insertPlayer(Player player, Loadout loadout) {
         BouncyBulletGamePlayer gamePlayer = new BouncyBulletGamePlayer(
