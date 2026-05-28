@@ -6,7 +6,7 @@ import dev.zenqrt.bouncybullets.event.GameEventNodes;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
 import dev.zenqrt.bouncybullets.event.events.PlayerQuitGameEvent;
 import dev.zenqrt.bouncybullets.game.base.GameState;
-import dev.zenqrt.bouncybullets.player.GamePlayerList;
+import dev.zenqrt.bouncybullets.game.games.GamePlayerList;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.event.player.PlayerEvent;

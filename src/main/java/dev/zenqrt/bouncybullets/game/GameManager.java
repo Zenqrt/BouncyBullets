@@ -3,48 +3,44 @@ package dev.zenqrt.bouncybullets.game;
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.GameSettings;
-import dev.zenqrt.bouncybullets.loadout.Loadout;
-import dev.zenqrt.bouncybullets.loadout.kit.PlayerClassType;
-import dev.zenqrt.bouncybullets.lobby.LobbyManager;
 import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
 import dev.zenqrt.bouncybullets.map.GameMap;
 import dev.zenqrt.bouncybullets.map.GameMapManager;
+import dev.zenqrt.bouncybullets.player.PlayerSessionManager;
+import dev.zenqrt.bouncybullets.stats.PlayerStatsManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRules;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public final class GameManager {
 
     private final Map<Integer, BouncyBulletGame> games = new HashMap<>();
-    private final Map<UUID, BouncyBulletGame> playerGames = new HashMap<>();
-    private final LobbyManager lobbyManager;
     private final GameMapManager mapManager;
     private final BouncyBulletsPlugin plugin;
     private final AtomicInteger nextGameId;
 
-    public GameManager(BouncyBulletsPlugin plugin, GameMapManager mapManager, LobbyManager lobbyManager) {
+    public GameManager(BouncyBulletsPlugin plugin, GameMapManager mapManager) {
         this.nextGameId = new AtomicInteger(0);
         this.plugin = plugin;
         this.mapManager = mapManager;
-        this.lobbyManager = lobbyManager;
     }
 
-    public BouncyBulletGame createGame(GameSettings settings, GameMap map) {
+    public BouncyBulletGame createGame(GameSettings settings, GameMap map, PlayerSessionManager sessionManager, PlayerStatsManager statsManager) {
         int gameId = this.nextGameId.incrementAndGet();
 
         World gameWorld = this.mapManager.createGameWorld(gameId, map);
         gameWorld.setGameRule(GameRules.LOCATOR_BAR, false);
 
-        FreeForAllActiveGameMap activeMap = new FreeForAllActiveGameMap(gameWorld, map.configuration());
+        FreeForAllActiveGameMap activeMap = new FreeForAllActiveGameMap(map, gameWorld, map.configuration());
 
-        BouncyBulletGame game = new BouncyBulletGame(gameId, this.plugin, settings, activeMap, this, this.lobbyManager);
+        BouncyBulletGame game = new BouncyBulletGame(gameId, this.plugin, settings, activeMap, this, sessionManager, statsManager);
         this.games.put(gameId, game);
 
         return game;
@@ -72,32 +68,9 @@ public final class GameManager {
         return game == null ? Optional.empty() : Optional.of(game);
     }
 
-    public void joinGame(Player player, BouncyBulletGame game) {
-        game.insertPlayer(player, new Loadout(PlayerClassType.STEALTH.getPlayerClass()));
-        this.playerGames.put(player.getUniqueId(), game);
-    }
-
-    public void leaveGame(Player player, BouncyBulletGame game) {
-        game.removePlayer(player.getUniqueId());
-        this.playerGames.remove(player.getUniqueId(), game);
-    }
-
-    public void tryLeaveGame(UUID uuid) {
-        BouncyBulletGame game = this.playerGames.remove(uuid);
-
-        if (game == null)
-            return;
-
-        game.removePlayer(uuid);
-    }
-
-    public Optional<BouncyBulletGame> findPlayerGame(UUID uuid) {
-        BouncyBulletGame game = this.playerGames.get(uuid);
-
-        return game == null ? Optional.empty() : Optional.of(game);
-    }
-
-    public boolean isInGame(UUID uuid) {
-        return this.playerGames.containsKey(uuid);
+    public Set<BouncyBulletGame> getAvailableGames() {
+        return this.games.values().stream()
+                .filter(BouncyBulletGame::canPlayersJoin)
+                .collect(Collectors.toSet());
     }
 }

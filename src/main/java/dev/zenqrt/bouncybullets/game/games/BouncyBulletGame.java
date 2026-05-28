@@ -1,6 +1,7 @@
 package dev.zenqrt.bouncybullets.game.games;
 
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
+import dev.zenqrt.bouncybullets.event.events.GameStateSwitchEvent;
 import dev.zenqrt.bouncybullets.event.events.PlayerJoinGameEvent;
 import dev.zenqrt.bouncybullets.event.events.PlayerQuitGameEvent;
 import dev.zenqrt.bouncybullets.game.GameManager;
@@ -10,9 +11,9 @@ import dev.zenqrt.bouncybullets.game.games.states.BattleGameState;
 import dev.zenqrt.bouncybullets.game.games.states.PregameGameState;
 import dev.zenqrt.bouncybullets.game.games.states.SendPlayersToLobbyGameState;
 import dev.zenqrt.bouncybullets.loadout.Loadout;
-import dev.zenqrt.bouncybullets.lobby.LobbyManager;
 import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
-import dev.zenqrt.bouncybullets.player.GamePlayerList;
+import dev.zenqrt.bouncybullets.player.PlayerSessionManager;
+import dev.zenqrt.bouncybullets.stats.PlayerStatsManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -30,7 +31,7 @@ public final class BouncyBulletGame extends Game {
     private final GameSettings gameSettings;
     private final BouncyBulletsPlugin plugin;
 
-    public BouncyBulletGame(int id, BouncyBulletsPlugin plugin, GameSettings gameSettings, FreeForAllActiveGameMap gameMap, GameManager gameManager, LobbyManager lobbyManager) {
+    public BouncyBulletGame(int id, BouncyBulletsPlugin plugin, GameSettings gameSettings, FreeForAllActiveGameMap gameMap, GameManager gameManager, PlayerSessionManager sessionManager, PlayerStatsManager statsManager) {
         super(id);
 
         this.plugin = plugin;
@@ -41,9 +42,9 @@ public final class BouncyBulletGame extends Game {
 
         this.states = List.of(
                 new PregameGameState(this, this.players),
-                new BattleGameState(this, this.players, gameMap),
-                new AnnounceWinnerGameState(this, this.players, 200),  // 10 seconds
-                new SendPlayersToLobbyGameState(this, gameManager, lobbyManager)
+                new BattleGameState(this, statsManager, this.players, gameMap),
+                new AnnounceWinnerGameState(this, statsManager, 200),  // 10 seconds
+                new SendPlayersToLobbyGameState(this, sessionManager)
         );
     }
 
@@ -60,6 +61,13 @@ public final class BouncyBulletGame extends Game {
         this.gameManager.deleteGame(this);
     }
 
+    @Override
+    public void switchNextState() {
+        super.switchNextState();
+
+        GameStateSwitchEvent event = new GameStateSwitchEvent(this, this.getGameState());
+        Bukkit.getPluginManager().callEvent(event);
+    }
 
     public void insertPlayer(Player player, Loadout loadout) {
         BouncyBulletGamePlayer gamePlayer = new BouncyBulletGamePlayer(

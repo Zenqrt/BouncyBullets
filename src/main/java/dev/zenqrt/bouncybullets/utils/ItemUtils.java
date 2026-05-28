@@ -1,6 +1,8 @@
 package dev.zenqrt.bouncybullets.utils;
 
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -28,6 +30,14 @@ public final class ItemUtils {
                         new AttributeModifier(BouncyBulletsPlugin.createKey("remove_armor"), 0, AttributeModifier.Operation.ADD_NUMBER)
                 )
         );
+
+        return itemStack;
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static ItemStack createWithItemName(Material material, Component itemName) {
+        ItemStack itemStack = new ItemStack(material);
+        itemStack.setData(DataComponentTypes.ITEM_NAME, itemName);
 
         return itemStack;
     }

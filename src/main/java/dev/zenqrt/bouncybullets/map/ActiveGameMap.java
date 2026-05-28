@@ -6,4 +6,5 @@ import org.bukkit.World;
 public interface ActiveGameMap {
     World world();
     Location intermissionSpawn();
+    GameMap gameMap();
 }

@@ -1,10 +1,10 @@
 package dev.zenqrt.bouncybullets.event.listeners;
 
-import dev.zenqrt.bouncybullets.game.GameManager;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
+import dev.zenqrt.bouncybullets.player.PlayerSessionManager;
 import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,10 +18,10 @@ import java.util.Optional;
 
 public final class GameItemListeners implements Listener {
 
-    private final GameManager gameManager;
+    private final PlayerSessionManager sessionManager;
 
-    public GameItemListeners(GameManager gameManager) {
-        this.gameManager = gameManager;
+    public GameItemListeners(PlayerSessionManager sessionManager) {
+        this.sessionManager = sessionManager;
     }
 
     @EventHandler
@@ -30,7 +30,7 @@ public final class GameItemListeners implements Listener {
             return;
 
         Player player = event.getPlayer();
-        Optional<BouncyBulletGame> gameOptional = this.gameManager.findPlayerGame(player.getUniqueId());
+        Optional<BouncyBulletGame> gameOptional = this.sessionManager.findGameSession(player.getUniqueId());
 
         if (gameOptional.isEmpty())
             return;
@@ -53,7 +53,7 @@ public final class GameItemListeners implements Listener {
     @EventHandler
     public void onPlayerItemHeld(PlayerItemHeldEvent event) {
         Player player = event.getPlayer();
-        Optional<BouncyBulletGame> gameOptional = this.gameManager.findPlayerGame(player.getUniqueId());
+        Optional<BouncyBulletGame> gameOptional = this.sessionManager.findGameSession(player.getUniqueId());
 
         if (gameOptional.isEmpty())
             return;
@@ -80,7 +80,7 @@ public final class GameItemListeners implements Listener {
     @EventHandler
     public void onInventorySlotChange(PlayerInventorySlotChangeEvent event) {
         Player player = event.getPlayer();
-        Optional<BouncyBulletGame> gameOptional = this.gameManager.findPlayerGame(player.getUniqueId());
+        Optional<BouncyBulletGame> gameOptional = this.sessionManager.findGameSession(player.getUniqueId());
 
         if (gameOptional.isEmpty())
             return;

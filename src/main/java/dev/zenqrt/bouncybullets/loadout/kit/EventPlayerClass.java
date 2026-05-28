@@ -11,7 +11,7 @@ public interface EventPlayerClass extends PlayerClass {
 
     default boolean isPlayerClass(BouncyBulletGame game, Player player, PlayerClass playerClass) {
         return game.findPlayer(player.getUniqueId())
-                .map(gamePlayer -> gamePlayer.getLoadout().playerClass() == playerClass)
+                .map(gamePlayer -> gamePlayer.getLoadout().classType().getPlayerClass() == playerClass)
                 .orElse(false);
     }
 }

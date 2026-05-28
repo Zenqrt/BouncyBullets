@@ -9,14 +9,15 @@ import dev.zenqrt.bouncybullets.event.events.PlayerQuitGameEvent;
 import dev.zenqrt.bouncybullets.game.base.GameState;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
+import dev.zenqrt.bouncybullets.game.games.GamePlayerList;
 import dev.zenqrt.bouncybullets.item.items.abilities.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
 import dev.zenqrt.bouncybullets.loadout.Loadout;
 import dev.zenqrt.bouncybullets.loadout.kit.EventPlayerClass;
 import dev.zenqrt.bouncybullets.loadout.kit.PlayerClass;
 import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
-import dev.zenqrt.bouncybullets.player.GamePlayerList;
-import dev.zenqrt.bouncybullets.sidebar.sidebars.BouncyBulletsSidebar;
+import dev.zenqrt.bouncybullets.sidebar.sidebars.GameSidebar;
+import dev.zenqrt.bouncybullets.stats.PlayerStatsManager;
 import dev.zenqrt.bouncybullets.utils.NMSConverter;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import dev.zenqrt.bouncybullets.utils.TaskManager;
@@ -72,15 +73,17 @@ public final class BattleGameState extends GameState {
     private final EventNode<PlayerEvent> playerEventNode;
     private final EventNode<EntityEvent> playerEntityEventNode;
 
-    private final Map<UUID, BouncyBulletsSidebar> sidebarMap = new HashMap<>();
+    private final Map<UUID, GameSidebar> sidebarMap = new HashMap<>();
 
     private final TaskManager taskManager;
     private final BouncyBulletGame game;
+    private final PlayerStatsManager statsManager;
     private final GamePlayerList players;
     private final FreeForAllActiveGameMap gameMap;
 
-    public BattleGameState(BouncyBulletGame game, GamePlayerList players, FreeForAllActiveGameMap gameMap) {
+    public BattleGameState(BouncyBulletGame game, PlayerStatsManager statsManager, GamePlayerList players, FreeForAllActiveGameMap gameMap) {
         this.game = game;
+        this.statsManager = statsManager;
         this.players = players;
         this.gameMap = gameMap;
         this.taskManager = new TaskManager(game.getPlugin());
@@ -123,7 +126,7 @@ public final class BattleGameState extends GameState {
 
             team.addPlayer(player);
 
-            BouncyBulletsSidebar sidebar = new BouncyBulletsSidebar(this.game.getGameSettings().gameTime(), initialTopPlayers);
+            GameSidebar sidebar = new GameSidebar(this.game.getGameSettings().gameTime(), initialTopPlayers);
             sidebar.addViewer(NMSConverter.serverPlayer(player));
 
             this.sidebarMap.put(player.getUniqueId(), sidebar);
@@ -132,6 +135,8 @@ public final class BattleGameState extends GameState {
             player.teleport(randomSpawn);
 
             gamePlayer.setAlive(true);
+
+            this.statsManager.recordGamePlayed(gamePlayer);
         });
 
         this.taskManager.runTaskTimer(
@@ -152,7 +157,9 @@ public final class BattleGameState extends GameState {
         this.taskManager.removeAllTasks();
 
         this.players.forEach((_, gamePlayer) -> {
-            gamePlayer.getLoadout().playerClass().onStopUse(gamePlayer);
+            PlayerClass playerClass = gamePlayer.getLoadout().classType().getPlayerClass();
+
+            playerClass.onStopUse(gamePlayer);
             gamePlayer.setAlive(false);
 
             Player player = gamePlayer.getPlayer();
@@ -167,7 +174,7 @@ public final class BattleGameState extends GameState {
             player.setGameMode(GameMode.SPECTATOR);
             player.clearActivePotionEffects();
 
-            for (ActiveAbilityItem ability : gamePlayer.getLoadout().playerClass().getActiveAbilities())
+            for (ActiveAbilityItem ability : playerClass.getActiveAbilities())
                 player.setCooldown(ability.getMaterial(), 0);
 
             this.sidebarMap.forEach((ignored, sidebar) -> sidebar.removeAllViewers());
@@ -179,7 +186,7 @@ public final class BattleGameState extends GameState {
 
     private void registerEvents() {
         Set<EventPlayerClass> playerClasses = this.players.values().stream()
-                .map(gamePlayer -> gamePlayer.getLoadout().playerClass())
+                .map(gamePlayer -> gamePlayer.getLoadout().classType().getPlayerClass())
                 .filter(playerClass -> playerClass instanceof EventPlayerClass)
                 .map(playerClass -> (EventPlayerClass) playerClass)
                 .collect(Collectors.toSet());
@@ -191,7 +198,7 @@ public final class BattleGameState extends GameState {
         }
 
         this.players.forEach((_, gamePlayer) -> {
-            PlayerClass playerClass = gamePlayer.getLoadout().playerClass();
+            PlayerClass playerClass = gamePlayer.getLoadout().classType().getPlayerClass();
             playerClass.onStartUse(gamePlayer);
         });
 
@@ -234,6 +241,8 @@ public final class BattleGameState extends GameState {
                                 BouncyBulletGamePlayer killerGamePlayer = this.game.findPlayerOrThrow(killer.getUniqueId());
 
                                 killerGamePlayer.addKill();
+                                this.statsManager.recordKill(killerGamePlayer);
+
                                 updateSidebar(
                                         killerGamePlayer.getUuid(),
                                         sidebar -> sidebar.setYourKills(killerGamePlayer.getKills())
@@ -253,6 +262,8 @@ public final class BattleGameState extends GameState {
                     BouncyBulletGamePlayer gamePlayer = this.game.findPlayerOrThrow(player.getUniqueId());
 
                     gamePlayer.addDeath();
+                    this.statsManager.recordDeath(gamePlayer);
+
                     gamePlayer.setAlive(false);
 
                     this.taskManager.runTaskTimer(
@@ -272,7 +283,7 @@ public final class BattleGameState extends GameState {
     }
 
     private void tryRemoveSidebar(Player player) {
-        BouncyBulletsSidebar sidebar = this.sidebarMap.get(player.getUniqueId());
+        GameSidebar sidebar = this.sidebarMap.get(player.getUniqueId());
 
         if (sidebar == null)
             return;
@@ -280,8 +291,8 @@ public final class BattleGameState extends GameState {
         sidebar.removeViewer(NMSConverter.serverPlayer(player));
     }
 
-    private void updateSidebar(UUID uuid, Consumer<BouncyBulletsSidebar> updateHandler) {
-        BouncyBulletsSidebar sidebar = this.sidebarMap.get(uuid);
+    private void updateSidebar(UUID uuid, Consumer<GameSidebar> updateHandler) {
+        GameSidebar sidebar = this.sidebarMap.get(uuid);
         updateHandler.accept(sidebar);
     }
 
@@ -292,7 +303,7 @@ public final class BattleGameState extends GameState {
                 .limit(3)
                 .toList();
 
-        for (BouncyBulletsSidebar sidebar : this.sidebarMap.values()) {
+        for (GameSidebar sidebar : this.sidebarMap.values()) {
             for (int i = topKillers.size() - 1; i >= 0; i--) {
                 BouncyBulletGamePlayer gamePlayer = topKillers.get(i);
 
@@ -337,12 +348,12 @@ public final class BattleGameState extends GameState {
 
         @Override
         public void run() {
-            if (--timeLeft == 0) {
-                game.switchNextState();
+            if (--this.timeLeft == 0) {
+                BattleGameState.this.game.switchNextState();
             }
 
-            for (BouncyBulletsSidebar sidebar : BattleGameState.this.sidebarMap.values()) {
-                sidebar.setGameTime(timeLeft);
+            for (GameSidebar sidebar : BattleGameState.this.sidebarMap.values()) {
+                sidebar.setGameTime(this.timeLeft);
             }
         }
     }
@@ -374,14 +385,17 @@ public final class BattleGameState extends GameState {
             if (--this.timeLeft == 0) {
                 this.cancel();
 
-                resupplyGuns(player.getInventory(), this.gamePlayer.getLoadout().playerClass());
+                PlayerClass playerClass = this.gamePlayer.getLoadout().classType().getPlayerClass();
+
+                resupplyGuns(player.getInventory(), playerClass);
 
                 player.setGameMode(GameMode.ADVENTURE);
                 player.teleport(chooseBestSpawnLocation());
                 player.clearTitle();
 
                 this.gamePlayer.setAlive(true);
-                this.gamePlayer.getLoadout().playerClass().onRespawn(this.gamePlayer);
+                playerClass.onRespawn(this.gamePlayer);
+
                 return;
             }
 

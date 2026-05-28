@@ -1,24 +1,21 @@
 package dev.zenqrt.bouncybullets.game.games.states;
 
-import dev.zenqrt.bouncybullets.game.GameManager;
 import dev.zenqrt.bouncybullets.game.base.GameState;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
-import dev.zenqrt.bouncybullets.lobby.LobbyManager;
+import dev.zenqrt.bouncybullets.player.PlayerSessionManager;
 import org.bukkit.entity.Player;
 
 import java.util.List;
 
 public final class SendPlayersToLobbyGameState extends GameState {
 
-    private final LobbyManager lobbyManager;
-    private final GameManager gameManager;
+    private final PlayerSessionManager sessionManager;
     private final BouncyBulletGame game;
 
-    public SendPlayersToLobbyGameState(BouncyBulletGame game, GameManager gameManager, LobbyManager lobbyManager) {
+    public SendPlayersToLobbyGameState(BouncyBulletGame game, PlayerSessionManager sessionManager) {
         this.game = game;
-        this.gameManager = gameManager;
-        this.lobbyManager = lobbyManager;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -28,8 +25,7 @@ public final class SendPlayersToLobbyGameState extends GameState {
                 .toList();
 
         for (Player player : players) {
-            this.lobbyManager.sendToLobby(player);
-            this.gameManager.leaveGame(player, this.game);
+            this.sessionManager.joinLobby(player, true);
         }
 
         this.game.switchNextState();

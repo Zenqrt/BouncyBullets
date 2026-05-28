@@ -8,9 +8,9 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public final class BouncyBulletsSidebar extends PacketSidebar {
+public final class GameSidebar extends PacketSidebar {
 
-    public BouncyBulletsSidebar(int gameTimeSeconds, List<Player> startingPlayersTop) {
+    public GameSidebar(int gameTimeSeconds, List<Player> startingPlayersTop) {
         super(Component.text("BOUNCY BULLETS", NamedTextColor.YELLOW).decorate(TextDecoration.BOLD));
 
         this.addLine("your_kills", yourKillsText(0));
