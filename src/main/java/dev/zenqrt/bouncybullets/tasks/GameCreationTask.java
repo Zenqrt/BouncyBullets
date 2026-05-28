@@ -1,6 +1,7 @@
 package dev.zenqrt.bouncybullets.tasks;
 
 import dev.zenqrt.bouncybullets.game.GameManager;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.GameSettings;
 import dev.zenqrt.bouncybullets.map.GameMap;
 import dev.zenqrt.bouncybullets.map.GameMapManager;
@@ -40,12 +41,13 @@ public final class GameCreationTask implements Runnable {
         for (int i = 0; i < gamesToCreate; i++) {
             GameMap randomMap = findRandomMap(ThreadLocalRandom.current());
 
-            this.gameManager.createGame(
+            this.gameManager.createGameAsync(
                     this.defaultGameSettings,
                     randomMap,
                     this.sessionManager,
-                    this.statsManager
-            ).start();
+                    this.statsManager,
+                    BouncyBulletGame::start
+            );
         }
     }
 

@@ -10,13 +10,13 @@ import dev.zenqrt.bouncybullets.player.PlayerSessionManager;
 import dev.zenqrt.bouncybullets.stats.PlayerStatsManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRules;
-import org.bukkit.World;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public final class GameManager {
@@ -32,18 +32,19 @@ public final class GameManager {
         this.mapManager = mapManager;
     }
 
-    public BouncyBulletGame createGame(GameSettings settings, GameMap map, PlayerSessionManager sessionManager, PlayerStatsManager statsManager) {
+    public void createGameAsync(GameSettings settings, GameMap map, PlayerSessionManager sessionManager, PlayerStatsManager statsManager, Consumer<BouncyBulletGame> onComplete) {
         int gameId = this.nextGameId.incrementAndGet();
 
-        World gameWorld = this.mapManager.createGameWorld(gameId, map);
-        gameWorld.setGameRule(GameRules.LOCATOR_BAR, false);
+        this.mapManager.createGameWorldAsync(gameId, map, gameWorld -> {
+            gameWorld.setGameRule(GameRules.LOCATOR_BAR, false);
 
-        FreeForAllActiveGameMap activeMap = new FreeForAllActiveGameMap(map, gameWorld, map.configuration());
+            FreeForAllActiveGameMap activeMap = new FreeForAllActiveGameMap(map, gameWorld, map.configuration());
 
-        BouncyBulletGame game = new BouncyBulletGame(gameId, this.plugin, settings, activeMap, this, sessionManager, statsManager);
-        this.games.put(gameId, game);
+            BouncyBulletGame game = new BouncyBulletGame(gameId, this.plugin, settings, activeMap, this, sessionManager, statsManager);
+            this.games.put(gameId, game);
 
-        return game;
+            onComplete.accept(game);
+        });
     }
 
     public void deleteGame(BouncyBulletGame game) {

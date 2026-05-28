@@ -12,6 +12,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public final class GameMapManager {
 
@@ -55,26 +57,32 @@ public final class GameMapManager {
         this.gameMapIds.clear();
     }
 
-    public World createGameWorld(int gameId, GameMap map) {
+    public void createGameWorldAsync(int gameId, GameMap map, Consumer<World> onComplete) {
         String worldName = "game_world_" + gameId;
 
-        try {
-            FileUtils.copyDirectory(map.worldFolder(), new File(Bukkit.getWorldContainer().getParentFile(), worldName));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        CompletableFuture.runAsync(
+                () -> {
+                    try {
+                        FileUtils.copyDirectory(map.worldFolder(), new File(Bukkit.getWorldContainer().getParentFile(), worldName));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+        ).thenRun(
+                () -> Bukkit.getScheduler().runTask(this.plugin, () -> {
+                    World world = Bukkit.createWorld(new WorldCreator(worldName)
+                            .generator(new VoidGenerator()));
 
-        World world = Bukkit.createWorld(new WorldCreator(worldName)
-                .generator(new VoidGenerator()));
+                    if (world == null) {
+                        throw new RuntimeException("Failed to load world: " + worldName);
+                    }
 
-        if (world == null) {
-            throw new RuntimeException("Failed to load world: " + worldName);
-        }
+                    world.setAutoSave(false);
+                    this.gameWorlds.put(gameId, world);
 
-        world.setAutoSave(false);
-        this.gameWorlds.put(gameId, world);
-
-        return world;
+                    onComplete.accept(world);
+                })
+        );
     }
 
     public void deleteGameWorld(int gameId, World world) {

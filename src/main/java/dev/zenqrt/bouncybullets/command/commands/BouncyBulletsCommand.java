@@ -94,16 +94,20 @@ public final class BouncyBulletsCommand {
         GameMap map = this.mapManager.findGameMap(mapId)
                 .orElseThrow(() -> new CommandErrorException("Could not find map '" + mapId + "'"));
 
-        BouncyBulletGame game = this.gameManager.createGame(settings, map, this.sessionManager, this.statsManager);
-        game.start();
+        this.gameManager.createGameAsync(
+                settings, map, this.sessionManager, this.statsManager,
+                game -> {
+                    game.start();
 
-        Messages.sendCommandSuccess(executor, "Created game with id " + game.getId());
+                    Messages.sendCommandSuccess(executor, "Created game with id " + game.getId());
 
-        if (!joinOnCreate)
-            return;
+                    if (!joinOnCreate)
+                        return;
 
-        Messages.sendCommandInfo(executor, "Joining game...");
-        this.sessionManager.joinGame(executor, game);
+                    Messages.sendCommandInfo(executor, "Joining game...");
+                    this.sessionManager.joinGame(executor, game);
+                }
+        );
     }
 
     @Subcommand("game join")
