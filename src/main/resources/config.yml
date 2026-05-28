@@ -2,9 +2,8 @@
 # Database Configuration
 #########################
 
-# MongoDB (uncomment to enable)
-#database:
-#  type: mongodb
+#### MongoDB (uncomment to enable)
+#mongodb:
 #  connection_string: "replace me"
 #  database: "bouncy_bullets"
 #  stats_collection: "player_stats"

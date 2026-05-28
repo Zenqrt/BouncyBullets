@@ -20,7 +20,6 @@ import dev.zenqrt.bouncybullets.stats.database.MongoPlayerStatsRepository;
 import dev.zenqrt.bouncybullets.stats.database.PlayerStatsRepository;
 import dev.zenqrt.bouncybullets.tasks.AutoRepositorySaveTask;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
-import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -95,34 +94,24 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
     }
 
     private PlayerStatsRepository getRepositoryFromConfig(FileConfiguration config) {
-        if (!config.contains("database"))
-            return new JSONPlayerStatsRepository(
-                    super.getDataPath().resolve("stats")
+        if (config.contains("mongodb")) {
+            super.getSLF4JLogger().info("MongoDB Database initializing...");
+
+            String connectionString = Objects.requireNonNull(
+                    config.getString("database.connection_string"),
+                    "Missing database.connection_string from config.yml"
             );
 
-        String databaseType = Objects.requireNonNull(
-                config.getString("database.type"),
-                "Missing database.type from config.yml"
+            this.mongoClient = MongoClients.create(connectionString);
+
+            super.getSLF4JLogger().info("MongoDB Database is now active!");
+
+            return MongoPlayerStatsRepository.parse(this.mongoClient, config);
+        }
+
+        return new JSONPlayerStatsRepository(
+                super.getDataPath().resolve("stats")
         );
-
-        return switch (databaseType) {
-            case "mongodb" -> {
-                super.getSLF4JLogger().info("MongoDB Database initializing...");
-
-                String connectionString = Objects.requireNonNull(
-                        config.getString("database.connection_string"),
-                        "Missing database.connection_string from config.yml"
-                );
-
-                this.mongoClient = MongoClients.create(connectionString);
-
-                super.getSLF4JLogger().info("MongoDB Database is now active!");
-
-                yield MongoPlayerStatsRepository.parse(this.mongoClient, config);
-            }
-            case "sql" -> throw new NotImplementedException();
-            default -> throw new IllegalStateException("Invalid database.type: " + databaseType);
-        };
     }
 
     @Override
