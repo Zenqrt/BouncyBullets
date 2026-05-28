@@ -1,0 +1,10 @@
+#########################
+# Database Configuration
+#########################
+
+# MongoDB (uncomment to enable)
+#database:
+#  type: mongodb
+#  connection_string: "replace me"
+#  database: "bouncy_bullets"
+#  stats_collection: "player_stats"

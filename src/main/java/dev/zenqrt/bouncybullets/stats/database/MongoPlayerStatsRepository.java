@@ -1,12 +1,15 @@
 package dev.zenqrt.bouncybullets.stats.database;
 
 import com.google.gson.Gson;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import dev.zenqrt.bouncybullets.stats.PlayerStats;
 import org.bson.Document;
+import org.bukkit.configuration.file.FileConfiguration;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -14,6 +17,22 @@ import java.util.concurrent.CompletableFuture;
 public class MongoPlayerStatsRepository implements PlayerStatsRepository {
 
     private static final Gson GSON = new Gson();
+
+    public static MongoPlayerStatsRepository parse(MongoClient client, FileConfiguration config) {
+        String databaseName = Objects.requireNonNull(
+                config.getString("database.database"),
+                "Missing database.database from config.yml"
+        );
+        String collectionName = Objects.requireNonNull(
+                config.getString("database.stats_collection"),
+                "Missing database.stats_collection from config.yml"
+        );
+
+        MongoCollection<Document> collection = client.getDatabase(databaseName)
+                .getCollection(collectionName);
+
+        return new MongoPlayerStatsRepository(collection);
+    }
 
     private final MongoCollection<Document> collection;
 

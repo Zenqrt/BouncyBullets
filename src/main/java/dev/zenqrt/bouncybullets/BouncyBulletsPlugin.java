@@ -1,5 +1,7 @@
 package dev.zenqrt.bouncybullets;
 
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import dev.zenqrt.bouncybullets.command.commands.BackupCommand;
 import dev.zenqrt.bouncybullets.command.commands.BouncyBulletsCommand;
 import dev.zenqrt.bouncybullets.config.ServerConfig;
@@ -14,23 +16,28 @@ import dev.zenqrt.bouncybullets.map.GameMapManager;
 import dev.zenqrt.bouncybullets.player.PlayerSessionManager;
 import dev.zenqrt.bouncybullets.stats.PlayerStatsManager;
 import dev.zenqrt.bouncybullets.stats.database.JSONPlayerStatsRepository;
+import dev.zenqrt.bouncybullets.stats.database.MongoPlayerStatsRepository;
 import dev.zenqrt.bouncybullets.stats.database.PlayerStatsRepository;
 import dev.zenqrt.bouncybullets.tasks.AutoRepositorySaveTask;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
 import revxrsal.commands.Lamp;
 import revxrsal.commands.bukkit.BukkitLamp;
 import revxrsal.commands.bukkit.actor.BukkitCommandActor;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.Objects;
 
 public final class BouncyBulletsPlugin extends JavaPlugin {
 
     private static final int AUTO_REPOSITORY_SAVE_INTERVAL_TICKS = 6000;        // 5 minutes
 
+    private @Nullable MongoClient mongoClient;
     private GameMapManager mapManager;
     private PlayerStatsManager statsManager;
     private static BouncyBulletsPlugin instance;
@@ -41,7 +48,7 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
 
         ServerConfig serverConfig = createOrGetConfig();
 
-        PlayerStatsRepository repository = new JSONPlayerStatsRepository(getDataPath().resolve("stats"));
+        PlayerStatsRepository repository = getRepositoryFromConfig(super.getConfig());
         repository.initialize();
 
         this.statsManager = new PlayerStatsManager(this, repository);
@@ -76,17 +83,40 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
     }
 
     private ServerConfig createOrGetConfig() {
-        File serverConfigFile = new File(getDataFolder(), "config.yml");
+        super.saveDefaultConfig();
 
-        if (!serverConfigFile.exists()) {
-            try {
-                serverConfigFile.createNewFile();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+        return new ServerConfig(this);
+    }
+
+    private PlayerStatsRepository getRepositoryFromConfig(FileConfiguration config) {
+        if (!config.contains("database"))
+            return new JSONPlayerStatsRepository(
+                    super.getDataPath().resolve("stats")
+            );
+
+        String databaseType = Objects.requireNonNull(
+                config.getString("database.type"),
+                "Missing database.type from config.yml"
+        );
+
+        return switch (databaseType) {
+            case "mongodb" -> {
+                super.getSLF4JLogger().info("MongoDB Database initializing...");
+
+                String connectionString = Objects.requireNonNull(
+                        config.getString("database.connection_string"),
+                        "Missing database.connection_string from config.yml"
+                );
+
+                this.mongoClient = MongoClients.create(connectionString);
+
+                super.getSLF4JLogger().info("MongoDB Database is now active!");
+
+                yield MongoPlayerStatsRepository.parse(this.mongoClient, config);
             }
-        }
-
-        return new ServerConfig(serverConfigFile);
+            case "sql" -> throw new NotImplementedException();
+            default -> throw new IllegalStateException("Invalid database.type: " + databaseType);
+        };
     }
 
     @Override
@@ -95,6 +125,9 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
 
         Bukkit.getOnlinePlayers().forEach(PlayerUtils::forceRemove);
         this.mapManager.deleteAllGameWorlds();
+
+        if (this.mongoClient != null)
+            this.mongoClient.close();
     }
 
     public static BouncyBulletsPlugin getInstance() {
