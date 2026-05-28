@@ -98,7 +98,7 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
             super.getSLF4JLogger().info("MongoDB Database initializing...");
 
             String connectionString = Objects.requireNonNull(
-                    config.getString("database.connection_string"),
+                    config.getString("mongodb.connection_string"),
                     "Missing database.connection_string from config.yml"
             );
 
