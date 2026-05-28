@@ -5,6 +5,7 @@ import com.github.stefvanschie.inventoryframework.gui.type.util.Gui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.Pane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
+import dev.zenqrt.bouncybullets.gui.ButtonItem;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
@@ -40,7 +41,7 @@ public final class GuiUtils {
                 Component.text("Back", NamedTextColor.GRAY)
         );
 
-        GuiItem back = new GuiItem(
+        GuiItem back = new ButtonItem(
                 backItemStack,
                 event -> {
                     event.setCancelled(true);

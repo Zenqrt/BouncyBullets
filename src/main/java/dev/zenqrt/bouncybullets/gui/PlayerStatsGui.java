@@ -67,7 +67,7 @@ public final class PlayerStatsGui extends ChestGui {
 
         pane.addItem(new GuiItem(statsItem), 1, 0);
         pane.addItem(
-                new GuiItem(
+                new ButtonItem(
                         classStatsItem,
                         event -> new ClassStatsGui(username, stats, this).show(event.getWhoClicked())
                 ),
