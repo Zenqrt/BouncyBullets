@@ -11,15 +11,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public final class GameMapManager {
 
     private final Map<String, GameMap> gameMaps = new HashMap<>();
     private final Map<Integer, World> gameWorlds = new HashMap<>();
+    private final List<String> gameMapIds = new ArrayList<>();
     private final File mapsFolder;
     private final BouncyBulletsPlugin plugin;
 
@@ -47,12 +45,14 @@ public final class GameMapManager {
 
     public void registerMap(String id, GameMap map) {
         this.gameMaps.put(id, map);
+        this.gameMapIds.add(id);
 
         this.plugin.getSLF4JLogger().info("Registered map '{}'", id);
     }
 
     public void unregisterAllMaps() {
         this.gameMaps.clear();
+        this.gameMapIds.clear();
     }
 
     public World createGameWorld(int gameId, GameMap map) {
@@ -108,5 +108,9 @@ public final class GameMapManager {
 
     public Map<String, GameMap> getGameMaps() {
         return Collections.unmodifiableMap(gameMaps);
+    }
+
+    public List<String> getGameMapIds() {
+        return gameMapIds;
     }
 }

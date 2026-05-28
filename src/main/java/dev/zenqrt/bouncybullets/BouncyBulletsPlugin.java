@@ -10,6 +10,7 @@ import dev.zenqrt.bouncybullets.event.listeners.GunListeners;
 import dev.zenqrt.bouncybullets.event.listeners.PlayerJoinListeners;
 import dev.zenqrt.bouncybullets.event.listeners.PlayerListeners;
 import dev.zenqrt.bouncybullets.game.GameManager;
+import dev.zenqrt.bouncybullets.game.games.GameSettings;
 import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.lobby.LobbyInstance;
 import dev.zenqrt.bouncybullets.map.GameMapManager;
@@ -19,6 +20,7 @@ import dev.zenqrt.bouncybullets.stats.database.JSONPlayerStatsRepository;
 import dev.zenqrt.bouncybullets.stats.database.MongoPlayerStatsRepository;
 import dev.zenqrt.bouncybullets.stats.database.PlayerStatsRepository;
 import dev.zenqrt.bouncybullets.tasks.AutoRepositorySaveTask;
+import dev.zenqrt.bouncybullets.tasks.GameCreationTask;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -64,6 +66,7 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
         LobbyInstance lobby = new LobbyInstance(serverConfig.getLobbySpawn());
 
         GameManager gameManager = new GameManager(this, this.mapManager);
+
         PlayerSessionManager sessionManager = new PlayerSessionManager(lobby, this.statsManager);
 
         Lamp<BukkitCommandActor> lamp = BukkitLamp.builder(this).build();
@@ -84,6 +87,30 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
                 new AutoRepositorySaveTask(this, this.statsManager),
                 0,
                 AUTO_REPOSITORY_SAVE_INTERVAL_TICKS
+        );
+
+        initializeGameInstances(gameManager, sessionManager);
+    }
+
+    private void initializeGameInstances(GameManager gameManager, PlayerSessionManager sessionManager) {
+        FileConfiguration config = this.getConfig();
+
+        if (!config.contains("game"))
+            return;
+
+        int maintainAvailableCount = config.getInt("game.maintain_available");
+
+        int minPlayers = config.getInt("game.default_settings.min_players");
+        int maxPlayers = config.getInt("game.default_settings.max_players");
+        int gameTime = config.getInt("game.default_settings.game_time");
+
+        GameSettings defaultSettings = new GameSettings(minPlayers, maxPlayers, gameTime);
+
+        Bukkit.getScheduler().runTaskTimer(
+                this,
+                new GameCreationTask(gameManager, this.mapManager, sessionManager, this.statsManager, defaultSettings, maintainAvailableCount),
+                0,
+                1200        // 1 minute
         );
     }
 

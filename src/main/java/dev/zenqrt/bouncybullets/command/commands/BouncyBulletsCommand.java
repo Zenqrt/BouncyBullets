@@ -117,6 +117,25 @@ public final class BouncyBulletsCommand {
                 .show(executor);
     }
 
+    @Subcommand("game info")
+    @CommandPermission("bouncybullets.command.game.info")
+    public void onGameInfo(
+            BukkitCommandActor actor,
+            int gameId
+    ) {
+        BouncyBulletGame game = this.gameManager.findGame(gameId)
+                .orElseThrow(() -> new CommandErrorException("Could not find game with id " + gameId));
+
+        Component diagnosticMessage =
+                Component.text("Game " + game.getId() + " Info:\n", NamedTextColor.GOLD)
+                        .append(Component.text(" State: {state}\n", NamedTextColor.GRAY)
+                                .replaceText(builder -> builder.matchLiteral("{state}").replacement(Component.text(game.getGameState().getClass().getSimpleName(), NamedTextColor.AQUA))))
+                        .append(Component.text(" Player Count: {player_count}", NamedTextColor.GRAY)
+                                .replaceText(builder -> builder.matchLiteral("{player_count}").replacement(Component.text(game.getPlayers().size(), NamedTextColor.YELLOW))));
+
+        actor.sender().sendMessage(diagnosticMessage);
+    }
+
     @Subcommand("game state next")
     @CommandPermission("bouncybullets.command.game.state")
     public void onGameStateNext(
