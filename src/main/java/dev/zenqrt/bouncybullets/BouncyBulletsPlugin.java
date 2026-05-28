@@ -32,6 +32,7 @@ import revxrsal.commands.bukkit.actor.BukkitCommandActor;
 
 import java.io.File;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 public final class BouncyBulletsPlugin extends JavaPlugin {
 
@@ -49,7 +50,12 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
         ServerConfig serverConfig = createOrGetConfig();
 
         PlayerStatsRepository repository = getRepositoryFromConfig(super.getConfig());
-        repository.initialize();
+
+        try {
+            repository.initialize().get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Failed to initialize player stats repository", e);
+        }
 
         this.statsManager = new PlayerStatsManager(this, repository);
 
