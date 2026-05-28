@@ -35,7 +35,7 @@ public final class LobbySidebar extends PacketSidebar {
         this.addEmptyLine();
         this.addLine("total_wins", totalWinsText(stats.getTotalWins()));
         this.addLine("total_kills", totalKillsText(stats.getTotalKills()));
-        this.addEmptyLine();
+        this.addLine("title_separator", Component.text("                         ", NamedTextColor.DARK_GRAY).decorate(TextDecoration.STRIKETHROUGH));
     }
 
     private static Component winLossRatioText(float winLossRatio) {
