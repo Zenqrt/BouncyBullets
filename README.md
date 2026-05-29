@@ -2,7 +2,7 @@
  A FPS-style minigame revolving around bullet ricochet mechanics.
 
  ## Gameplay
-[![Watch the video](https://img.youtube.com/vi/F5L94IXlb7g/hqdefault.jpg)](https://www.youtube.com/embed/F5L94IXlb7g)
+[![Watch the video](https://img.youtube.com/vi/K7K-QCUrioY/hqdefault.jpg)](https://www.youtube.com/embed/K7K-QCUrioY)
 
 ## Features
 
