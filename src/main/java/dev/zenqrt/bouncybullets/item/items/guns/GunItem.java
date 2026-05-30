@@ -200,12 +200,14 @@ public abstract class GunItem extends GameItem {
         int timeToReload = this.gunProperties.reloadTicksPerAmmo() * (this.gunProperties.magazineSize() - ammo);
         AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
 
+        gamePlayer.setReloading(true);
+
         movementSpeed.removeModifier(RELOAD_SLOWDOWN_MODIFIER);
         movementSpeed.addTransientModifier(RELOAD_SLOWDOWN_MODIFIER);
 
         player.setCooldown(itemStack.getType(), timeToReload);
 
-        new ReloadTask(player, gamePlayer.getHud(), timeToReload, itemStack, player.getInventory().getHeldItemSlot())
+        new ReloadTask(this, gamePlayer, timeToReload, itemStack, player.getInventory().getHeldItemSlot())
                 .runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, this.gunProperties.reloadTicksPerAmmo());
     }
 
@@ -274,18 +276,18 @@ public abstract class GunItem extends GameItem {
         return movementSpeed.getModifier(AIM_ZOOM_MODIFIER_KEY) != null;
     }
 
-    private class ReloadTask extends BukkitRunnable {
+    private static class ReloadTask extends BukkitRunnable {
 
-        private final Player player;
-        private final BouncyBulletsHUD hud;
+        private final GunItem gunItem;
+        private final BouncyBulletGamePlayer gamePlayer;
         private final int timeToReload;
         private final ItemStack itemStack;
         private final int slot;
         private int ticks;
 
-        ReloadTask(Player player, BouncyBulletsHUD hud, int timeToReload, ItemStack itemStack, int slot) {
-            this.player = player;
-            this.hud = hud;
+        ReloadTask(GunItem gunItem, BouncyBulletGamePlayer gamePlayer, int timeToReload, ItemStack itemStack, int slot) {
+            this.gunItem = gunItem;
+            this.gamePlayer = gamePlayer;
             this.timeToReload = timeToReload;
             this.itemStack = itemStack;
             this.slot = slot;
@@ -293,30 +295,34 @@ public abstract class GunItem extends GameItem {
 
         @Override
         public void run() {
-            if (player.getInventory().getHeldItemSlot() != slot || ticks >= timeToReload) {
+            Player player = this.gamePlayer.getPlayer();
+
+            if (player.getInventory().getHeldItemSlot() != this.slot || this.ticks >= this.timeToReload) {
                 AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
 
                 movementSpeed.removeModifier(RELOAD_SLOWDOWN_MODIFIER);
-                player.setCooldown(itemStack.getType(), 0);
+                player.setCooldown(this.itemStack.getType(), 0);
+
+                this.gamePlayer.setReloading(false);
                 this.cancel();
 
                 return;
             }
 
-            int newAmmo = getAmmo(itemStack) + 1;
+            int newAmmo = this.gunItem.getAmmo(this.itemStack) + 1;
 
             itemStack.editMeta(meta -> {
                 PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
                 dataContainer.set(AMMO_KEY, PersistentDataType.INTEGER, newAmmo);
             });
 
-            this.hud.updateAmmo(newAmmo, GunItem.this.gunProperties.magazineSize());
-            this.hud.updateHudText();
+            this.gamePlayer.getHud().updateAmmo(newAmmo, this.gunItem.getGunProperties().magazineSize());
+            this.gamePlayer.getHud().updateHudText();
 
-            player.getInventory().setItemInMainHand(itemStack);
-            player.playSound(getReloadSound(), Sound.Emitter.self());
+            player.getInventory().setItemInMainHand(this.itemStack);
+            player.playSound(this.gunItem.getReloadSound(), Sound.Emitter.self());
 
-            ticks += GunItem.this.gunProperties.reloadTicksPerAmmo();
+            ticks += this.gunItem.getGunProperties().reloadTicksPerAmmo();
         }
     }
 }

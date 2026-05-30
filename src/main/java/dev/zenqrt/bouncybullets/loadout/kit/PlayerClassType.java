@@ -69,7 +69,8 @@ public enum PlayerClassType {
             ),
             createPassiveDescriptions(
                     "Tank", "Gain an extra row of <red>20<gray>.",
-                    "Sluggish", "Your speed is decreased by some amount."
+                    "Sluggish", "Your speed is decreased by some amount.",
+                    "Undefended", "You take <red>+100% <gray>more damage while you are reloading or firing."
             )
     )
 //    SIDEWINDER(new SidewinderPlayerClass(), Material.FEATHER,

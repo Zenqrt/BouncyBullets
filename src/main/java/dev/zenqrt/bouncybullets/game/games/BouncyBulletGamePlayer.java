@@ -14,6 +14,8 @@ public class BouncyBulletGamePlayer {
     private int deaths;
     private int kills;
     private boolean alive;
+    private boolean reloading;
+
     private boolean invisible;
     private ItemStack[] pastArmorContents;
 
@@ -31,6 +33,8 @@ public class BouncyBulletGamePlayer {
         this.kills = 0;
         this.deaths = 0;
         this.alive = false;
+        this.reloading = false;
+
         this.invisible = false;
     }
 
@@ -50,6 +54,14 @@ public class BouncyBulletGamePlayer {
 
     public boolean isInvisible() {
         return invisible;
+    }
+
+    public void setReloading(boolean reloading) {
+        this.reloading = reloading;
+    }
+
+    public boolean isReloading() {
+        return reloading;
     }
 
     public void setAlive(boolean alive) {
