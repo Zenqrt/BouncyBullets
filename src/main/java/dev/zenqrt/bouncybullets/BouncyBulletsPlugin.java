@@ -63,6 +63,8 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
         this.mapManager = new GameMapManager(this, new File(getDataFolder(), "maps"));
         this.mapManager.loadGameMaps();
 
+        serverConfig.getLobbySpawn().getWorld().setAutoSave(false);
+
         LobbyInstance lobby = new LobbyInstance(serverConfig.getLobbySpawn());
 
         GameManager gameManager = new GameManager(this, this.mapManager);

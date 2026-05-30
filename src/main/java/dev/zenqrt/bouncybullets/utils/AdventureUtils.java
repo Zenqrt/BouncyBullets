@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 
 public final class AdventureUtils {
 

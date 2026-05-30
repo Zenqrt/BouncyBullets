@@ -11,6 +11,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -35,13 +36,14 @@ public final class GameMapManager {
         File[] folders = Preconditions.checkNotNull(this.mapsFolder.listFiles(), "Specified map folder is not a directory.");
 
         for (File directory : folders) {
-            if (directory.isDirectory()) {
-                YamlConfiguration configuration = YamlConfiguration.loadConfiguration(new File(directory, "config.yml"));
-                String displayName = configuration.getString("DisplayName");
-                File worldFolder = new File(directory, "world");
+            if (!directory.isDirectory())
+                continue;
 
-                registerMap(directory.getName(), new GameMap(displayName, worldFolder, configuration));
-            }
+            YamlConfiguration configuration = YamlConfiguration.loadConfiguration(new File(directory, "config.yml"));
+            String displayName = configuration.getString("DisplayName");
+            File worldFolder = new File(directory, "world");
+
+            registerMap(directory.getName(), new GameMap(displayName, worldFolder, configuration));
         }
     }
 
@@ -57,13 +59,18 @@ public final class GameMapManager {
         this.gameMapIds.clear();
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public void createGameWorldAsync(int gameId, GameMap map, Consumer<World> onComplete) {
         String worldName = "game_world_" + gameId;
 
         CompletableFuture.runAsync(
                 () -> {
                     try {
-                        FileUtils.copyDirectory(map.worldFolder(), new File(Bukkit.getWorldContainer().getParentFile(), worldName));
+                        Path dimensionsPath = Bukkit.getServer().getLevelDirectory()
+                                .resolve("dimensions/minecraft")
+                                .resolve(worldName);
+
+                        FileUtils.copyDirectory(map.worldFolder(), dimensionsPath.toFile());
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

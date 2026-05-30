@@ -13,6 +13,7 @@ import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import dev.zenqrt.bouncybullets.utils.Sounds;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemAttributeModifiers;
+import io.papermc.paper.datacomponent.item.SwingAnimation;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -231,6 +232,20 @@ public abstract class GunItem extends GameItem {
 
     public BulletProperties getBulletProperties() {
         return bulletProperties;
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    @Override
+    public ItemStack buildItemStack() {
+        ItemStack itemStack = super.buildItemStack();
+        itemStack.setData(
+                DataComponentTypes.SWING_ANIMATION,
+                SwingAnimation.swingAnimation()
+                        .type(SwingAnimation.Animation.NONE)
+                        .duration(1)
+        );
+
+        return itemStack;
     }
 
     public static void startAiming(Player player, GunProperties gunProperties) {

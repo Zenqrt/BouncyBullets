@@ -13,7 +13,6 @@ import dev.zenqrt.bouncybullets.loadout.kit.PlayerClassType;
 import dev.zenqrt.bouncybullets.utils.AdventureUtils;
 import dev.zenqrt.bouncybullets.utils.GuiUtils;
 import dev.zenqrt.bouncybullets.utils.ItemUtils;
-import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.text.Component;
@@ -113,7 +112,7 @@ public final class ClassSelectGui extends ChestGui {
     }
 
     private static List<Component> buildClassDescriptionLore(PlayerClassType playerClass) {
-        return MiniMessageUtils.wordWrapLore(playerClass.getDescription(), 30).stream()
+        return playerClass.getDescription().stream()
                 .map(component -> component.decoration(TextDecoration.ITALIC, false))
                 .toList();
     }

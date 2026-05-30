@@ -111,8 +111,7 @@ public final class BattleGameState extends GameState {
 
         team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
 
-        List<Player> initialTopPlayers = players.values().stream()
-                .map(BouncyBulletGamePlayer::getPlayer)
+        List<BouncyBulletGamePlayer> initialTopPlayers = this.players.values().stream()
                 .limit(3)
                 .toList();
 
@@ -307,7 +306,7 @@ public final class BattleGameState extends GameState {
             for (int i = topKillers.size() - 1; i >= 0; i--) {
                 BouncyBulletGamePlayer gamePlayer = topKillers.get(i);
 
-                sidebar.setPlace(i + 1, gamePlayer.getPlayer(), gamePlayer.getKills());
+                sidebar.setPlace(i + 1, gamePlayer);
             }
         }
     }

@@ -9,10 +9,15 @@ import java.util.regex.Pattern;
 
 public final class MiniMessageUtils {
 
+    private static final Pattern NEW_LINE_PATTERN = Pattern.compile("\n");
+
     public static List<Component> wordWrapLore(List<String> lore, int wordWrapLength) {
         MiniMessage miniMessage = MiniMessage.builder().preProcessor(string -> {
             if (string.length() > wordWrapLength) {
-                return wrapTextIgnoringTags(string, wordWrapLength);
+                String s = wrapTextIgnoringTags(string, wordWrapLength);
+
+                System.out.println(s);
+                return s;
             }
 
             return string;
@@ -23,7 +28,7 @@ public final class MiniMessageUtils {
 
         lore.forEach(string -> {
             Component component = miniMessage.deserialize(string);
-            components.addAll(ComponentSplitting.split(component, Pattern.compile("\n")));
+            components.addAll(ComponentSplitting.split(component, NEW_LINE_PATTERN));
         });
 
         return components;
