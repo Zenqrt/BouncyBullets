@@ -18,8 +18,6 @@ import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -34,7 +32,6 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,28 +39,22 @@ import java.util.UUID;
 
 public abstract class GunItem extends GameItem {
 
-    private static final NamespacedKey AIM_ZOOM_MODIFIER_KEY = BouncyBulletsPlugin.createKey("aim_zoom");
     private static final AttributeModifier RELOAD_SLOWDOWN_MODIFIER = new AttributeModifier(
             BouncyBulletsPlugin.createKey("reload_slowdown"),
             -0.05,
             AttributeModifier.Operation.ADD_NUMBER
     );
     private static final NamespacedKey AMMO_KEY = new NamespacedKey(BouncyBulletsPlugin.getInstance(), "ammo");
-    private static final Sound AIM_SOUND = Sound.sound(Sounds.UI_BUTTON_CLICK, Sound.Source.MASTER, 0.5F, 2F);
-    private static final Title AIM_CROSSHAIR_TITLE = Title.title(
-            Component.empty(),
-            Component.text("^", NamedTextColor.DARK_GRAY).decorate(TextDecoration.BOLD),
-            Title.Times.times(Duration.ZERO, Duration.ofDays(1), Duration.ZERO));
 
     protected final Map<UUID, Long> lastShootTicks = new HashMap<>();
     protected final GunProperties gunProperties;
     protected final BulletProperties bulletProperties;
 
     @SuppressWarnings("UnstableApiUsage")
-    public GunItem(String key, Material material, Component displayName, GunProperties gunProperties, BulletProperties bulletProperties, DataComponentsBuilder dataComponentsBuilder) {
+    public GunItem(String key, Component displayName, GunProperties gunProperties, BulletProperties bulletProperties, DataComponentsBuilder dataComponentsBuilder) {
         super(
                 key,
-                material,
+                Material.BOW,
                 displayName,
                 buildGunPropertyDescription(bulletProperties),
                 dataComponentsBuilder
@@ -87,6 +78,10 @@ public abstract class GunItem extends GameItem {
                                         .addHiddenComponents(DataComponentTypes.ATTRIBUTE_MODIFIERS)
                                         .build()
                         )
+                        .addData(
+                                DataComponentTypes.ITEM_MODEL,
+                                NamespacedKey.minecraft(key)
+                        )
         );
 
         this.gunProperties = gunProperties;
@@ -97,10 +92,9 @@ public abstract class GunItem extends GameItem {
         return 4 - 20D / pullOutTicks;
     }
 
-    public GunItem(String key, Material material, String displayName, GunProperties gunProperties, BulletProperties bulletProperties, DataComponentsBuilder dataComponentsBuilder) {
+    public GunItem(String key, String displayName, GunProperties gunProperties, BulletProperties bulletProperties, DataComponentsBuilder dataComponentsBuilder) {
         this(
                 key,
-                material,
                 Component.text(displayName, NamedTextColor.YELLOW)
                         .append(
                                 Component.text(" (", NamedTextColor.GRAY)
@@ -113,12 +107,12 @@ public abstract class GunItem extends GameItem {
         );
     }
 
-    public GunItem(String key, Material material, String displayName, GunProperties gunProperties, BulletProperties bulletProperties) {
-        this(key, material, displayName, gunProperties, bulletProperties, dataComponentsBuilder());
+    public GunItem(String key, String displayName, GunProperties gunProperties, BulletProperties bulletProperties) {
+        this(key, displayName, gunProperties, bulletProperties, dataComponentsBuilder());
     }
 
     protected abstract void useGun(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack);
-    protected abstract void shootProjectile(BouncyBulletGame game, Player player, BulletProperties bulletProperties);
+    protected abstract void shootProjectile(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, BulletProperties bulletProperties);
     protected abstract Sound getShootingSound();
 
     @Override
@@ -140,41 +134,40 @@ public abstract class GunItem extends GameItem {
 
         gamePlayer.getHud().hideAmmo();
         gamePlayer.getHud().updateHudText();
+
+        if (gamePlayer.isAiming())
+            gamePlayer.stopAiming(game);
     }
 
     @Override
     public void onInteract(BouncyBulletGame game, Player player, ItemStack itemStack, PlayerInteractEvent event) {
         event.setCancelled(true);
 
+        BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
+
         if (event.getAction().isLeftClick()) {
-            displayAimZoom(player);
+            if (gamePlayer.isAiming())
+                gamePlayer.stopAiming(game);
+            else
+                gamePlayer.startAiming(game, this);
+
         } else if (event.getAction().isRightClick()) {
             if (player.hasCooldown(this.material))
                 return;
-
-            BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
 
             useGun(game, gamePlayer, player, itemStack);
         }
     }
 
-    private void displayAimZoom(Player player) {
-        AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
+    protected final void shootGun(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, BouncyBulletsHUD hud, ItemStack itemStack) {
+        Player player = gamePlayer.getPlayer();
 
-        if (movementSpeed.getModifier(AIM_ZOOM_MODIFIER_KEY) != null) {
-            stopAiming(player);
-        } else {
-            startAiming(player, this.gunProperties);
-        }
-    }
-
-    protected final void shootGun(BouncyBulletGame game, Player player, BouncyBulletsHUD hud, ItemStack itemStack) {
         GunShootEvent event = new GunShootEvent(this, player, this.bulletProperties);
         Bukkit.getPluginManager().callEvent(event);
 
         player.getWorld().playSound(getShootingSound(), player);
 
-        shootProjectile(game, player, event.getBulletProperties());
+        shootProjectile(game, gamePlayer, event.getBulletProperties());
         useAmmo(itemStack, hud);
     }
 
@@ -248,32 +241,6 @@ public abstract class GunItem extends GameItem {
         );
 
         return itemStack;
-    }
-
-    public static void startAiming(Player player, GunProperties gunProperties) {
-        AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
-
-        AttributeModifier zoomModifier = new AttributeModifier(
-                AIM_ZOOM_MODIFIER_KEY,
-                -0.15 * gunProperties.scopeMagnifyMultiplier(),
-                AttributeModifier.Operation.ADD_SCALAR
-        );
-        movementSpeed.addTransientModifier(zoomModifier);
-        player.showTitle(AIM_CROSSHAIR_TITLE);
-        player.playSound(AIM_SOUND, Sound.Emitter.self());
-    }
-
-    public static void stopAiming(Player player) {
-        AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
-
-        player.clearTitle();
-        movementSpeed.removeModifier(AIM_ZOOM_MODIFIER_KEY);
-    }
-
-    public static boolean isAiming(Player player) {
-        AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
-
-        return movementSpeed.getModifier(AIM_ZOOM_MODIFIER_KEY) != null;
     }
 
     private static class ReloadTask extends BukkitRunnable {

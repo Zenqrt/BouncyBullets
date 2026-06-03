@@ -5,13 +5,17 @@ import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 
 public final class PistolGunItem extends BulletGunItem {
 
     public PistolGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
-        super("pistol", Material.GOLDEN_HOE, "BB-Pistol", gunProperties, bulletProperties);
+        super(
+                "pistol",
+                "BB-Pistol",
+                gunProperties,
+                bulletProperties
+        );
     }
 
     @Override

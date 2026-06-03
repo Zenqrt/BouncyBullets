@@ -3,7 +3,6 @@ package dev.zenqrt.bouncybullets.event.listeners;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.item.GameItems;
-import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
 import dev.zenqrt.bouncybullets.player.PlayerSessionManager;
 import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent;
 import org.bukkit.entity.Player;
@@ -57,8 +56,6 @@ public final class GameItemListeners implements Listener {
 
         if (gameOptional.isEmpty())
             return;
-
-        GunItem.stopAiming(player);
 
         BouncyBulletGame game = gameOptional.get();
         ItemStack previousItem = player.getInventory().getItem(event.getPreviousSlot());

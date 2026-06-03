@@ -14,10 +14,7 @@ public final class MiniMessageUtils {
     public static List<Component> wordWrapLore(List<String> lore, int wordWrapLength) {
         MiniMessage miniMessage = MiniMessage.builder().preProcessor(string -> {
             if (string.length() > wordWrapLength) {
-                String s = wrapTextIgnoringTags(string, wordWrapLength);
-
-                System.out.println(s);
-                return s;
+                return wrapTextIgnoringTags(string, wordWrapLength);
             }
 
             return string;
@@ -34,6 +31,7 @@ public final class MiniMessageUtils {
         return components;
     }
 
+    // TODO: Needs a rewrite to accomodate for </tag> tags
     private static String wrapTextIgnoringTags(String text, int wrapLength) {
         if (text.isBlank())
             return text;

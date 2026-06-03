@@ -35,7 +35,7 @@ public final class PlayerJoinListeners implements Listener {
     @EventHandler
     public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
         try {
-            this.statsManager.loadStatsAsync(event.getUniqueId())
+            this.statsManager.loadStatsAsync(event.getPlayerProfile().getId())
                     .get(LOAD_STATS_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             event.disallow(

@@ -10,7 +10,6 @@ import dev.zenqrt.bouncybullets.utils.ExplosionUtils;
 import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
@@ -25,11 +24,12 @@ public final class GrenadeLauncherGunItem extends GunItem {
     private static final int EXPLOSION_RADIUS = 6;
 
     public GrenadeLauncherGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
-        super("grenade_launcher", Material.GOLDEN_HORSE_ARMOR, "Grenade Launcher", gunProperties, bulletProperties);
+        super("grenade_launcher", "Grenade Launcher", gunProperties, bulletProperties);
     }
 
     @Override
-    protected void shootProjectile(BouncyBulletGame game, Player player, BulletProperties bulletProperties) {
+    protected void shootProjectile(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, BulletProperties bulletProperties) {
+        Player player = gamePlayer.getPlayer();
         Location eyeLocation = player.getEyeLocation();
 
         player.setVelocity(eyeLocation.getDirection().normalize().multiply(-1));
@@ -38,8 +38,6 @@ public final class GrenadeLauncherGunItem extends GunItem {
         tnt.setSource(player);
         tnt.setFuseTicks(Integer.MAX_VALUE);
         tnt.setVelocity(eyeLocation.getDirection().normalize().multiply(bulletProperties.speed()));
-
-        BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
 
         new TNTBounceTask(gamePlayer, player, tnt, bulletProperties.numberOfBounces()).runTaskTimer(BouncyBulletsPlugin.getInstance(), 0, 1);
     }
@@ -61,7 +59,7 @@ public final class GrenadeLauncherGunItem extends GunItem {
             }
         }
 
-        shootGun(game, player, gamePlayer.getHud(), itemStack);
+        shootGun(game, gamePlayer, gamePlayer.getHud(), itemStack);
 
         super.lastShootTicks.put(player.getUniqueId(), currentGameTime);
     }

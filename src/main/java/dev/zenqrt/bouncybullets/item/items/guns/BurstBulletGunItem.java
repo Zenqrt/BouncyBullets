@@ -5,7 +5,6 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -13,8 +12,8 @@ public abstract class BurstBulletGunItem extends BulletGunItem {
 
     private final int burstRounds;
 
-    public BurstBulletGunItem(String key, Material material, String displayName, GunProperties gunProperties, BulletProperties bulletProperties, int burstRounds) {
-        super(key, material, displayName, gunProperties, bulletProperties);
+    public BurstBulletGunItem(String key, String displayName, GunProperties gunProperties, BulletProperties bulletProperties, int burstRounds) {
+        super(key, displayName, gunProperties, bulletProperties);
 
         this.burstRounds = burstRounds;
     }
@@ -41,7 +40,7 @@ public abstract class BurstBulletGunItem extends BulletGunItem {
         for (int i = 0; i < rounds; i++) {
             Bukkit.getScheduler().runTaskLater(
                     game.getPlugin(),
-                    () -> shootGun(game, player, gamePlayer.getHud(), itemStack),
+                    () -> shootGun(game, gamePlayer, gamePlayer.getHud(), itemStack),
                     i * 2L
             );
         }

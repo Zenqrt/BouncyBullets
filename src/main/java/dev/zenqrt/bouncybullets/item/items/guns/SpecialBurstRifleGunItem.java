@@ -5,7 +5,6 @@ import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 
 public final class SpecialBurstRifleGunItem extends BurstBulletGunItem {
@@ -13,7 +12,6 @@ public final class SpecialBurstRifleGunItem extends BurstBulletGunItem {
     public SpecialBurstRifleGunItem(GunProperties gunProperties, BulletProperties bulletProperties, int burstRounds) {
         super(
                 "special_burst_rifle",
-                Material.DIAMOND_HORSE_ARMOR,
                 "Burst Rifle",
                 gunProperties,
                 bulletProperties,

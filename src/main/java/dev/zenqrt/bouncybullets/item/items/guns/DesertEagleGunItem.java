@@ -5,13 +5,12 @@ import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 
 public final class DesertEagleGunItem extends BulletGunItem {
 
     public DesertEagleGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
-        super("desert_eagle", Material.DIAMOND_HOE, "Desert Eagle", gunProperties, bulletProperties);
+        super("desert_eagle", "Desert Eagle", gunProperties, bulletProperties);
     }
 
     @Override

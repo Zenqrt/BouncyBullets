@@ -66,9 +66,7 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
         serverConfig.getLobbySpawn().getWorld().setAutoSave(false);
 
         LobbyInstance lobby = new LobbyInstance(serverConfig.getLobbySpawn());
-
         GameManager gameManager = new GameManager(this, this.mapManager);
-
         PlayerSessionManager sessionManager = new PlayerSessionManager(lobby, this.statsManager);
 
         Lamp<BukkitCommandActor> lamp = BukkitLamp.builder(this).build();
@@ -159,7 +157,7 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
     }
 
     public static NamespacedKey createKey(String id) {
-        return NamespacedKey.fromString(id, instance);
+        return new NamespacedKey("bouncy_bullets", id);
     }
 
 }

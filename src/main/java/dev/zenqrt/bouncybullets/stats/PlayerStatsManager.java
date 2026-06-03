@@ -57,6 +57,7 @@ public final class PlayerStatsManager {
     }
 
     private PlayerStats createNew(UUID uuid) {
+        System.out.println("Creating new for " + uuid.toString());
         markDirty(uuid);
 
         return new PlayerStats();

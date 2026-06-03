@@ -42,5 +42,4 @@ public final class PlayerListeners implements Listener {
                 )
         );
     }
-
 }

@@ -6,7 +6,6 @@ import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -15,7 +14,7 @@ import org.bukkit.inventory.ItemStack;
 public final class TwinPistolGunItem extends BulletGunItem {
 
     public TwinPistolGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
-        super("twin_pistol", Material.NETHERITE_HOE, "Twin Pistol", gunProperties, bulletProperties);
+        super("twin_pistol", "Twin Pistol", gunProperties, bulletProperties);
     }
 
     @Override

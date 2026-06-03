@@ -16,11 +16,14 @@ import dev.zenqrt.bouncybullets.loadout.Loadout;
 import dev.zenqrt.bouncybullets.loadout.kit.EventPlayerClass;
 import dev.zenqrt.bouncybullets.loadout.kit.PlayerClass;
 import dev.zenqrt.bouncybullets.map.FreeForAllActiveGameMap;
+import dev.zenqrt.bouncybullets.packet.GunAnimationPacketHandler;
 import dev.zenqrt.bouncybullets.sidebar.sidebars.GameSidebar;
 import dev.zenqrt.bouncybullets.stats.PlayerStatsManager;
 import dev.zenqrt.bouncybullets.utils.NMSConverter;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import dev.zenqrt.bouncybullets.utils.TaskManager;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -115,10 +118,23 @@ public final class BattleGameState extends GameState {
                 .limit(3)
                 .toList();
 
+        Int2ObjectMap<BouncyBulletGamePlayer> idToGamePlayerMap = this.players.values().stream()
+                .collect(
+                        Int2ObjectOpenHashMap::new,
+                        (map, gamePlayer) -> map.put(gamePlayer.getPlayer().getEntityId(), gamePlayer),
+                        Int2ObjectOpenHashMap::putAll
+                );
+
         this.players.forEach((_, gamePlayer) -> {
             Player player = gamePlayer.getPlayer();
 
             player.getInventory().clear();
+
+            PlayerUtils.injectPacketListener(
+                    player,
+                    "bb_gun_animation",
+                    new GunAnimationPacketHandler(player.getEntityId(), idToGamePlayerMap)
+            );
 
             setupPlayerAttributes(player);
             setupPlayerInventory(player.getInventory(), gamePlayer.getLoadout());
@@ -255,10 +271,10 @@ public final class BattleGameState extends GameState {
                         }
                     }
 
-                    if (GunItem.isAiming(player))
-                        GunItem.stopAiming(player);
-
                     BouncyBulletGamePlayer gamePlayer = this.game.findPlayerOrThrow(player.getUniqueId());
+
+                    if (gamePlayer.isAiming())
+                        gamePlayer.stopAiming(this.game);
 
                     gamePlayer.addDeath();
                     this.statsManager.recordDeath(gamePlayer);

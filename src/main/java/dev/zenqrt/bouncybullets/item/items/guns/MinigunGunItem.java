@@ -5,7 +5,6 @@ import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 
 public final class MinigunGunItem extends BulletGunItem {
@@ -13,7 +12,6 @@ public final class MinigunGunItem extends BulletGunItem {
     public MinigunGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
         super(
                 "minigun",
-                Material.GOLDEN_HORSE_ARMOR,
                 "Minigun",
                 gunProperties,
                 bulletProperties
