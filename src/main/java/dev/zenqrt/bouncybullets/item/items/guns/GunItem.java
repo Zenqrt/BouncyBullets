@@ -9,6 +9,7 @@ import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.player.BouncyBulletsHUD;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
+import dev.zenqrt.bouncybullets.utils.NMSConverter;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import dev.zenqrt.bouncybullets.utils.Sounds;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -18,6 +19,9 @@ import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Abilities;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -30,6 +34,7 @@ import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
@@ -167,8 +172,29 @@ public abstract class GunItem extends GameItem {
 
         player.getWorld().playSound(getShootingSound(), player);
 
+        ServerPlayer nmsPlayer = NMSConverter.serverPlayer(player);
+
+        playCameraEffect(game.getPlugin(), nmsPlayer);
+
         shootProjectile(game, gamePlayer, event.getBulletProperties());
         useAmmo(itemStack, hud);
+    }
+
+    private void playCameraEffect(Plugin plugin, ServerPlayer nmsPlayer) {
+        Abilities abilities = new Abilities();
+        abilities.apply(nmsPlayer.getAbilities().pack());
+        abilities.setWalkingSpeed(0.09F);
+
+        ClientboundPlayerAbilitiesPacket abilitiesPacket = new ClientboundPlayerAbilitiesPacket(abilities);
+        nmsPlayer.connection.send(abilitiesPacket);
+
+        ClientboundPlayerAbilitiesPacket resetAbilitiesPacket = new ClientboundPlayerAbilitiesPacket(nmsPlayer.getAbilities());
+
+        Bukkit.getScheduler().runTaskLater(
+                plugin,
+                () -> nmsPlayer.connection.send(resetAbilitiesPacket),
+                3
+        );
     }
 
     protected final void useAmmo(ItemStack itemStack, BouncyBulletsHUD hud) {
