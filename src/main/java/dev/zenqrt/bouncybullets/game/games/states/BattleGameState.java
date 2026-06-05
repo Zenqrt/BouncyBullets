@@ -274,7 +274,7 @@ public final class BattleGameState extends GameState {
                     BouncyBulletGamePlayer gamePlayer = this.game.findPlayerOrThrow(player.getUniqueId());
 
                     if (gamePlayer.isAiming())
-                        gamePlayer.stopAiming(this.game);
+                        gamePlayer.stopAiming(this.game, player.getInventory().getItemInMainHand());
 
                     gamePlayer.addDeath();
                     this.statsManager.recordDeath(gamePlayer);

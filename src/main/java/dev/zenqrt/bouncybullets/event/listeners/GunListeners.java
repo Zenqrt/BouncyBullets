@@ -44,7 +44,7 @@ public final class GunListeners implements Listener {
         BouncyBulletGame game = gameOptional.get();
         BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
 
-        gamePlayer.stopAiming(game);
+        gamePlayer.stopAiming(game, itemStack);
         gunItem.reload(gamePlayer, player, itemStack);
     }
 

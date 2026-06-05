@@ -9,11 +9,9 @@ import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import dev.zenqrt.bouncybullets.utils.Sounds;
 import dev.zenqrt.bouncybullets.utils.entity.EntityUtils;
 import dev.zenqrt.bouncybullets.utils.entity.LivingEntityFlags;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.CustomModelData;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.title.Title;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,7 +24,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -36,10 +33,6 @@ public class BouncyBulletGamePlayer {
 
     private static final NamespacedKey AIM_ZOOM_MODIFIER_KEY = BouncyBulletsPlugin.createKey("aim_zoom");
     private static final Sound AIM_SOUND = Sound.sound(Sounds.UI_BUTTON_CLICK, Sound.Source.MASTER, 0.5F, 2F);
-    private static final Title AIM_CROSSHAIR_TITLE = Title.title(
-            Component.empty(),
-            Component.text("^", NamedTextColor.DARK_GRAY).decorate(TextDecoration.BOLD),
-            Title.Times.times(Duration.ZERO, Duration.ofDays(1), Duration.ZERO));
 
     private int deaths;
     private int kills;
@@ -96,7 +89,8 @@ public class BouncyBulletGamePlayer {
         return reloading;
     }
 
-    public void startAiming(BouncyBulletGame game, GunItem gunItem) {
+    @SuppressWarnings("UnstableApiUsage")
+    public void startAiming(BouncyBulletGame game, GunItem gunItem, ItemStack itemStack) {
         this.aiming = true;
 
         AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(this.player, Attribute.MOVEMENT_SPEED);
@@ -107,7 +101,14 @@ public class BouncyBulletGamePlayer {
         );
 
         movementSpeed.addTransientModifier(zoomModifier);
-        this.player.showTitle(AIM_CROSSHAIR_TITLE);
+
+        itemStack.setData(
+                DataComponentTypes.CUSTOM_MODEL_DATA,
+                CustomModelData.customModelData()
+                        .addString("aim")
+                        .build()
+        );
+
         this.player.playSound(AIM_SOUND, Sound.Emitter.self());
 
         ServerPlayer nmsPlayer = NMSConverter.serverPlayer(this.player);
@@ -134,12 +135,17 @@ public class BouncyBulletGamePlayer {
         }
     }
 
-    public void stopAiming(BouncyBulletGame game) {
+    @SuppressWarnings("UnstableApiUsage")
+    public void stopAiming(BouncyBulletGame game, ItemStack itemStack) {
         this.aiming = false;
 
         AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(this.player, Attribute.MOVEMENT_SPEED);
 
-        this.player.clearTitle();
+        itemStack.setData(
+                DataComponentTypes.CUSTOM_MODEL_DATA,
+                CustomModelData.customModelData().build()
+        );
+
         movementSpeed.removeModifier(AIM_ZOOM_MODIFIER_KEY);
 
         ServerPlayer nmsPlayer = NMSConverter.serverPlayer(this.player);

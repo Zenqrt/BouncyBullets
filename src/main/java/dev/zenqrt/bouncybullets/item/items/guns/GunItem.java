@@ -80,7 +80,7 @@ public abstract class GunItem extends GameItem {
                         )
                         .addData(
                                 DataComponentTypes.ITEM_MODEL,
-                                NamespacedKey.minecraft(key)
+                                new NamespacedKey("bouncybullets", key)
                         )
         );
 
@@ -136,7 +136,7 @@ public abstract class GunItem extends GameItem {
         gamePlayer.getHud().updateHudText();
 
         if (gamePlayer.isAiming())
-            gamePlayer.stopAiming(game);
+            gamePlayer.stopAiming(game, itemStack);
     }
 
     @Override
@@ -147,9 +147,9 @@ public abstract class GunItem extends GameItem {
 
         if (event.getAction().isLeftClick()) {
             if (gamePlayer.isAiming())
-                gamePlayer.stopAiming(game);
+                gamePlayer.stopAiming(game, itemStack);
             else
-                gamePlayer.startAiming(game, this);
+                gamePlayer.startAiming(game, this, itemStack);
 
         } else if (event.getAction().isRightClick()) {
             if (player.hasCooldown(this.material))
