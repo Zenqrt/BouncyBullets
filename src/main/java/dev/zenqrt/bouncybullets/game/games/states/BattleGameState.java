@@ -179,6 +179,8 @@ public final class BattleGameState extends GameState {
 
             Player player = gamePlayer.getPlayer();
 
+            PlayerUtils.removePacketListener(player, "bb_gun_animation");
+
             AttributeInstance knockbackResistance = PlayerUtils.requireNonNullAttribute(player, Attribute.KNOCKBACK_RESISTANCE);
             AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
 

@@ -26,6 +26,10 @@ public final class PlayerUtils {
         NMSConverter.serverPlayer(player).connection.connection.channel.pipeline().remove(handler);
     }
 
+    public static void removePacketListener(Player player, String id) {
+        NMSConverter.serverPlayer(player).connection.connection.channel.pipeline().remove(id);
+    }
+
     public static @NotNull AttributeInstance requireNonNullAttribute(Player player, Attribute attribute) {
         return Objects.requireNonNull(
                 player.getAttribute(attribute),
