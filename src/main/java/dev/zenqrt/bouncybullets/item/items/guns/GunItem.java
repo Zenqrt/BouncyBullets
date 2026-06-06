@@ -148,6 +148,10 @@ public abstract class GunItem extends GameItem {
         if (gamePlayer.isReloading()) {
             gamePlayer.setReloading(false);
 
+            gamePlayer.getHud().removeDisplay("reloading");
+            gamePlayer.getHud().updateHudText();
+            player.stopSound(getReloadSound());
+
             BukkitTask reloadTask = this.reloadTaskMap.remove(gamePlayer.getUuid());
 
             if (reloadTask != null)
