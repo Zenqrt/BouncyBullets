@@ -23,6 +23,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,10 @@ public class BouncyBulletGamePlayer {
     private boolean alive;
     private boolean reloading;
     private boolean aiming;
+
+    private Vector deltaMovement;
+    private float deltaYaw;
+    private float deltaPitch;
 
     private boolean invisible;
     private ItemStack[] pastArmorContents;
@@ -202,6 +207,30 @@ public class BouncyBulletGamePlayer {
 
     public int getKills() {
         return kills;
+    }
+
+    public void setDeltaMovement(Vector deltaMovement) {
+        this.deltaMovement = deltaMovement;
+    }
+
+    public Vector getDeltaMovement() {
+        return deltaMovement;
+    }
+
+    public void setDeltaYaw(float deltaYaw) {
+        this.deltaYaw = deltaYaw;
+    }
+
+    public float getDeltaYaw() {
+        return deltaYaw;
+    }
+
+    public void setDeltaPitch(float deltaPitch) {
+        this.deltaPitch = deltaPitch;
+    }
+
+    public float getDeltaPitch() {
+        return deltaPitch;
     }
 
     public BouncyBulletsHUD getHud() {

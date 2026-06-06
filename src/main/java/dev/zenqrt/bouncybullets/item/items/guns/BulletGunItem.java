@@ -43,12 +43,31 @@ public abstract class BulletGunItem extends GunItem {
                     .add(forward.multiply(0.5))
                     .add(right.multiply(-0.02));
         } else {
-
             gunTipPos = eyeLocation.clone()
                     .add(forward)
                     .add(right.multiply(0.27))
                     .add(0, -0.15, 0);
         }
+
+        Vector deltaMovement = gamePlayer.getDeltaMovement();
+
+        if (!deltaMovement.isZero()) {
+            Vector drift = deltaMovement.clone()
+                    .normalize()
+                    .multiply(0.1);
+
+            gunTipPos
+                    .add(deltaMovement)
+                    .add(drift);
+        }
+
+        gunTipPos.addRotation(
+                gamePlayer.getDeltaYaw(), gamePlayer.getDeltaPitch()
+        );
+
+        System.out.println("Delta Yaw: " + gamePlayer.getDeltaYaw());
+        System.out.println("Delta Pitch: " + gamePlayer.getDeltaPitch());
+
 
         Location bulletDestroyPos = player.getEyeLocation().clone()
                 .subtract(0, 100, 0);

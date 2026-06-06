@@ -5,10 +5,7 @@ import com.mongodb.client.MongoClients;
 import dev.zenqrt.bouncybullets.command.commands.BackupCommand;
 import dev.zenqrt.bouncybullets.command.commands.BouncyBulletsCommand;
 import dev.zenqrt.bouncybullets.config.ServerConfig;
-import dev.zenqrt.bouncybullets.event.listeners.GameItemListeners;
-import dev.zenqrt.bouncybullets.event.listeners.GunListeners;
-import dev.zenqrt.bouncybullets.event.listeners.PlayerJoinListeners;
-import dev.zenqrt.bouncybullets.event.listeners.PlayerListeners;
+import dev.zenqrt.bouncybullets.event.listeners.*;
 import dev.zenqrt.bouncybullets.game.GameManager;
 import dev.zenqrt.bouncybullets.game.games.GameSettings;
 import dev.zenqrt.bouncybullets.item.GameItems;
@@ -21,6 +18,7 @@ import dev.zenqrt.bouncybullets.stats.database.MongoPlayerStatsRepository;
 import dev.zenqrt.bouncybullets.stats.database.PlayerStatsRepository;
 import dev.zenqrt.bouncybullets.tasks.AutoRepositorySaveTask;
 import dev.zenqrt.bouncybullets.tasks.GameCreationTask;
+import dev.zenqrt.bouncybullets.tasks.UpdateDeltaMovementTask;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -77,6 +75,7 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(lobby, this.statsManager, sessionManager), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListeners(), this);
+//        Bukkit.getPluginManager().registerEvents(new GamePlayerListeners(sessionManager), this);
         Bukkit.getPluginManager().registerEvents(new GameItemListeners(sessionManager), this);
         Bukkit.getPluginManager().registerEvents(new GunListeners(sessionManager), this);
         Bukkit.getPluginManager().registerEvents(GameItems.SNIPER_ACTIVE_ABILITY, this);
@@ -87,6 +86,13 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
                 new AutoRepositorySaveTask(this, this.statsManager),
                 0,
                 AUTO_REPOSITORY_SAVE_INTERVAL_TICKS
+        );
+
+        Bukkit.getScheduler().runTaskTimer(
+                this,
+                new UpdateDeltaMovementTask(sessionManager),
+                0,
+                1
         );
 
         initializeGameInstances(gameManager, sessionManager);
