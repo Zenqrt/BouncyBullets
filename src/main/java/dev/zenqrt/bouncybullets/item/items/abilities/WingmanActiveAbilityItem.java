@@ -60,13 +60,6 @@ public final class WingmanActiveAbilityItem extends ActiveAbilityItem {
         player.setCooldown(super.material, COOLDOWN_TICKS);
     }
 
-    private static ParticleBuilder createBulletTrail() {
-        return Particle.ELECTRIC_SPARK.builder()
-                .count(1)
-                .extra(0)
-                .force(true);
-    }
-
     private static class ShootingTask extends BukkitRunnable {
 
         private static final int SHOTS_PER_ITERATION = 4;
@@ -98,8 +91,7 @@ public final class WingmanActiveAbilityItem extends ActiveAbilityItem {
                         this.shooter.getEyeLocation(),
                         direction,
                         BULLET_PROPERTIES,
-                        0,
-                        createBulletTrail()
+                        0
                 ).runTaskTimer(this.plugin, 1, 1);
 
                 if (this.thetaOffset >= 2 * Math.PI || this.gamePlayer.isDead()) {

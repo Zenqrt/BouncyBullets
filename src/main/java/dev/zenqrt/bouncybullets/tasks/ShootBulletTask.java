@@ -1,6 +1,5 @@
 package dev.zenqrt.bouncybullets.tasks;
 
-import com.destroystokyo.paper.ParticleBuilder;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
@@ -26,7 +25,6 @@ public final class ShootBulletTask extends BukkitRunnable {
 
     private final Player shooter;
     private final BulletProperties bulletProperties;
-    private final ParticleBuilder trailParticle;
     private Location bounceLocation;
     private Location lastBulletLocation;
     private Vector currentDirection;
@@ -34,10 +32,9 @@ public final class ShootBulletTask extends BukkitRunnable {
     private int tickSinceBounce = 0;
     private int currentTick = 0;
 
-    public ShootBulletTask(Player shooter, Location startLocation, Vector direction, BulletProperties bulletProperties, double recoilRange, ParticleBuilder trailParticle) {
+    public ShootBulletTask(Player shooter, Location startLocation, Vector direction, BulletProperties bulletProperties, double recoilRange) {
         this.shooter = shooter;
         this.bulletProperties = bulletProperties;
-        this.trailParticle = trailParticle;
 
         this.bounceLocation = startLocation;
         this.lastBulletLocation = startLocation;
@@ -61,14 +58,22 @@ public final class ShootBulletTask extends BukkitRunnable {
             return;
         }
 
-        double segmentLength = (bulletProperties.speed() + (bulletProperties.speed() * (bulletProperties.speedChange() * bounces))) / 20;
+        double segmentLength = (bulletProperties.speed() + (bulletProperties.speed() * (bulletProperties.speedChange() * bounces))) / 2;
         double distance = segmentLength * tickSinceBounce++;
         Vector increment = currentDirection.clone().multiply(distance);
         Location location = bounceLocation.clone().add(increment);
 
         spawnBulletParticle(location);
 
-        RayTraceResult result = location.getWorld().rayTrace(location, currentDirection, segmentLength, FluidCollisionMode.NEVER, true, 0.1, entity -> entity instanceof Player player && player.getGameMode() == GameMode.ADVENTURE && player != shooter);
+        RayTraceResult result = location.getWorld().rayTrace(
+                location,
+                currentDirection,
+                segmentLength,
+                FluidCollisionMode.NEVER,
+                true,
+                0.1,
+                entity -> entity instanceof Player player && player.getGameMode() == GameMode.ADVENTURE && (player != this.shooter || this.bounces > 0)
+        );
 
         if (result != null) {
             Location hitLocation = result.getHitPosition().toLocation(location.getWorld());
@@ -155,7 +160,13 @@ public final class ShootBulletTask extends BukkitRunnable {
     }
 
     private void spawnBulletParticle(Location location) {
-        this.trailParticle
+        Particle.CRIT.builder()
+//                .data(new Particle.Trail(
+//                        location.clone().subtract(0, 0.5, 0),
+//                        Color.fromRGB(227, 202, 170),
+//                        10
+//                ))
+                .extra(0)
                 .location(location)
                 .allPlayers()
                 .force(true)

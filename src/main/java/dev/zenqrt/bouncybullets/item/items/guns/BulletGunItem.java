@@ -8,7 +8,6 @@ import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.player.BouncyBulletsHUD;
 import dev.zenqrt.bouncybullets.tasks.ShootBulletTask;
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
@@ -41,11 +40,7 @@ public abstract class BulletGunItem extends GunItem {
     @Override
     protected void shootProjectile(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, BulletProperties bulletProperties) {
         Player player = gamePlayer.getPlayer();
-        Location eyeLocation = getPredictedEyeLocation(gamePlayer);
-        System.out.println("predicted eye location: " + eyeLocation);
-        System.out.println("Actual eye location: " + player.getEyeLocation());
-        System.out.println("Delta yaw: " + gamePlayer.getDeltaYaw());
-        System.out.println("Delta pitch: " + gamePlayer.getDeltaPitch());
+        Location eyeLocation = predictEyeLocation(gamePlayer);
 
         Vector forward = eyeLocation.getDirection().normalize();
         Vector up = new Vector(0, 1, 0);
@@ -58,21 +53,16 @@ public abstract class BulletGunItem extends GunItem {
             gunTipPos = eyeLocation.clone()
                     .add(forward.multiply(this.tipOffsetAiming.forward))
                     .add(right.multiply(this.tipOffsetAiming.right));
-//                    .add(forward.multiply(0.5))
-//                    .add(right.multiply(-0.02));
         } else {
             gunTipPos = eyeLocation.clone()
                     .add(forward.multiply(this.tipOffset.forward))
                     .add(right.multiply(this.tipOffset.right))
                     .subtract(0, this.tipOffset.down, 0);
-//                    .add(forward)
-//                    .add(right.multiply(0.27))
-//                    .add(0, -0.15, 0);
         }
 
-        Location bulletDestroyPos = player.getEyeLocation().clone()
-                .subtract(0, 100, 0);
-        Color fireColor = Color.fromRGB(252, 158, 38);
+//        Location bulletDestroyPos = player.getEyeLocation().clone()
+//                .subtract(0, 100, 0);
+//        Color fireColor = Color.fromRGB(252, 158, 38);
 
         Particle.END_ROD.builder()
 //                .data(new Particle.Trail(bulletDestroyPos, fireColor, 1))
@@ -87,13 +77,11 @@ public abstract class BulletGunItem extends GunItem {
                 gunTipPos,
                 player.getEyeLocation().getDirection().normalize(),
                 bulletProperties,
-                gamePlayer.isAiming() ? this.gunProperties.spreadRangeFocused() : this.gunProperties.spreadRange(),
-//                getBulletParticleBuilder()
-                Particle.ASH.builder()
+                gamePlayer.isAiming() ? this.gunProperties.spreadRangeFocused() : this.gunProperties.spreadRange()
         ).runTaskTimer(game.getPlugin(), 0, 1);
     }
 
-    private static Location getPredictedEyeLocation(BouncyBulletGamePlayer gamePlayer) {
+    private static Location predictEyeLocation(BouncyBulletGamePlayer gamePlayer) {
         Location eyeLocation = gamePlayer.getPlayer().getEyeLocation();
         Vector deltaMovement = gamePlayer.getDeltaMovement();
 
