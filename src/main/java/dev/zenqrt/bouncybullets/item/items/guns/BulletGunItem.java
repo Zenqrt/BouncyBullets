@@ -7,11 +7,19 @@ import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.player.BouncyBulletsHUD;
 import dev.zenqrt.bouncybullets.tasks.ShootBulletTask;
+import dev.zenqrt.bouncybullets.utils.PlayerUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 public abstract class BulletGunItem extends GunItem {
@@ -36,6 +44,45 @@ public abstract class BulletGunItem extends GunItem {
     }
 
     protected abstract ParticleBuilder getBulletParticleBuilder();
+
+    @Override
+    protected BukkitTask startReloading(Plugin plugin, BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack, int ammo) {
+        gamePlayer.getHud().addDisplay("reloading", Component.text("Reloading...", NamedTextColor.WHITE));
+        gamePlayer.getHud().updateHudText();
+
+        AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
+
+        gamePlayer.setReloading(true);
+
+        movementSpeed.removeModifier(RELOAD_SLOWDOWN_MODIFIER);
+        movementSpeed.addTransientModifier(RELOAD_SLOWDOWN_MODIFIER);
+
+        player.setCooldown(itemStack.getType(), super.gunProperties.reloadTicks()); // TODO Change cooldown mechanics
+        player.playSound(getReloadSound());
+
+        return Bukkit.getScheduler().runTaskLater(
+                plugin,
+                () -> {
+                    itemStack.editMeta(meta -> {
+                        PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
+
+                        setAmmo(dataContainer, BulletGunItem.super.gunProperties.magazineSize());
+                    });
+
+                    movementSpeed.removeModifier(RELOAD_SLOWDOWN_MODIFIER);
+                    player.setCooldown(itemStack.getType(), 0);
+
+                    gamePlayer.getHud().updateAmmo(
+                            BulletGunItem.super.gunProperties.magazineSize(),
+                            BulletGunItem.super.gunProperties.magazineSize()
+                    );
+                    gamePlayer.getHud().removeDisplay("reloading");
+                    gamePlayer.getHud().updateHudText();
+                    gamePlayer.setReloading(false);
+                },
+                BulletGunItem.super.gunProperties.reloadTicks()
+        );
+    }
 
     @Override
     protected void shootProjectile(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, BulletProperties bulletProperties) {

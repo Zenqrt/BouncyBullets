@@ -48,7 +48,7 @@ public final class GunListeners implements Listener {
             return;
 
         gamePlayer.stopAiming(game, itemStack);
-        gunItem.reload(game.getPlugin(), gamePlayer, player, itemStack);
+        gunItem.handleReload(game.getPlugin(), gamePlayer, player, itemStack);
     }
 
 }

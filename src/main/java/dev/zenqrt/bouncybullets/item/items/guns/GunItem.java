@@ -1,5 +1,6 @@
 package dev.zenqrt.bouncybullets.item.items.guns;
 
+import com.google.common.base.Preconditions;
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.event.events.GunShootEvent;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
@@ -44,7 +45,7 @@ import java.util.UUID;
 
 public abstract class GunItem extends GameItem {
 
-    private static final AttributeModifier RELOAD_SLOWDOWN_MODIFIER = new AttributeModifier(
+    protected static final AttributeModifier RELOAD_SLOWDOWN_MODIFIER = new AttributeModifier(
             BouncyBulletsPlugin.createKey("reload_slowdown"),
             -0.05,
             AttributeModifier.Operation.ADD_NUMBER
@@ -118,6 +119,8 @@ public abstract class GunItem extends GameItem {
         this(key, displayName, gunProperties, bulletProperties, dataComponentsBuilder());
     }
 
+    protected abstract BukkitTask startReloading(Plugin plugin, BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack, int currentAmmo);
+
     protected abstract void useGun(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack);
     protected abstract void shootProjectile(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, BulletProperties bulletProperties);
     protected abstract Sound getShootingSound();
@@ -147,6 +150,9 @@ public abstract class GunItem extends GameItem {
 
         if (gamePlayer.isReloading()) {
             gamePlayer.setReloading(false);
+
+            AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
+            movementSpeed.removeModifier(RELOAD_SLOWDOWN_MODIFIER);
 
             gamePlayer.getHud().removeDisplay("reloading");
             gamePlayer.getHud().updateHudText();
@@ -226,49 +232,23 @@ public abstract class GunItem extends GameItem {
         });
     }
 
-    public final void reload(Plugin plugin, BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack) {
+    public final void handleReload(Plugin plugin, BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack) {
+        Preconditions.checkArgument(!gamePlayer.isReloading(), "gamePlayer must not be reloading");
+
         int ammo = getAmmo(itemStack);
 
         if (ammo >= this.gunProperties.magazineSize())
             return;
 
-        gamePlayer.getHud().addDisplay("reloading", Component.text("Reloading...", NamedTextColor.WHITE));
-        gamePlayer.getHud().updateHudText();
-
-        AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
-
-        gamePlayer.setReloading(true);
-
-        movementSpeed.removeModifier(RELOAD_SLOWDOWN_MODIFIER);
-        movementSpeed.addTransientModifier(RELOAD_SLOWDOWN_MODIFIER);
-
-        player.setCooldown(itemStack.getType(), this.gunProperties.reloadTicks()); // TODO Change cooldown mechanics
-        player.playSound(getReloadSound());
-
-        BukkitTask reloadTask = Bukkit.getScheduler().runTaskLater(
-                plugin,
-                () -> {
-                    itemStack.editMeta(meta -> {
-                        PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
-                        dataContainer.set(AMMO_KEY, PersistentDataType.INTEGER, this.gunProperties.magazineSize());
-                    });
-
-                    movementSpeed.removeModifier(RELOAD_SLOWDOWN_MODIFIER);
-                    player.setCooldown(itemStack.getType(), 0);
-
-                    gamePlayer.getHud().updateAmmo(this.gunProperties.magazineSize(), this.gunProperties.magazineSize());
-                    gamePlayer.getHud().removeDisplay("reloading");
-                    gamePlayer.getHud().updateHudText();
-                    gamePlayer.setReloading(false);
-                },
-                this.gunProperties.reloadTicks()
-        );
-
-        this.reloadTaskMap.put(gamePlayer.getUuid(), reloadTask);
+        this.reloadTaskMap.put(gamePlayer.getUuid(), startReloading(plugin, gamePlayer, player, itemStack, ammo));
     }
 
     protected Sound getReloadSound() {
         return Sound.sound(Sounds.ITEM_ARMOR_EQUIP_CHAIN, Sound.Source.PLAYER, 1, 1);
+    }
+
+    protected void setAmmo(PersistentDataContainer dataContainer, int ammo) {
+        dataContainer.set(AMMO_KEY, PersistentDataType.INTEGER, ammo);
     }
 
     public int getAmmo(ItemStack itemStack) {

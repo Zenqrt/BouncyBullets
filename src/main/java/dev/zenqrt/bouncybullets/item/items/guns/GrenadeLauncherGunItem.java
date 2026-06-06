@@ -7,16 +7,24 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.utils.ExplosionUtils;
+import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import dev.zenqrt.bouncybullets.utils.Sounds;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 public final class GrenadeLauncherGunItem extends GunItem {
@@ -25,6 +33,62 @@ public final class GrenadeLauncherGunItem extends GunItem {
 
     public GrenadeLauncherGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
         super("grenade_launcher", "Grenade Launcher", gunProperties, bulletProperties);
+    }
+
+    @Override
+    protected BukkitTask startReloading(Plugin plugin, BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack, int currentAmmo) {
+        int maxAmmo = super.gunProperties.magazineSize();
+        int ticksPerAmmo = super.gunProperties.reloadTicks() / maxAmmo;
+
+        gamePlayer.getHud().addDisplay("reloading", Component.text("Reloading...", NamedTextColor.WHITE));
+        gamePlayer.getHud().updateHudText();
+
+        AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
+
+        gamePlayer.setReloading(true);
+
+        movementSpeed.removeModifier(RELOAD_SLOWDOWN_MODIFIER);
+        movementSpeed.addTransientModifier(RELOAD_SLOWDOWN_MODIFIER);
+
+        player.setCooldown(itemStack.getType(), super.gunProperties.reloadTicks());
+        player.playSound(getReloadSound());
+
+        return new BukkitRunnable() {
+            @Override
+            public void run() {
+                int ammo = GrenadeLauncherGunItem.super.getAmmo(itemStack);
+
+                if (ammo >= maxAmmo) {
+                    this.cancel();
+
+                    movementSpeed.removeModifier(RELOAD_SLOWDOWN_MODIFIER);
+                    player.setCooldown(itemStack.getType(), 0);
+
+                    gamePlayer.getHud().removeDisplay("reloading");
+                    gamePlayer.getHud().updateHudText();
+                    gamePlayer.setReloading(false);
+
+                    return;
+                }
+
+                int newAmmo = ammo + 1;
+
+                itemStack.editMeta(meta -> {
+                    PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
+
+                    setAmmo(dataContainer, newAmmo);
+                });
+
+
+                gamePlayer.getHud().updateAmmo(
+                        newAmmo,
+                        GrenadeLauncherGunItem.super.gunProperties.magazineSize()
+                );
+                gamePlayer.getHud().updateHudText();
+
+                player.playSound(Sound.sound(Sounds.BLOCK_BARREL_CLOSE, Sound.Source.PLAYER, 1, 0.75F));
+            }
+        }.runTaskTimer(plugin, ticksPerAmmo, ticksPerAmmo);
     }
 
     @Override
@@ -67,11 +131,6 @@ public final class GrenadeLauncherGunItem extends GunItem {
     @Override
     protected Sound getShootingSound() {
         return Sound.sound(Sounds.ENTITY_GENERIC_EXPLODE, Sound.Source.PLAYER, 1, 2);
-    }
-
-    @Override
-    protected Sound getReloadSound() {
-        return Sound.sound(Sounds.BLOCK_BARREL_CLOSE, Sound.Source.PLAYER, 1, 0.75F);
     }
 
     private class TNTBounceTask extends BukkitRunnable {
