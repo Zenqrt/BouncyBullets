@@ -6,6 +6,6 @@ public record GunProperties(
         double spreadRange,
         double spreadRangeFocused,
         int magazineSize,
-        int reloadTicksPerAmmo,
+        int reloadTicks,
         int scopeMagnifyMultiplier
 ) {}

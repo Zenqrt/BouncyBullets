@@ -31,4 +31,9 @@ public final class DesertEagleGunItem extends BulletGunItem {
     protected Sound getShootingSound() {
         return Sound.sound(Sounds.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, Sound.Source.PLAYER, 1, 1);
     }
+
+    @Override
+    protected Sound getReloadSound() {
+        return Sound.sound(Sounds.GUN_DESERT_EAGLE_RELOAD, Sound.Source.PLAYER, 1, 1);
+    }
 }
