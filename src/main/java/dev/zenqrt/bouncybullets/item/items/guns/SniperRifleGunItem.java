@@ -9,8 +9,15 @@ import org.bukkit.Particle;
 
 public final class SniperRifleGunItem extends BulletGunItem {
 
-    public SniperRifleGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
-        super("sniper_rifle", "Sniper Rifle", gunProperties, bulletProperties);
+    public SniperRifleGunItem(GunProperties gunProperties, BulletProperties bulletProperties, TipOffset tipOffset, TipOffset tipOffsetAiming) {
+        super(
+                "sniper_rifle",
+                "Sniper Rifle",
+                gunProperties,
+                bulletProperties,
+                tipOffset,
+                tipOffsetAiming
+        );
     }
 
     @Override

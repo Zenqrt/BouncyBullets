@@ -13,8 +13,15 @@ import org.bukkit.inventory.ItemStack;
 
 public final class TwinPistolGunItem extends BulletGunItem {
 
-    public TwinPistolGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
-        super("twin_pistol", "Twin Pistol", gunProperties, bulletProperties);
+    public TwinPistolGunItem(GunProperties gunProperties, BulletProperties bulletProperties, TipOffset tipOffset, TipOffset tipOffsetAiming) {
+        super(
+                "twin_pistol",
+                "Twin Pistol",
+                gunProperties,
+                bulletProperties,
+                tipOffset,
+                tipOffsetAiming
+        );
     }
 
     @Override

@@ -61,10 +61,10 @@ public final class UpdateDeltaMovementTask implements Runnable {
                     )
             );
             gamePlayer.setDeltaYaw(
-                    (currentPosition.yaw() - lastPosition.yaw() + 10) / deltaTime
+                    (currentPosition.yaw() - lastPosition.yaw()) / deltaTime
             );
             gamePlayer.setDeltaPitch(
-                    (currentPosition.pitch() - lastPosition.pitch() + 10) / deltaTime
+                    (currentPosition.pitch() - lastPosition.pitch()) / deltaTime
             );
         }
     }

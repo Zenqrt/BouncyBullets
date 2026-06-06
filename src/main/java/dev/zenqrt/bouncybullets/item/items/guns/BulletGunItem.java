@@ -19,8 +19,21 @@ public abstract class BulletGunItem extends GunItem {
 
     private static final int INTERACT_EVENT_TICK_DELAY = 4;
 
-    public BulletGunItem(String key, String displayName, GunProperties gunProperties, BulletProperties bulletProperties) {
+    private final TipOffset tipOffset;
+    private final TipOffset tipOffsetAiming;
+
+    public BulletGunItem(
+            String key,
+            String displayName,
+            GunProperties gunProperties,
+            BulletProperties bulletProperties,
+            TipOffset tipOffset,
+            TipOffset tipOffsetAiming
+    ) {
         super(key, displayName, gunProperties, bulletProperties);
+
+        this.tipOffset = tipOffset;
+        this.tipOffsetAiming = tipOffsetAiming;
     }
 
     protected abstract ParticleBuilder getBulletParticleBuilder();
@@ -28,46 +41,34 @@ public abstract class BulletGunItem extends GunItem {
     @Override
     protected void shootProjectile(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, BulletProperties bulletProperties) {
         Player player = gamePlayer.getPlayer();
-        Location eyeLocation = player.getEyeLocation();
+        Location eyeLocation = getPredictedEyeLocation(gamePlayer);
+        System.out.println("predicted eye location: " + eyeLocation);
+        System.out.println("Actual eye location: " + player.getEyeLocation());
+        System.out.println("Delta yaw: " + gamePlayer.getDeltaYaw());
+        System.out.println("Delta pitch: " + gamePlayer.getDeltaPitch());
 
         Vector forward = eyeLocation.getDirection().normalize();
         Vector up = new Vector(0, 1, 0);
         Vector right = forward.clone()
                 .crossProduct(up)
-                .normalize()
-                .multiply(1);
+                .normalize();
         Location gunTipPos;
 
         if (gamePlayer.isAiming()) {
             gunTipPos = eyeLocation.clone()
-                    .add(forward.multiply(0.5))
-                    .add(right.multiply(-0.02));
+                    .add(forward.multiply(this.tipOffsetAiming.forward))
+                    .add(right.multiply(this.tipOffsetAiming.right));
+//                    .add(forward.multiply(0.5))
+//                    .add(right.multiply(-0.02));
         } else {
             gunTipPos = eyeLocation.clone()
-                    .add(forward)
-                    .add(right.multiply(0.27))
-                    .add(0, -0.15, 0);
+                    .add(forward.multiply(this.tipOffset.forward))
+                    .add(right.multiply(this.tipOffset.right))
+                    .subtract(0, this.tipOffset.down, 0);
+//                    .add(forward)
+//                    .add(right.multiply(0.27))
+//                    .add(0, -0.15, 0);
         }
-
-        Vector deltaMovement = gamePlayer.getDeltaMovement();
-
-        if (!deltaMovement.isZero()) {
-            Vector drift = deltaMovement.clone()
-                    .normalize()
-                    .multiply(0.1);
-
-            gunTipPos
-                    .add(deltaMovement)
-                    .add(drift);
-        }
-
-        gunTipPos.addRotation(
-                gamePlayer.getDeltaYaw(), gamePlayer.getDeltaPitch()
-        );
-
-        System.out.println("Delta Yaw: " + gamePlayer.getDeltaYaw());
-        System.out.println("Delta Pitch: " + gamePlayer.getDeltaPitch());
-
 
         Location bulletDestroyPos = player.getEyeLocation().clone()
                 .subtract(0, 100, 0);
@@ -90,6 +91,24 @@ public abstract class BulletGunItem extends GunItem {
 //                getBulletParticleBuilder()
                 Particle.ASH.builder()
         ).runTaskTimer(game.getPlugin(), 0, 1);
+    }
+
+    private static Location getPredictedEyeLocation(BouncyBulletGamePlayer gamePlayer) {
+        Location eyeLocation = gamePlayer.getPlayer().getEyeLocation();
+        Vector deltaMovement = gamePlayer.getDeltaMovement();
+
+        if (deltaMovement.isZero())
+            return eyeLocation.clone()
+                    .addRotation(gamePlayer.getDeltaYaw(), gamePlayer.getDeltaPitch());
+
+        Vector drift = deltaMovement.clone()
+                .normalize()
+                .multiply(0.1);
+
+        return eyeLocation.clone()
+                .addRotation(gamePlayer.getDeltaYaw(), gamePlayer.getDeltaPitch())
+                .add(deltaMovement)
+                .add(drift);
     }
 
     @Override
@@ -134,4 +153,6 @@ public abstract class BulletGunItem extends GunItem {
         shootGun(game, gamePlayer, hud, itemStack);
         super.lastShootTicks.put(player.getUniqueId(), currentGameTime);
     }
+
+    public record TipOffset(float down, float forward, float right) {}
 }

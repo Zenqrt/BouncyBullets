@@ -9,12 +9,14 @@ import org.bukkit.Particle;
 
 public final class MinigunGunItem extends BulletGunItem {
 
-    public MinigunGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
+    public MinigunGunItem(GunProperties gunProperties, BulletProperties bulletProperties, TipOffset tipOffset, TipOffset tipOffsetAiming) {
         super(
                 "minigun",
                 "Minigun",
                 gunProperties,
-                bulletProperties
+                bulletProperties,
+                tipOffset,
+                tipOffsetAiming
         );
     }
 

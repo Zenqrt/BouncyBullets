@@ -12,8 +12,16 @@ public abstract class BurstBulletGunItem extends BulletGunItem {
 
     private final int burstRounds;
 
-    public BurstBulletGunItem(String key, String displayName, GunProperties gunProperties, BulletProperties bulletProperties, int burstRounds) {
-        super(key, displayName, gunProperties, bulletProperties);
+    public BurstBulletGunItem(
+            String key,
+            String displayName,
+            GunProperties gunProperties,
+            BulletProperties bulletProperties,
+            TipOffset tipOffset,
+            TipOffset tipOffsetAiming,
+            int burstRounds
+    ) {
+        super(key, displayName, gunProperties, bulletProperties, tipOffset, tipOffsetAiming);
 
         this.burstRounds = burstRounds;
     }

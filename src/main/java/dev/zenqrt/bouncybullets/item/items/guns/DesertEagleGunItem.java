@@ -9,12 +9,14 @@ import org.bukkit.Particle;
 
 public final class DesertEagleGunItem extends BulletGunItem {
 
-    public DesertEagleGunItem(GunProperties gunProperties, BulletProperties bulletProperties) {
+    public DesertEagleGunItem(GunProperties gunProperties, BulletProperties bulletProperties, TipOffset tipOffset, TipOffset tipOffsetAiming) {
         super(
                 "desert_eagle", 
                 "Desert Eagle",
                 gunProperties,
-                bulletProperties
+                bulletProperties,
+                tipOffset,
+                tipOffsetAiming
         );
     }
 

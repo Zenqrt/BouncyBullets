@@ -9,12 +9,14 @@ import org.bukkit.Particle;
 
 public final class SpecialBurstRifleGunItem extends BurstBulletGunItem {
 
-    public SpecialBurstRifleGunItem(GunProperties gunProperties, BulletProperties bulletProperties, int burstRounds) {
+    public SpecialBurstRifleGunItem(GunProperties gunProperties, BulletProperties bulletProperties, TipOffset tipOffset, TipOffset tipOffsetAiming, int burstRounds) {
         super(
                 "special_burst_rifle",
                 "Burst Rifle",
                 gunProperties,
                 bulletProperties,
+                tipOffset,
+                tipOffsetAiming,
                 burstRounds
         );
     }
