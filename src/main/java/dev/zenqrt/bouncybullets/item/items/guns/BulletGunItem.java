@@ -6,11 +6,12 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.player.BouncyBulletsHUD;
-import dev.zenqrt.bouncybullets.tasks.ShootBulletTask;
+import dev.zenqrt.bouncybullets.tasks.ShootBulletTaskV2;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.attribute.Attribute;
@@ -21,6 +22,9 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class BulletGunItem extends GunItem {
 
@@ -107,23 +111,36 @@ public abstract class BulletGunItem extends GunItem {
                     .subtract(0, this.tipOffset.down, 0);
         }
 
-//        Location bulletDestroyPos = player.getEyeLocation().clone()
-//                .subtract(0, 100, 0);
-//        Color fireColor = Color.fromRGB(252, 158, 38);
+        Random random = ThreadLocalRandom.current();
+        double range = 0.05;
+        int particleCount = 5;
 
-        Particle.END_ROD.builder()
-//                .data(new Particle.Trail(bulletDestroyPos, fireColor, 1))
-                .location(gunTipPos)
-//                .offset(0.025, 0.025, 0.025)
-                .extra(1000)
-                .count(1)
-                .spawn();
+        for (int i = 0; i < particleCount; i++) {
+            Color fireColor = Color.fromRGB(
+                    252,
+                    120 + random.nextInt(75),
+                    38
+            );
 
-        new ShootBulletTask(
+            Particle.INSTANT_EFFECT.builder()
+                    .data(new Particle.Spell(fireColor, 100))
+                    .location(
+                            gunTipPos.clone().add(
+                                    random.nextDouble(-range, range),
+                                    random.nextDouble(-range, range),
+                                    random.nextDouble(-range, range)
+                            )
+                    )
+                    .extra(1000)
+                    .count(1)
+                    .spawn();
+        }
+
+        new ShootBulletTaskV2(
                 player,
+                bulletProperties,
                 gunTipPos,
                 player.getEyeLocation().getDirection().normalize(),
-                bulletProperties,
                 gamePlayer.isAiming() ? this.gunProperties.spreadRangeFocused() : this.gunProperties.spreadRange()
         ).runTaskTimer(game.getPlugin(), 0, 1);
     }
