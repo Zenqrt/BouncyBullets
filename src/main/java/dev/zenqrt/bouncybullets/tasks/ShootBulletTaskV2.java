@@ -125,7 +125,7 @@ public final class ShootBulletTaskV2 extends BukkitRunnable {
 
             Block hitBlock = result.getHitBlock();
 
-            if (hitBlock == null )
+            if (hitBlock == null)
                 break;
 
             if (this.bounces + bouncesInTick >= this.bulletProperties.numberOfBounces()) {
@@ -170,8 +170,8 @@ public final class ShootBulletTaskV2 extends BukkitRunnable {
 
         this.bulletLocation = current;
         this.currentDirection = direction;
-        this.bounces += bouncesInTick;
         this.lastBounceLocation = lastBounceInTick;
+        this.bounces += bouncesInTick;
     }
 
     private RayTraceResult raytraceBullet(Location start, Vector direction, double distance) {

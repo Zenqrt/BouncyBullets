@@ -33,7 +33,7 @@ import java.util.UUID;
 public class BouncyBulletGamePlayer {
 
     private static final NamespacedKey AIM_ZOOM_MODIFIER_KEY = BouncyBulletsPlugin.createKey("aim_zoom");
-    private static final Sound AIM_SOUND = Sound.sound(Sounds.UI_BUTTON_CLICK, Sound.Source.MASTER, 0.5F, 2F);
+    private static final Sound AIM_SOUND = Sound.sound(Sounds.ITEM_ARMOR_EQUIP_GENERIC, Sound.Source.PLAYER, 0.5F, 0);
 
     private int deaths;
     private int kills;

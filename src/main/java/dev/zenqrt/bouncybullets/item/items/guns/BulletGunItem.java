@@ -8,6 +8,8 @@ import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.player.BouncyBulletsHUD;
 import dev.zenqrt.bouncybullets.tasks.ShootBulletTaskV2;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
+import dev.zenqrt.bouncybullets.utils.Sounds;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -189,8 +191,12 @@ public abstract class BulletGunItem extends GunItem {
 
         long currentGameTime = player.getServer().getCurrentTick();
 
-        if (getAmmo(itemStack) <= 0)
+        if (getAmmo(itemStack) <= 0) {
+            player.playSound(
+                    Sound.sound(Sounds.UI_BUTTON_CLICK, Sound.Source.PLAYER, 0.5F, 2)
+            );
             return;
+        }
 
         if (super.lastShootTicks.containsKey(player.getUniqueId())) {
             long lastShootTick = super.lastShootTicks.get(player.getUniqueId());
