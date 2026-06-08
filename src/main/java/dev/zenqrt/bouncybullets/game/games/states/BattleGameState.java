@@ -21,6 +21,7 @@ import dev.zenqrt.bouncybullets.sidebar.sidebars.GameSidebar;
 import dev.zenqrt.bouncybullets.stats.PlayerStatsManager;
 import dev.zenqrt.bouncybullets.utils.NMSConverter;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
+import dev.zenqrt.bouncybullets.utils.PlayerVisualEffects;
 import dev.zenqrt.bouncybullets.utils.TaskManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -39,8 +40,10 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -283,11 +286,30 @@ public final class BattleGameState extends GameState {
 
                     gamePlayer.setAlive(false);
 
+                    PlayerVisualEffects.hideLowHealthEffect(player);
+
                     this.taskManager.runTaskTimer(
                             new DeathSpectatorTask(gamePlayer, 5),
                             0, 20
                     );
                 })
+                .build());
+        this.playerEntityEventNode.registerListener(PaperEventListener.builder(EntityDamageEvent.class, EventPriority.MONITOR)
+                .filter(event -> !event.isCancelled())
+                .filter(event ->
+                        event.getEntity() instanceof Player player
+                                && player.getHealth() - event.getFinalDamage() <= 6
+                                && player.getHealth() - event.getFinalDamage() > 0
+                )
+                .handler(event -> PlayerVisualEffects.showLowHealthEffect((Player) event.getEntity()))
+                .build());
+        this.playerEntityEventNode.registerListener(PaperEventListener.builder(EntityRegainHealthEvent.class, EventPriority.MONITOR)
+                .filter(event -> !event.isCancelled())
+                .filter(event ->
+                        event.getEntity() instanceof Player player
+                                && player.getHealth() + event.getAmount() > 6
+                )
+                .handler(event -> PlayerVisualEffects.hideLowHealthEffect((Player) event.getEntity()))
                 .build());
         this.stateEventNode.registerListener(PaperEventListener.builder(InventoryClickEvent.class)
                 .filter(event -> this.players.containsKey(event.getWhoClicked().getUniqueId()))
@@ -409,6 +431,7 @@ public final class BattleGameState extends GameState {
                 player.setGameMode(GameMode.ADVENTURE);
                 player.teleport(chooseBestSpawnLocation());
                 player.clearTitle();
+
 
                 this.gamePlayer.setAlive(true);
                 playerClass.onRespawn(this.gamePlayer);

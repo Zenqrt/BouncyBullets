@@ -38,9 +38,8 @@ final class HealerPlayerClass implements PlayerClass {
 
                             double maxHealth = PlayerUtils.requireNonNullAttribute(player, Attribute.MAX_HEALTH).getValue();
 
-                            if (player.getHealth() < maxHealth) {
-                                player.setHealth(Math.min(maxHealth, player.getHealth() + 1));
-                            }
+                            if (player.getHealth() < maxHealth)
+                                player.heal(1);
                         },
                         0, 40
                 )

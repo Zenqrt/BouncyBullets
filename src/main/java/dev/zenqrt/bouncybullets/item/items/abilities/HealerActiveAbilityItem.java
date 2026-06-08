@@ -1,10 +1,7 @@
 package dev.zenqrt.bouncybullets.item.items.abilities;
 
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
-import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
-import dev.zenqrt.bouncybullets.utils.PlayerUtils;
-import dev.zenqrt.bouncybullets.utils.SoundUtils;
-import dev.zenqrt.bouncybullets.utils.Sounds;
+import dev.zenqrt.bouncybullets.utils.*;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -48,6 +45,8 @@ public final class HealerActiveAbilityItem extends ActiveAbilityItem {
 
         player.setHealth(maxHealth);
         player.setAbsorptionAmount(4);
+
+        PlayerVisualEffects.hideLowHealthEffect(player);
 
         SoundUtils.playSoundFromPlayer(player, HEAL_SOUND);
 
