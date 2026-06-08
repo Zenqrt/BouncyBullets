@@ -29,7 +29,8 @@ public final class ShootBulletTaskV2 extends BukkitRunnable {
 
     private Location lastBounceLocation;
     private Location bulletLocation;
-    private final  Vector currentDirection;
+    private Vector currentDirection;
+    private int particleIndex;
     private int bounces;
     private int currentTick;
 
@@ -70,137 +71,71 @@ public final class ShootBulletTaskV2 extends BukkitRunnable {
             return;
         }
 
-        Location tail = this.bulletLocation.clone();
-        Location head = this.bulletLocation
-                .add(this.currentDirection);
-        World world = head.getWorld();
-        double distance = head.distance(tail);
+        Location current = this.bulletLocation.clone();
+        Vector direction = this.currentDirection.clone();
+        Location lastBounceInTick = this.lastBounceLocation.clone();
+        double remainingDistance = this.bulletProperties.speed() / 20;
+        int bouncesInTick = 0;
 
-//        for (int i = 0; i < particles - 3; i++) {
-//            Particle.CRIT.builder()
-//                    .extra(0)
-//                    .location(tail)
-//                    .allPlayers()
-//                    .force(true)
-//                    .spawn();
-//
-//            tail.add(
-//                    this.currentDirection.clone()
-//                            .normalize()
-//                            .multiply(TRAIL_PARTICLE_STEP)
-//            );
-//        }
-//
-//        for (int i = 0; i < 3; i++) {
-//            Particle.END_ROD.builder()
-//                    .location(tail)
-//                    .extra(1000)
-//                    .count(1)
-//                    .spawn();
-//
-//            tail.add(
-//                    this.currentDirection.clone()
-//                            .normalize()
-//                            .multiply(TRAIL_PARTICLE_STEP)
-//            );
-//        }
+        while (remainingDistance > 0) {
+            World world = current.getWorld();
+            Location tail = current.clone();
 
-        // Find collisions
-        RayTraceResult result = world.rayTrace(builder ->
-                builder
-                        .start(tail)
-                        .maxDistance(distance)
-                        .direction(this.currentDirection)
-                        .fluidCollisionMode(FluidCollisionMode.NEVER)
-                        .raySize(0.1)
-                        .ignorePassableBlocks(true)
-                        .entityFilter(entity -> entity instanceof Player player
-                                && player.getGameMode() == GameMode.ADVENTURE
-                                && (player != this.shooter || this.bounces > 0)
-                        )
-                        .targets(RayTraceTarget.BLOCK, RayTraceTarget.ENTITY)
-        );
-
-        if (result == null) {
-            // Spawn particles
-            int particles = (int) (distance / TRAIL_PARTICLE_STEP);
-
-            Location endLocation = spawnParticleLine(
-                    tail,
-                    this.currentDirection,
-                    particles - BULLET_PARTICLE_AMOUNT,
-                    Particle.CRIT.builder()
-                            .extra(0)
+            current.add(
+                    direction.clone()
+                            .normalize()
+                            .multiply(remainingDistance)
             );
 
-            spawnParticleLine(
-                    endLocation,
-                    this.currentDirection,
-                    BULLET_PARTICLE_AMOUNT,
-                    Particle.END_ROD.builder()
-                            .extra(1000)
-                            .count(1)
-            );
+            // Find collisions
+            RayTraceResult result = raytraceBullet(tail, direction, remainingDistance);
 
-            return;
-        }
+            if (result == null) {
+                spawnBulletParticle(tail, direction, remainingDistance);
+                break;
+            }
 
-        Location hitLocation = result.getHitPosition().toLocation(world);
+            Location hitLocation = result.getHitPosition().toLocation(world);
+            double distanceTravelled = tail.distance(hitLocation);
 
-        // TODO: Make particle calculations distance based instead of size based
-        // TODO: Also, particle indexing would be must easier than whatever the hell I have been doing
-        int maxParticles = (int) (distance / TRAIL_PARTICLE_STEP);
-        int particles = (int) (tail.distance(hitLocation) / TRAIL_PARTICLE_STEP);
+            spawnBulletParticle(tail, direction, distanceTravelled);
 
-        int bulletParticles = BULLET_PARTICLE_AMOUNT - (maxParticles - particles);
+            if (result.getHitEntity() instanceof Player hitPlayer) {
+                double lastBounceDistance = hitPlayer.getLocation().distance(lastBounceInTick);
+                double damage = calculateBulletDamage(lastBounceDistance);
 
-        Location endLocation = spawnParticleLine(
-                tail,
-                this.currentDirection,
-                particles - bulletParticles,
-                Particle.CRIT.builder()
-                        .extra(0)
-        );
+                hitPlayer.damage(
+                        damage,
+                        DamageSource.builder(DamageType.MOB_PROJECTILE)
+                                .withDirectEntity(this.shooter)
+                                .withCausingEntity(this.shooter)
+                                .build()
+                );
+                hitPlayer.setNoDamageTicks(0);
 
-        if (bulletParticles != 0) {
-            spawnParticleLine(
-                    endLocation,
-                    this.currentDirection,
-                    bulletParticles,
-                    Particle.END_ROD.builder()
-                            .extra(1000)
-                            .count(1)
-            );
-        }
+                HIT_PARTICLE
+                        .location(hitLocation)
+                        .spawn();
 
-        if (result.getHitEntity() instanceof Player hitPlayer) {
-            double lastBounceDistance = hitPlayer.getLocation().distance(this.lastBounceLocation);
-            double damage = calculateBulletDamage(lastBounceDistance);
+                this.shooter.playSound(HIT_SOUND, Sound.Emitter.self());
 
-            hitPlayer.damage(
-                    damage,
-                    DamageSource.builder(DamageType.MOB_PROJECTILE)
-                            .withDirectEntity(this.shooter)
-                            .withCausingEntity(this.shooter)
-                            .build()
-            );
-            hitPlayer.setNoDamageTicks(0);
+                this.cancel();
+                return;
+            }
 
-            HIT_PARTICLE
-                    .location(hitLocation)
-                    .spawn();
+            Block hitBlock = result.getHitBlock();
 
-            this.shooter.playSound(HIT_SOUND, Sound.Emitter.self());
+            if (hitBlock == null )
+                break;
 
-            this.cancel();
-            return;
-        }
+            if (this.bounces + bouncesInTick >= this.bulletProperties.numberOfBounces()) {
+                this.cancel();
+                return;
+            }
 
-        Block hitBlock = result.getHitBlock();
-
-        if (hitBlock != null) {
-            this.lastBounceLocation = hitLocation;
-            this.bounces++;
+            current = hitLocation;
+            lastBounceInTick = hitLocation;
+            bouncesInTick++;
 
             Particle.BLOCK_CRUMBLE.builder()
                     .location(result.getHitPosition().toLocation(world))
@@ -222,51 +157,38 @@ public final class ShootBulletTaskV2 extends BukkitRunnable {
             BlockFace blockFace = result.getHitBlockFace();
 
             if (blockFace == null)
-                return;
+                break;
 
             switch (blockFace) {
-                case UP, DOWN -> this.currentDirection.setY(-this.currentDirection.getY());
-                case EAST, WEST -> this.currentDirection.setX(-this.currentDirection.getX());
-                case NORTH, SOUTH -> this.currentDirection.setZ(-this.currentDirection.getZ());
+                case UP, DOWN -> direction.setY(-direction.getY());
+                case EAST, WEST -> direction.setX(-direction.getX());
+                case NORTH, SOUTH -> direction.setZ(-direction.getZ());
             }
 
-            int remainingParticles = maxParticles - particles;
-
-            if (remainingParticles > 0) {
-                if (remainingParticles > BULLET_PARTICLE_AMOUNT) {
-                    int trailParticles = remainingParticles - BULLET_PARTICLE_AMOUNT;
-
-                    endLocation = spawnParticleLine(
-                            hitLocation,
-                            this.currentDirection,
-                            trailParticles,
-                            Particle.CRIT.builder()
-                                    .extra(0)
-                    );
-
-                    endLocation = spawnParticleLine(
-                            endLocation,
-                            this.currentDirection,
-                            BULLET_PARTICLE_AMOUNT,
-                            Particle.END_ROD.builder()
-                                    .extra(1000)
-                                    .count(1)
-                    );
-                } else {
-                    endLocation = spawnParticleLine(
-                            hitLocation,
-                            this.currentDirection,
-                            remainingParticles,
-                            Particle.END_ROD.builder()
-                                    .extra(1000)
-                                    .count(1)
-                    );
-                }
-            }
-
-            this.bulletLocation = endLocation;
+            remainingDistance -= distanceTravelled;
         }
 
+        this.bulletLocation = current;
+        this.currentDirection = direction;
+        this.bounces += bouncesInTick;
+        this.lastBounceLocation = lastBounceInTick;
+    }
+
+    private RayTraceResult raytraceBullet(Location start, Vector direction, double distance) {
+        return start.getWorld().rayTrace(builder ->
+                builder
+                        .start(start)
+                        .maxDistance(distance)
+                        .direction(direction)
+                        .fluidCollisionMode(FluidCollisionMode.NEVER)
+                        .raySize(0.1)
+                        .ignorePassableBlocks(true)
+                        .entityFilter(entity -> entity instanceof Player player
+                                && player.getGameMode() == GameMode.ADVENTURE
+                                && (player != this.shooter || this.bounces > 0)
+                        )
+                        .targets(RayTraceTarget.BLOCK, RayTraceTarget.ENTITY)
+        );
     }
 
     private double calculateBulletDamage(double lastBounceDistance) {
@@ -287,21 +209,31 @@ public final class ShootBulletTaskV2 extends BukkitRunnable {
         return damage * bounceScale;
     }
 
-    private static Location spawnParticleLine(Location start, Vector direction, int times, ParticleBuilder builder) {
+    private void spawnBulletParticle(Location start, Vector direction, double distance) {
+        int cycleLength = (int) ((this.bulletProperties.speed() / 20) / TRAIL_PARTICLE_STEP);
+
         Location location = start.clone();
+
         Vector directionStep = direction.clone()
                 .normalize()
                 .multiply(TRAIL_PARTICLE_STEP);
 
-        for (int i = 0; i < times; i++) {
-            builder.location(location)
-                    .allPlayers()
-                    .force(true)
+        for (double currentDistance = 0; currentDistance <= distance; currentDistance += TRAIL_PARTICLE_STEP) {
+            int index = this.particleIndex % cycleLength;
+
+            ParticleBuilder particleBuilder = index < cycleLength - BULLET_PARTICLE_AMOUNT
+                    ? Particle.CRIT.builder()
+                        .extra(0)
+                    : Particle.END_ROD.builder()
+                        .extra(1000)
+                        .count(1);
+
+            particleBuilder
+                    .location(location)
                     .spawn();
 
             location.add(directionStep);
+            this.particleIndex++;
         }
-
-        return location;
     }
 }

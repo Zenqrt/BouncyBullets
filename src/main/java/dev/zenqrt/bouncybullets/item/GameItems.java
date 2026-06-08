@@ -30,7 +30,7 @@ public final class GameItems {
                     new GunProperties(5, 10, 0.05, 0.02, 6, 40, 2),
                     new BulletProperties(3, 200, -0.1F, 1, 7, 0.1F, 25, 4),
                     new BulletGunItem.TipOffset(0.15F, 1, 0.27F),
-                    new BulletGunItem.TipOffset(0, 0.5F, -0.02F)
+                    new BulletGunItem.TipOffset(0, 0.8F, -0.02F)
             )
     );
     public static final GrenadeLauncherGunItem GRENADE_LAUNCHER = registerGun(
