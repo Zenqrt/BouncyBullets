@@ -4,6 +4,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import dev.zenqrt.bouncybullets.command.commands.BackupCommand;
 import dev.zenqrt.bouncybullets.command.commands.BouncyBulletsCommand;
+import dev.zenqrt.bouncybullets.command.commands.RecoilCommand;
 import dev.zenqrt.bouncybullets.config.ServerConfig;
 import dev.zenqrt.bouncybullets.event.listeners.*;
 import dev.zenqrt.bouncybullets.game.GameManager;
@@ -70,7 +71,8 @@ public final class BouncyBulletsPlugin extends JavaPlugin {
         Lamp<BukkitCommandActor> lamp = BukkitLamp.builder(this).build();
         lamp.register(
                 new BouncyBulletsCommand(gameManager, this.mapManager, serverConfig, sessionManager, this.statsManager),
-                new BackupCommand(this)
+                new BackupCommand(this),
+                new RecoilCommand(this)
         );
 
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListeners(lobby, this.statsManager, sessionManager), this);

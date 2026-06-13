@@ -8,6 +8,7 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
+import dev.zenqrt.bouncybullets.packet.PacketSender;
 import dev.zenqrt.bouncybullets.player.BouncyBulletsHUD;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import dev.zenqrt.bouncybullets.utils.NMSConverter;
@@ -211,7 +212,7 @@ public abstract class GunItem extends GameItem {
     private void playCameraEffect(Plugin plugin, ServerPlayer nmsPlayer, boolean focused) {
         Abilities abilities = new Abilities();
         abilities.apply(nmsPlayer.getAbilities().pack());
-        abilities.setWalkingSpeed(0.075F);
+        abilities.setWalkingSpeed(0.08F);
 
         ClientboundPlayerAbilitiesPacket abilitiesPacket = new ClientboundPlayerAbilitiesPacket(abilities);
         nmsPlayer.connection.send(abilitiesPacket);
@@ -254,11 +255,18 @@ public abstract class GunItem extends GameItem {
         if (existingAnimationTask != null)
             existingAnimationTask.cancel();
 
-        AtomicReference<Float> xRotAngle = new AtomicReference<>(0F);
-        AtomicReference<Float> yRotAngle = new AtomicReference<>(0F);
-
         double pitchSpread = random.nextDouble(spread);
         double yawSpread = random.nextDouble(spread);
+
+        float pitchAmplitude = (float) (pitchMag + pitchSpread);
+        float yawAmplitude = (float) (yawMag + yawSpread);
+
+        AtomicReference<Float> xRotAngle = new AtomicReference<>(pitchAmplitude);
+        AtomicReference<Float> yRotAngle = new AtomicReference<>(yawAmplitude);
+
+        ClientboundPlayerPositionPacket startPacket = createHeadRotationPacket(-pitchAmplitude, yawAmplitude);
+
+        PacketSender.sendNow(nmsPlayer, startPacket);
 
         /*
         - Calculate angle with decaying exponential sine
@@ -276,45 +284,57 @@ public abstract class GunItem extends GameItem {
                         return;
                     }
 
-                    float shakeXRot = (float) -(Math.exp(-1.5 * elapsed)
-                            * Math.cos((12 - 4 * elapsed) * elapsed)
-                            * (pitchMag + pitchSpread)
-                    );
+                    float shakeXRot;
+                    float cutoff = 0.15F;
+
+                    if (elapsed > cutoff) {
+                        shakeXRot = (float) -(Math.exp(-2 * elapsed)
+                                * Math.sin(Math.PI * (elapsed - cutoff))
+                                * 2.25
+                        );
+                    } else {
+                        shakeXRot = (float) (pitchAmplitude * Math.sin(Math.PI * elapsed / cutoff));
+                    }
                     float shakeYRot = (float) (Math.exp(-5 * elapsed)
                             * Math.cos(elapsed)
-                            * (yawMag + yawSpread)
+                            * yawAmplitude
                     );
 
                     float deltaXRot = shakeXRot - xRotAngle.getAndSet(shakeXRot);
                     float deltaYRot = shakeYRot - yRotAngle.getAndSet(shakeYRot);
 
-                    ClientboundPlayerPositionPacket positionPacket = new ClientboundPlayerPositionPacket(
-                            random.nextInt(10000, 1000000),
-                            new PositionMoveRotation(
-                                    Vec3.ZERO,
-                                    Vec3.ZERO,
-                                    deltaYRot,
-                                    -deltaXRot
-                            ),
-                            Set.of(
-                                    Relative.X,
-                                    Relative.Y,
-                                    Relative.Z,
-                                    Relative.DELTA_X,
-                                    Relative.DELTA_Y,
-                                    Relative.DELTA_Z,
-                                    Relative.X_ROT,
-                                    Relative.Y_ROT
-                            )
-                    );
-                    nmsPlayer.connection.send(positionPacket);
+                    ClientboundPlayerPositionPacket positionPacket = createHeadRotationPacket(-deltaXRot, deltaYRot);
+
+                    PacketSender.sendNow(nmsPlayer, positionPacket);
                 },
                 0,
-                50,
+                10,
                 TimeUnit.MILLISECONDS
         );
 
         this.recoilAnimationMap.put(nmsPlayer.getUUID(), animationTask);
+    }
+
+    public static ClientboundPlayerPositionPacket createHeadRotationPacket(float xRot, float yRot) {
+        return new ClientboundPlayerPositionPacket(
+                ThreadLocalRandom.current().nextInt(10000, 1000000),
+                new PositionMoveRotation(
+                        Vec3.ZERO,
+                        Vec3.ZERO,
+                        yRot,
+                        xRot
+                ),
+                Set.of(
+                        Relative.X,
+                        Relative.Y,
+                        Relative.Z,
+                        Relative.DELTA_X,
+                        Relative.DELTA_Y,
+                        Relative.DELTA_Z,
+                        Relative.X_ROT,
+                        Relative.Y_ROT
+                )
+        );
     }
 
     protected final void useAmmo(ItemStack itemStack, BouncyBulletsHUD hud) {

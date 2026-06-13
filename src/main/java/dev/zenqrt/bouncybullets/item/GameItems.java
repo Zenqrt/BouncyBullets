@@ -27,7 +27,7 @@ public final class GameItems {
     );
     public static final DesertEagleGunItem DESERT_EAGLE = registerGun(
             new DesertEagleGunItem(
-                    new GunProperties(5, 10, 0.05, 0.02, 1, 0.5, 0.8, 0.3, 6, 40, 2),
+                    new GunProperties(5, 10, 0.05, 0.02, 3, 0.5, 2, 0.3, 6, 40, 2),
                     new BulletProperties(3, 200, -0.1F, 1, 7, 0.1F, 25, 4),
                     new BulletGunItem.TipOffset(0.15F, 1, 0.27F),
                     new BulletGunItem.TipOffset(0, 0.8F, -0.02F)
