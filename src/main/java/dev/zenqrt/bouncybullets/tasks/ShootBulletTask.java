@@ -161,11 +161,6 @@ public final class ShootBulletTask extends BukkitRunnable {
 
     private void spawnBulletParticle(Location location) {
         Particle.CRIT.builder()
-//                .data(new Particle.Trail(
-//                        location.clone().subtract(0, 0.5, 0),
-//                        Color.fromRGB(227, 202, 170),
-//                        10
-//                ))
                 .extra(0)
                 .location(location)
                 .allPlayers()

@@ -100,6 +100,7 @@ public final class ShootBulletTaskV2 extends BukkitRunnable {
 
             spawnBulletParticle(tail, direction, distanceTravelled);
 
+            // Handle player damage
             if (result.getHitEntity() instanceof Player hitPlayer) {
                 double lastBounceDistance = hitPlayer.getLocation().distance(lastBounceInTick);
                 double damage = calculateBulletDamage(lastBounceDistance);
@@ -133,6 +134,7 @@ public final class ShootBulletTaskV2 extends BukkitRunnable {
                 return;
             }
 
+            // Handle block collision and bouncing
             current = hitLocation;
             lastBounceInTick = hitLocation;
             bouncesInTick++;

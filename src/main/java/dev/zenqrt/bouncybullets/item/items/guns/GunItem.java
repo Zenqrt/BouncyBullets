@@ -17,12 +17,17 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemAttributeModifiers;
 import io.papermc.paper.datacomponent.item.SwingAnimation;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.player.Abilities;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -38,10 +43,10 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class GunItem extends GameItem {
 
@@ -53,6 +58,7 @@ public abstract class GunItem extends GameItem {
     private static final NamespacedKey AMMO_KEY = new NamespacedKey(BouncyBulletsPlugin.getInstance(), "ammo");
 
     private final Map<UUID, BukkitTask> reloadTaskMap = new HashMap<>();
+    private final Map<UUID, ScheduledTask> recoilAnimationMap = new HashMap<>();
     protected final Map<UUID, Long> lastShootTicks = new HashMap<>();
 
     protected final GunProperties gunProperties;
@@ -196,16 +202,16 @@ public abstract class GunItem extends GameItem {
 
         ServerPlayer nmsPlayer = NMSConverter.serverPlayer(player);
 
-        playCameraEffect(game.getPlugin(), nmsPlayer);
+        playCameraEffect(game.getPlugin(), nmsPlayer, gamePlayer.isAiming());
 
         shootProjectile(game, gamePlayer, event.getBulletProperties());
         useAmmo(itemStack, hud);
     }
 
-    private void playCameraEffect(Plugin plugin, ServerPlayer nmsPlayer) {
+    private void playCameraEffect(Plugin plugin, ServerPlayer nmsPlayer, boolean focused) {
         Abilities abilities = new Abilities();
         abilities.apply(nmsPlayer.getAbilities().pack());
-        abilities.setWalkingSpeed(0.09F);
+        abilities.setWalkingSpeed(0.075F);
 
         ClientboundPlayerAbilitiesPacket abilitiesPacket = new ClientboundPlayerAbilitiesPacket(abilities);
         nmsPlayer.connection.send(abilitiesPacket);
@@ -217,6 +223,98 @@ public abstract class GunItem extends GameItem {
                 () -> nmsPlayer.connection.send(resetAbilitiesPacket),
                 3
         );
+
+        if (focused)
+            showRecoilAnimation(
+                    nmsPlayer,
+                    this.gunProperties.recoilPitchFocused(),
+                    this.gunProperties.recoilYawFocused(),
+                    this.gunProperties.spreadRangeFocused(),
+                    plugin,
+                    ThreadLocalRandom.current()
+            );
+        else
+            showRecoilAnimation(
+                    nmsPlayer,
+                    this.gunProperties.recoilPitch(),
+                    this.gunProperties.recoilYaw(),
+                    this.gunProperties.spreadRange(),
+                    plugin,
+                    ThreadLocalRandom.current()
+            );
+
+    }
+
+    private void showRecoilAnimation(ServerPlayer nmsPlayer, double pitchMag, double yawMag, double spread, Plugin plugin, Random random) {
+        float cycles = 2;
+        long startTime = System.currentTimeMillis();
+
+        ScheduledTask existingAnimationTask = this.recoilAnimationMap.remove(nmsPlayer.getUUID());
+
+        if (existingAnimationTask != null)
+            existingAnimationTask.cancel();
+
+        AtomicReference<Float> xRotAngle = new AtomicReference<>(0F);
+        AtomicReference<Float> yRotAngle = new AtomicReference<>(0F);
+
+        double pitchSpread = random.nextDouble(spread);
+        double yawSpread = random.nextDouble(spread);
+
+        /*
+        - Calculate angle with decaying exponential sine
+        - Get difference from that and xRotAngle
+        - Save current angle to xRotAngle
+        - Apply difference to player
+         */
+        ScheduledTask animationTask = Bukkit.getAsyncScheduler().runAtFixedRate(
+                plugin,
+                task -> {
+                    float elapsed = (System.currentTimeMillis() - startTime) / 1000f;
+
+                    if (elapsed >= 4 * Math.PI * cycles - 1) {
+                        task.cancel();
+                        return;
+                    }
+
+                    float shakeXRot = (float) -(Math.exp(-1.5 * elapsed)
+                            * Math.cos((12 - 4 * elapsed) * elapsed)
+                            * (pitchMag + pitchSpread)
+                    );
+                    float shakeYRot = (float) (Math.exp(-5 * elapsed)
+                            * Math.cos(elapsed)
+                            * (yawMag + yawSpread)
+                    );
+
+                    float deltaXRot = shakeXRot - xRotAngle.getAndSet(shakeXRot);
+                    float deltaYRot = shakeYRot - yRotAngle.getAndSet(shakeYRot);
+
+                    ClientboundPlayerPositionPacket positionPacket = new ClientboundPlayerPositionPacket(
+                            random.nextInt(10000, 1000000),
+                            new PositionMoveRotation(
+                                    Vec3.ZERO,
+                                    Vec3.ZERO,
+                                    deltaYRot,
+                                    -deltaXRot
+                            ),
+                            Set.of(
+                                    Relative.X,
+                                    Relative.Y,
+                                    Relative.Z,
+                                    Relative.DELTA_X,
+                                    Relative.DELTA_Y,
+                                    Relative.DELTA_Z,
+                                    Relative.X_ROT,
+                                    Relative.Y_ROT
+                            )
+                    );
+                    nmsPlayer.connection.send(positionPacket);
+                },
+                0,
+                50,
+                TimeUnit.MILLISECONDS
+        );
+
+        this.recoilAnimationMap.put(nmsPlayer.getUUID(), animationTask);
     }
 
     protected final void useAmmo(ItemStack itemStack, BouncyBulletsHUD hud) {

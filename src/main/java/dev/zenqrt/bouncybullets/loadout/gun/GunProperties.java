@@ -5,6 +5,10 @@ public record GunProperties(
         int shootDelayTicks,
         double spreadRange,
         double spreadRangeFocused,
+        double recoilPitch,
+        double recoilYaw,
+        double recoilPitchFocused,
+        double recoilYawFocused,
         int magazineSize,
         int reloadTicks,
         int scopeMagnifyMultiplier
