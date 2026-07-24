@@ -1,7 +1,10 @@
 package dev.zenqrt.bouncybullets.tasks;
 
 import com.destroystokyo.paper.ParticleBuilder;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
+import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
+import dev.zenqrt.bouncybullets.player.PlayerSessionManager;
 import dev.zenqrt.bouncybullets.utils.Sounds;
 import io.papermc.paper.raytracing.RayTraceTarget;
 import net.kyori.adventure.sound.Sound;
@@ -15,6 +18,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class ShootBulletTaskV2 extends BukkitRunnable {
@@ -35,10 +39,12 @@ public final class ShootBulletTaskV2 extends BukkitRunnable {
     private int currentTick;
 
     private final BulletProperties bulletProperties;
-    private final Player shooter;
+    private final BouncyBulletGame game;
+    private final BouncyBulletGamePlayer shooter;
 
-    public ShootBulletTaskV2(Player shooter, BulletProperties bulletProperties, Location shotFrom, Vector direction, double spread) {
+    public ShootBulletTaskV2(BouncyBulletGamePlayer shooter, BouncyBulletGame game, BulletProperties bulletProperties, Location shotFrom, Vector direction, double spread) {
         this.shooter = shooter;
+        this.game = game;
         this.bulletProperties = bulletProperties;
         this.bulletLocation = shotFrom.clone();
         this.lastBounceLocation = shotFrom.clone();
@@ -102,23 +108,26 @@ public final class ShootBulletTaskV2 extends BukkitRunnable {
 
             // Handle player damage
             if (result.getHitEntity() instanceof Player hitPlayer) {
+                Optional<BouncyBulletGamePlayer> gamePlayerOptional = this.game.findPlayer(hitPlayer.getUniqueId());
+
+                if (gamePlayerOptional.isEmpty())
+                    return;
+
                 double lastBounceDistance = hitPlayer.getLocation().distance(lastBounceInTick);
                 double damage = calculateBulletDamage(lastBounceDistance);
 
-                hitPlayer.damage(
-                        damage,
-                        DamageSource.builder(DamageType.MOB_PROJECTILE)
-                                .withDirectEntity(this.shooter)
-                                .withCausingEntity(this.shooter)
-                                .build()
+                BouncyBulletGamePlayer gamePlayer = gamePlayerOptional.get();
+
+                gamePlayer.hurt(
+                        (int) damage,
+                        this.shooter
                 );
-                hitPlayer.setNoDamageTicks(0);
 
                 HIT_PARTICLE
                         .location(hitLocation)
                         .spawn();
 
-                this.shooter.playSound(HIT_SOUND, Sound.Emitter.self());
+                this.shooter.getPlayer().playSound(HIT_SOUND, Sound.Emitter.self());
 
                 this.cancel();
                 return;

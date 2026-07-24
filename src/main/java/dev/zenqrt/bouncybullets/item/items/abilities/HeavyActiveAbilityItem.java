@@ -1,5 +1,6 @@
 package dev.zenqrt.bouncybullets.item.items.abilities;
 
+import dev.zenqrt.bouncybullets.event.events.GamePlayerDamageEvent;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
@@ -11,7 +12,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -47,14 +47,16 @@ public final class HeavyActiveAbilityItem extends ActiveAbilityItem implements L
     }
 
     @EventHandler
-    public void onEntityDamage(EntityDamageEvent event) {
-        if (!(event.getEntity() instanceof Player player) || !this.abilityActive.contains(player.getUniqueId()))
+    public void onGamePlayerDamage(GamePlayerDamageEvent event) {
+        if (!this.abilityActive.contains(event.getGamePlayer().getUuid()))
             return;
 
         if (cannotDeflect(ThreadLocalRandom.current()))
             return;
 
         event.setCancelled(true);
+
+        Player player = event.getGamePlayer().getPlayer();
         player.getWorld().playSound(DEFLECT_SOUND, player);
     }
 

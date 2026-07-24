@@ -48,7 +48,7 @@ public abstract class BurstBulletGunItem extends BulletGunItem {
         for (int i = 0; i < rounds; i++) {
             Bukkit.getScheduler().runTaskLater(
                     game.getPlugin(),
-                    () -> shootGun(game, gamePlayer, gamePlayer.getHud(), itemStack),
+                    () -> shootGun(game, gamePlayer, gamePlayer.getOldHud(), itemStack),
                     i * 2L
             );
         }

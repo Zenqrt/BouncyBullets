@@ -3,6 +3,7 @@ package dev.zenqrt.bouncybullets.loadout.kit;
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
 import dev.zenqrt.bouncybullets.event.EventNode;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
+import dev.zenqrt.bouncybullets.event.events.GamePlayerDamageEvent;
 import dev.zenqrt.bouncybullets.event.events.GunShootEvent;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
@@ -19,7 +20,6 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
@@ -77,10 +77,9 @@ public final class HeavyPlayerClass implements EventPlayerClass {
     public EventNode<Event> registerEvents(BouncyBulletGame game) {
         EventNode<Event> eventNode = EventNode.create();
 
-        eventNode.registerListener(PaperEventListener.builder(EntityDamageEvent.class)
-                .filter(event -> event.getCause() == EntityDamageEvent.DamageCause.PROJECTILE)
-                .filter(event -> event.getEntity() instanceof Player player && isPlayerClass(game, player, this))
-                .filter(event -> shouldTakeExtraDamage(event.getEntity(), game))
+        eventNode.registerListener(PaperEventListener.builder(GamePlayerDamageEvent.class)
+                .filter(event -> isPlayerClass(event.getGamePlayer(), this))
+                .filter(event -> shouldTakeExtraDamage(event.getGamePlayer().getPlayer(), game))
                 .handler(event -> event.setDamage(event.getDamage() * 2))
                 .build());
 

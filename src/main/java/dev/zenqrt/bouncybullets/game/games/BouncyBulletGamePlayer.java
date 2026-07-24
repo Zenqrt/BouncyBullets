@@ -1,12 +1,12 @@
 package dev.zenqrt.bouncybullets.game.games;
 
 import dev.zenqrt.bouncybullets.BouncyBulletsPlugin;
+import dev.zenqrt.bouncybullets.event.events.GamePlayerDamageEvent;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
 import dev.zenqrt.bouncybullets.loadout.Loadout;
-import dev.zenqrt.bouncybullets.player.BouncyBulletsHUD;
-import dev.zenqrt.bouncybullets.utils.NMSConverter;
-import dev.zenqrt.bouncybullets.utils.PlayerUtils;
-import dev.zenqrt.bouncybullets.utils.Sounds;
+import dev.zenqrt.bouncybullets.player.hud.GameplayHud;
+import dev.zenqrt.bouncybullets.player.hud.actionbar.BouncyBulletsHUD;
+import dev.zenqrt.bouncybullets.utils.*;
 import dev.zenqrt.bouncybullets.utils.entity.EntityUtils;
 import dev.zenqrt.bouncybullets.utils.entity.LivingEntityFlags;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -15,15 +15,18 @@ import net.kyori.adventure.sound.Sound;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.damage.DamageSource;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,9 +40,12 @@ public class BouncyBulletGamePlayer {
 
     private int deaths;
     private int kills;
+    private int health;
+    private int maxHealth;
     private boolean alive;
     private boolean reloading;
     private boolean aiming;
+    private BouncyBulletGamePlayer lastDamager;
 
     private Vector deltaMovement;
     private float deltaYaw;
@@ -48,7 +54,8 @@ public class BouncyBulletGamePlayer {
     private boolean invisible;
     private ItemStack[] pastArmorContents;
 
-    private final BouncyBulletsHUD hud;
+    private final BouncyBulletsHUD oldHud;
+    private final GameplayHud hud;
     private Loadout loadout;
     private final Player player;
     private final UUID uuid;
@@ -57,7 +64,8 @@ public class BouncyBulletGamePlayer {
         this.uuid = player.getUniqueId();
         this.player = player;
         this.loadout = loadout;
-        this.hud = new BouncyBulletsHUD();
+        this.oldHud = new BouncyBulletsHUD();
+        this.hud = new GameplayHud();
 
         this.kills = 0;
         this.deaths = 0;
@@ -66,6 +74,58 @@ public class BouncyBulletGamePlayer {
         this.aiming = false;
 
         this.invisible = false;
+    }
+
+    public void hurt(int damage, @Nullable BouncyBulletGamePlayer damager) {
+        GamePlayerDamageEvent event = new GamePlayerDamageEvent(this, damage, damager);
+        Bukkit.getPluginManager().callEvent(event);
+
+        if (event.isCancelled())
+            return;
+
+        int newHealth = this.health - event.getDamage();
+
+        if (newHealth <= 0) {
+            this.player.kill();
+            return;
+        }
+
+        setHealth(newHealth);
+        this.hud.setHealth(newHealth);
+
+        this.lastDamager = event.getDamager();
+
+        SoundUtils.playSoundFromPlayer(this.player, Sound.sound(Sounds.ENTITY_PLAYER_HURT, Sound.Source.PLAYER, 0.5F, 2));
+    }
+
+    public BouncyBulletGamePlayer getLastDamager() {
+        return lastDamager;
+    }
+
+    public void setHealth(int newHealth) {
+        int lowHealthIndicator = (int) (this.maxHealth / 3F);
+
+        if (this.health > lowHealthIndicator && newHealth <= lowHealthIndicator)
+            PlayerVisualEffects.showLowHealthEffect(this.player);
+        else
+            PlayerVisualEffects.hideLowHealthEffect(this.player);
+
+        this.health = newHealth;
+        this.hud.setHealth(newHealth);
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public void setMaxHealth(int maxHealth) {
+        this.maxHealth = maxHealth;
+
+        this.hud.setMaxHealth(maxHealth);
+    }
+
+    public int getMaxHealth() {
+        return maxHealth;
     }
 
     public void hide() {
@@ -233,7 +293,11 @@ public class BouncyBulletGamePlayer {
         return deltaPitch;
     }
 
-    public BouncyBulletsHUD getHud() {
+    public BouncyBulletsHUD getOldHud() {
+        return oldHud;
+    }
+
+    public GameplayHud getHud() {
         return hud;
     }
 

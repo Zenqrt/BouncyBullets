@@ -2,12 +2,13 @@ package dev.zenqrt.bouncybullets.loadout.kit;
 
 import dev.zenqrt.bouncybullets.event.EventNode;
 import dev.zenqrt.bouncybullets.event.PaperEventListener;
+import dev.zenqrt.bouncybullets.event.events.GamePlayerDamageEvent;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.item.items.abilities.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
-import dev.zenqrt.bouncybullets.player.BouncyBulletsHUD;
+import dev.zenqrt.bouncybullets.player.hud.actionbar.BouncyBulletsHUD;
 import dev.zenqrt.bouncybullets.utils.ItemUtils;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -15,13 +16,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
@@ -30,10 +28,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public final class StealthPlayerClass implements EventPlayerClass {
 
@@ -130,13 +125,13 @@ public final class StealthPlayerClass implements EventPlayerClass {
                 })
                 .build()
         );
-        eventNode.registerListener(PaperEventListener.builder(EntityDamageEvent.class, EventPriority.MONITOR)
+        eventNode.registerListener(PaperEventListener.builder(GamePlayerDamageEvent.class, EventPriority.MONITOR)
                 .filter(event -> !event.isCancelled())
-                .filter(event -> event.getEntity() instanceof Player player && isPlayerClass(game, player, this))
+                .filter(event -> isPlayerClass(event.getGamePlayer(), this))
                 .handler(event -> {
-                    Player player = (Player) event.getEntity();
-                    UUID uuid = player.getUniqueId();
-                    BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(uuid);
+                    BouncyBulletGamePlayer gamePlayer = event.getGamePlayer();
+                    UUID uuid = gamePlayer.getUuid();
+                    Player player = gamePlayer.getPlayer();
 
                     applyCombatTimer(uuid, game);
 
@@ -147,14 +142,13 @@ public final class StealthPlayerClass implements EventPlayerClass {
                 })
                 .build()
         );
-        eventNode.registerListener(PaperEventListener.builder(EntityDamageByEntityEvent.class, EventPriority.MONITOR)
+        eventNode.registerListener(PaperEventListener.builder(GamePlayerDamageEvent.class, EventPriority.MONITOR)
                 .filter(event -> !event.isCancelled())
-                .filter(event -> event.getDamageSource().getDamageType() == DamageType.MOB_PROJECTILE)
-                .filter(event -> event.getDamager() instanceof Player player && isPlayerClass(game, player, this))
+                .filter(event -> event.getDamager() != null && isPlayerClass(event.getDamager(), this))
                 .handler(event -> {
-                    Player player = (Player) event.getDamager();
-                    UUID uuid = player.getUniqueId();
-                    BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(uuid);
+                    BouncyBulletGamePlayer gamePlayer = Objects.requireNonNull(event.getDamager());
+                    UUID uuid = gamePlayer.getUuid();
+                    Player player = gamePlayer.getPlayer();
 
                     applyCombatTimer(uuid, game);
 
@@ -181,7 +175,7 @@ public final class StealthPlayerClass implements EventPlayerClass {
 
         this.combatTimerTasks.put(
                 uuid,
-                new CombatTimerTask(uuid, gamePlayer.getHud(), COMBAT_TIMER_SECONDS)
+                new CombatTimerTask(uuid, gamePlayer.getOldHud(), COMBAT_TIMER_SECONDS)
                         .start(game.getPlugin())
         );
     }

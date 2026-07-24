@@ -128,8 +128,15 @@ public final class BattleGameState extends GameState {
                         Int2ObjectOpenHashMap::putAll
                 );
 
-        this.players.forEach((_, gamePlayer) -> {
+        for (BouncyBulletGamePlayer gamePlayer : this.game.getPlayers().values()) {
             Player player = gamePlayer.getPlayer();
+
+            gamePlayer.getHud().setGameTimer(this.game.getGameSettings().gameTime());
+            gamePlayer.getHud().setPlayerClassType(gamePlayer.getLoadout().classType());
+            gamePlayer.getHud().display(player);
+
+            gamePlayer.setMaxHealth(20);
+            gamePlayer.setHealth(20);
 
             player.getInventory().clear();
 
@@ -155,7 +162,7 @@ public final class BattleGameState extends GameState {
             gamePlayer.setAlive(true);
 
             this.statsManager.recordGamePlayed(gamePlayer);
-        });
+        }
 
         this.taskManager.runTaskTimer(
                 new GameTimerTask(this.game.getGameSettings().gameTime()),
@@ -176,11 +183,12 @@ public final class BattleGameState extends GameState {
 
         this.players.forEach((_, gamePlayer) -> {
             PlayerClass playerClass = gamePlayer.getLoadout().classType().getPlayerClass();
+            Player player = gamePlayer.getPlayer();
 
             playerClass.onStopUse(gamePlayer);
-            gamePlayer.setAlive(false);
 
-            Player player = gamePlayer.getPlayer();
+            gamePlayer.setAlive(false);
+            gamePlayer.getHud().hide(player);
 
             PlayerUtils.removePacketListener(player, "bb_gun_animation");
 
@@ -241,8 +249,12 @@ public final class BattleGameState extends GameState {
                 .filter(event -> event.getPlayer().getGameMode() == GameMode.SPECTATOR)
                 .handler(event -> event.setCancelled(true))
                 .build());
+        this.playerEntityEventNode.registerListener(PaperEventListener.builder(EntityDamageEvent.class, EventPriority.LOWEST)
+                .filter(event -> this.players.containsKey(event.getEntity().getUniqueId()))
+                .handler(event -> event.setCancelled(true))
+                .build());
         this.playerEntityEventNode.registerListener(PaperEventListener.builder(PlayerDeathEvent.class)
-                .filter(event -> players.containsKey(event.getPlayer().getUniqueId()))
+                .filter(event -> this.players.containsKey(event.getPlayer().getUniqueId()))
                 .handler(event -> {
                     event.setCancelled(true);
 
@@ -253,30 +265,26 @@ public final class BattleGameState extends GameState {
                             Title.Times.times(Duration.ZERO, Duration.ofSeconds(5), Duration.ZERO)));
                     player.clearActivePotionEffects();
 
-                    EntityDamageEvent lastDamageEvent = player.getLastDamageCause();
-
-                    if (lastDamageEvent != null) {
-                        if (lastDamageEvent.getDamageSource().getCausingEntity() instanceof Player killer && players.containsKey(killer.getUniqueId())) {
-                            if (killer != player) {
-                                BouncyBulletGamePlayer killerGamePlayer = this.game.findPlayerOrThrow(killer.getUniqueId());
-
-                                killerGamePlayer.addKill();
-                                this.statsManager.recordKill(killerGamePlayer);
-
-                                updateSidebar(
-                                        killerGamePlayer.getUuid(),
-                                        sidebar -> sidebar.setYourKills(killerGamePlayer.getKills())
-                                );
-                                updateKillsLeaderboard();
-                            }
-
-                            player.setSpectatorTarget(killer);
-                            killer.playSound(KILL_SOUND, Sound.Emitter.self());
-                            this.players.sendMessage(Component.text(player.getName() + " \uD83D\uDD2B " + killer.getName(), NamedTextColor.RED));
-                        }
-                    }
-
                     BouncyBulletGamePlayer gamePlayer = this.game.findPlayerOrThrow(player.getUniqueId());
+                    BouncyBulletGamePlayer lastDamager = gamePlayer.getLastDamager();
+
+                    if (lastDamager != null) {
+                        lastDamager.addKill();
+                        this.statsManager.recordKill(lastDamager);
+
+                        updateSidebar(
+                                lastDamager.getUuid(),
+                                sidebar -> sidebar.setYourKills(lastDamager.getKills())
+                        );
+                        updateKillsLeaderboard();
+
+                        Player lastDamagerPlayer = lastDamager.getPlayer();
+
+                        player.setSpectatorTarget(lastDamagerPlayer);
+                        lastDamagerPlayer.playSound(KILL_SOUND, Sound.Emitter.self());
+
+                        this.players.sendMessage(Component.text(player.getName() + " \uD83D\uDD2B " + lastDamagerPlayer.getName(), NamedTextColor.RED));
+                    }
 
                     if (gamePlayer.isAiming())
                         gamePlayer.stopAiming(this.game, player.getInventory().getItemInMainHand());
@@ -294,23 +302,23 @@ public final class BattleGameState extends GameState {
                     );
                 })
                 .build());
-        this.playerEntityEventNode.registerListener(PaperEventListener.builder(EntityDamageEvent.class, EventPriority.MONITOR)
-                .filter(event -> !event.isCancelled())
-                .filter(event ->
-                        event.getEntity() instanceof Player player
-                                && player.getHealth() - event.getFinalDamage() <= 6
-                                && player.getHealth() - event.getFinalDamage() > 0
-                )
-                .handler(event -> PlayerVisualEffects.showLowHealthEffect((Player) event.getEntity()))
-                .build());
-        this.playerEntityEventNode.registerListener(PaperEventListener.builder(EntityRegainHealthEvent.class, EventPriority.MONITOR)
-                .filter(event -> !event.isCancelled())
-                .filter(event ->
-                        event.getEntity() instanceof Player player
-                                && player.getHealth() + event.getAmount() > 6
-                )
-                .handler(event -> PlayerVisualEffects.hideLowHealthEffect((Player) event.getEntity()))
-                .build());
+//        this.playerEntityEventNode.registerListener(PaperEventListener.builder(EntityDamageEvent.class, EventPriority.MONITOR)
+//                .filter(event -> !event.isCancelled())
+//                .filter(event ->
+//                        event.getEntity() instanceof Player player
+//                                && player.getHealth() - event.getFinalDamage() <= 6
+//                                && player.getHealth() - event.getFinalDamage() > 0
+//                )
+//                .handler(event -> PlayerVisualEffects.showLowHealthEffect((Player) event.getEntity()))
+//                .build());
+//        this.playerEntityEventNode.registerListener(PaperEventListener.builder(EntityRegainHealthEvent.class, EventPriority.MONITOR)
+//                .filter(event -> !event.isCancelled())
+//                .filter(event ->
+//                        event.getEntity() instanceof Player player
+//                                && player.getHealth() + event.getAmount() > 6
+//                )
+//                .handler(event -> PlayerVisualEffects.hideLowHealthEffect((Player) event.getEntity()))
+//                .build());
         this.stateEventNode.registerListener(PaperEventListener.builder(InventoryClickEvent.class)
                 .filter(event -> this.players.containsKey(event.getWhoClicked().getUniqueId()))
                 .handler(event -> event.setCancelled(true))
@@ -394,6 +402,10 @@ public final class BattleGameState extends GameState {
             for (GameSidebar sidebar : BattleGameState.this.sidebarMap.values()) {
                 sidebar.setGameTime(this.timeLeft);
             }
+
+            for (BouncyBulletGamePlayer gamePlayer : BattleGameState.this.game.getPlayers().values()) {
+                gamePlayer.getHud().setGameTimer(this.timeLeft);
+            }
         }
     }
 
@@ -402,7 +414,8 @@ public final class BattleGameState extends GameState {
         @Override
         public void run() {
             for (BouncyBulletGamePlayer gamePlayer : BattleGameState.this.game.getPlayers().values()) {
-                gamePlayer.getHud().show(gamePlayer.getPlayer());
+//                gamePlayer.getOldHud().show(gamePlayer.getPlayer());
+                gamePlayer.getHud().tick();
             }
         }
     }
@@ -427,6 +440,9 @@ public final class BattleGameState extends GameState {
                 PlayerClass playerClass = this.gamePlayer.getLoadout().classType().getPlayerClass();
 
                 resupplyGuns(player.getInventory(), playerClass);
+
+                this.gamePlayer.setHealth(20);
+                this.gamePlayer.setMaxHealth(20);
 
                 player.setGameMode(GameMode.ADVENTURE);
                 player.teleport(chooseBestSpawnLocation());

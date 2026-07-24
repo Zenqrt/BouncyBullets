@@ -42,7 +42,6 @@ public final class GamePlayerListeners implements Listener {
         gamePlayer.setDeltaMovement(
                 deltaMovement.add(nudge)
         );
-
     }
 
 }

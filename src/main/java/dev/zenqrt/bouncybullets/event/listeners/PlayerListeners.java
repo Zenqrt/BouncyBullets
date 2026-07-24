@@ -19,12 +19,12 @@ public final class PlayerListeners implements Listener {
         event.setCancelled(true);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onEntityDamageEvent(EntityDamageEvent event) {
-        if (event.getDamageSource().getDamageType() != DamageType.MOB_PROJECTILE) {
-            event.setCancelled(true);
-        }
-    }
+//    @EventHandler(priority = EventPriority.HIGHEST)
+//    public void onEntityDamageEvent(EntityDamageEvent event) {
+//        if (event.getDamageSource().getDamageType() != DamageType.MOB_PROJECTILE) {
+//            event.setCancelled(true);
+//        }
+//    }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerHandSwapItems(PlayerSwapHandItemsEvent event) {

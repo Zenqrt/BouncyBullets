@@ -5,7 +5,7 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
-import dev.zenqrt.bouncybullets.player.BouncyBulletsHUD;
+import dev.zenqrt.bouncybullets.player.hud.actionbar.BouncyBulletsHUD;
 import dev.zenqrt.bouncybullets.tasks.ShootBulletTaskV2;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import dev.zenqrt.bouncybullets.utils.Sounds;
@@ -53,8 +53,7 @@ public abstract class BulletGunItem extends GunItem {
 
     @Override
     protected BukkitTask startReloading(Plugin plugin, BouncyBulletGamePlayer gamePlayer, Player player, ItemStack itemStack, int ammo) {
-        gamePlayer.getHud().addDisplay("reloading", Component.text("Reloading...", NamedTextColor.WHITE));
-        gamePlayer.getHud().updateHudText();
+        gamePlayer.getHud().setStatus(Component.text("...", NamedTextColor.DARK_GRAY));
 
         AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
 
@@ -78,12 +77,9 @@ public abstract class BulletGunItem extends GunItem {
                     movementSpeed.removeModifier(RELOAD_SLOWDOWN_MODIFIER);
                     player.setCooldown(itemStack.getType(), 0);
 
-                    gamePlayer.getHud().updateAmmo(
-                            BulletGunItem.super.gunProperties.magazineSize(),
-                            BulletGunItem.super.gunProperties.magazineSize()
-                    );
-                    gamePlayer.getHud().removeDisplay("reloading");
-                    gamePlayer.getHud().updateHudText();
+                    gamePlayer.getHud().setAmmo(BulletGunItem.super.gunProperties.magazineSize());
+                    gamePlayer.getHud().clearStatus();
+
                     gamePlayer.setReloading(false);
                 },
                 BulletGunItem.super.gunProperties.reloadTicks()
@@ -139,7 +135,8 @@ public abstract class BulletGunItem extends GunItem {
         }
 
         new ShootBulletTaskV2(
-                player,
+                gamePlayer,
+                game,
                 bulletProperties,
                 gunTipPos,
                 player.getEyeLocation().getDirection().normalize(),
@@ -170,12 +167,12 @@ public abstract class BulletGunItem extends GunItem {
         if (super.gunProperties.shootDelayTicks() < INTERACT_EVENT_TICK_DELAY) {
             long shootDivisions = INTERACT_EVENT_TICK_DELAY / super.gunProperties.shootDelayTicks();
 
-            tryShootGun(game, gamePlayer, gamePlayer.getHud(), itemStack);
+            tryShootGun(game, gamePlayer, gamePlayer.getOldHud(), itemStack);
 
             for (int i = 1; i < shootDivisions; i++) {
                 Bukkit.getScheduler().runTaskLater(
                         game.getPlugin(),
-                        () -> tryShootGun(game, gamePlayer, gamePlayer.getHud(), itemStack),
+                        () -> tryShootGun(game, gamePlayer, gamePlayer.getOldHud(), itemStack),
                         (long) i * super.gunProperties.shootDelayTicks()
                 );
             }
@@ -183,7 +180,7 @@ public abstract class BulletGunItem extends GunItem {
             return;
         }
 
-        tryShootGun(game, gamePlayer, gamePlayer.getHud(), itemStack);
+        tryShootGun(game, gamePlayer, gamePlayer.getOldHud(), itemStack);
     }
 
     private void tryShootGun(BouncyBulletGame game, BouncyBulletGamePlayer gamePlayer, BouncyBulletsHUD hud, ItemStack itemStack) {

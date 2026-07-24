@@ -36,7 +36,7 @@ public final class ClassStatsGui extends ChestGui {
                     new PlayerClassStats()
             );
 
-            ItemStack itemStack = classType.getIcon().clone();
+            ItemStack itemStack = classType.getSelectionUIIcon().clone();
             itemStack.setData(
                     DataComponentTypes.CUSTOM_NAME,
                     AdventureUtils.withoutItalics(classType.getPlayerClass().getName(), NamedTextColor.YELLOW)

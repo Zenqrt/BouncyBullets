@@ -40,8 +40,8 @@ public final class GrenadeLauncherGunItem extends GunItem {
         int maxAmmo = super.gunProperties.magazineSize();
         int ticksPerAmmo = super.gunProperties.reloadTicks() / maxAmmo;
 
-        gamePlayer.getHud().addDisplay("reloading", Component.text("Reloading...", NamedTextColor.WHITE));
-        gamePlayer.getHud().updateHudText();
+        gamePlayer.getOldHud().addDisplay("reloading", Component.text("Reloading...", NamedTextColor.WHITE));
+        gamePlayer.getOldHud().updateHudText();
 
         AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
 
@@ -64,8 +64,8 @@ public final class GrenadeLauncherGunItem extends GunItem {
                     movementSpeed.removeModifier(RELOAD_SLOWDOWN_MODIFIER);
                     player.setCooldown(itemStack.getType(), 0);
 
-                    gamePlayer.getHud().removeDisplay("reloading");
-                    gamePlayer.getHud().updateHudText();
+                    gamePlayer.getOldHud().removeDisplay("reloading");
+                    gamePlayer.getOldHud().updateHudText();
                     gamePlayer.setReloading(false);
 
                     return;
@@ -80,11 +80,7 @@ public final class GrenadeLauncherGunItem extends GunItem {
                 });
 
 
-                gamePlayer.getHud().updateAmmo(
-                        newAmmo,
-                        GrenadeLauncherGunItem.super.gunProperties.magazineSize()
-                );
-                gamePlayer.getHud().updateHudText();
+                gamePlayer.getHud().setAmmo(newAmmo);
 
                 player.playSound(Sound.sound(Sounds.BLOCK_BARREL_CLOSE, Sound.Source.PLAYER, 1, 0.75F));
             }
@@ -123,7 +119,7 @@ public final class GrenadeLauncherGunItem extends GunItem {
             }
         }
 
-        shootGun(game, gamePlayer, gamePlayer.getHud(), itemStack);
+        shootGun(game, gamePlayer, gamePlayer.getOldHud(), itemStack);
 
         super.lastShootTicks.put(player.getUniqueId(), currentGameTime);
     }

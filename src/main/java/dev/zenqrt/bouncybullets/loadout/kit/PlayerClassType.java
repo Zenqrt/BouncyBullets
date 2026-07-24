@@ -1,6 +1,8 @@
 package dev.zenqrt.bouncybullets.loadout.kit;
 
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
+import dev.zenqrt.bouncybullets.utils.atlas.AtlasSpriteKey;
+import dev.zenqrt.bouncybullets.utils.atlas.Atlases;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
@@ -14,7 +16,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public enum PlayerClassType {
-    STEALTH(new StealthPlayerClass(), Material.IRON_HORSE_ARMOR,
+    STEALTH(new StealthPlayerClass(), Material.IRON_HORSE_ARMOR, AtlasSpriteKey.item("ominous_bottle"),
             List.of(
                     Component.text("SMG", NamedTextColor.GRAY),
                     Component.text("Silenced Pistol", NamedTextColor.GRAY),
@@ -25,7 +27,7 @@ public enum PlayerClassType {
                     "Surprise Attack", "After emerging from being invisible, gain <aqua>Speed II<gray> for <green>5s<gray>."
             )
     ),
-    HEALER(new HealerPlayerClass(), Material.SPLASH_POTION, meta -> ((PotionMeta) meta).setBasePotionType(PotionType.HEALING),
+    HEALER(new HealerPlayerClass(), Material.SPLASH_POTION, AtlasSpriteKey.particle("goldheart_2"), meta -> ((PotionMeta) meta).setBasePotionType(PotionType.HEALING),
             List.of(
                     Component.text("BB-Pistol", NamedTextColor.GRAY),
                     Component.text("Miracle", NamedTextColor.LIGHT_PURPLE)
@@ -34,15 +36,16 @@ public enum PlayerClassType {
                     "Blessing", "Regenerage <red>1❤<gray> every <green>2s<gray>."
             )
     ),
-    SNIPER(new SniperPlayerClass(), Material.ENDER_EYE, List.of(
-            Component.text("Sniper Rifle", NamedTextColor.GRAY),
-            Component.text("Pistol", NamedTextColor.GRAY)
-    ),
+    SNIPER(new SniperPlayerClass(), Material.ENDER_EYE, AtlasSpriteKey.item("ender_eye"),
+            List.of(
+                    Component.text("Sniper Rifle", NamedTextColor.GRAY),
+                    Component.text("Pistol", NamedTextColor.GRAY)
+            ),
             createPassiveDescriptions(
                     "Concentration", "For each second of standing still, accumulate a <red>5%<gray> damage increase, up to <red>50%<gray> maximum. This is shown in the experience bar."
             )
     ),
-    DEMOMAN(new DemomanPlayerClass(), Material.TNT,
+    DEMOMAN(new DemomanPlayerClass(), Material.TNT, AtlasSpriteKey.block("tnt_side"),
             List.of(
                     Component.text("Grenade Launcher", NamedTextColor.GRAY),
                     Component.text("Desert Eagle", NamedTextColor.GRAY),
@@ -52,7 +55,7 @@ public enum PlayerClassType {
                     "Sluggish", "Your speed is decreased by some amount."
             )
     ),
-    WINGMAN(new WingmanPlayerClass(), Material.ELYTRA,
+    WINGMAN(new WingmanPlayerClass(), Material.ELYTRA, AtlasSpriteKey.item("elytra"),
             List.of(
                     Component.text("Twin Pistols", NamedTextColor.GRAY),
                     Component.text("Bullet Spread", NamedTextColor.LIGHT_PURPLE)
@@ -62,7 +65,7 @@ public enum PlayerClassType {
                     "idk what to call this", "Any shots fired while flying above <green>2 blocks<gray> does <red>50%<gray> more damage."
             )
     ),
-    HEAVY(new HeavyPlayerClass(), Material.IRON_CHESTPLATE,
+    HEAVY(new HeavyPlayerClass(), Material.IRON_CHESTPLATE, AtlasSpriteKey.item("iron_chestplate"),
             List.of(
                     Component.text("Minigun", NamedTextColor.GRAY),
                     Component.text("Bulletproof", NamedTextColor.LIGHT_PURPLE)
@@ -105,28 +108,35 @@ public enum PlayerClassType {
 
     private final PlayerClass playerClass;
     private final ItemStack icon;
+    private final AtlasSpriteKey hudIcon;
     private final List<Component> itemContents;
     private final List<Component> description;
 
-    PlayerClassType(PlayerClass playerClass, Material material, Consumer<ItemMeta> itemMetaHandler, List<Component> itemContents, List<Component> description) {
+    PlayerClassType(PlayerClass playerClass, Material material, AtlasSpriteKey hudIcon, Consumer<ItemMeta> itemMetaHandler, List<Component> itemContents, List<Component> description) {
         this.playerClass = playerClass;
         this.itemContents = itemContents;
         this.description = description;
 
         this.icon = new ItemStack(material);
         this.icon.editMeta(itemMetaHandler);
+
+        this.hudIcon = hudIcon;
     }
 
-    PlayerClassType(PlayerClass playerClass, Material material, List<Component> itemContents, List<Component> description) {
-        this(playerClass, material, _ -> {}, itemContents, description);
+    PlayerClassType(PlayerClass playerClass, Material material, AtlasSpriteKey hudIcon, List<Component> itemContents, List<Component> description) {
+        this(playerClass, material, hudIcon, _ -> {}, itemContents, description);
     }
 
     public PlayerClass getPlayerClass() {
         return playerClass;
     }
 
-    public ItemStack getIcon() {
+    public ItemStack getSelectionUIIcon() {
         return icon;
+    }
+
+    public AtlasSpriteKey getHudIcon() {
+        return hudIcon;
     }
 
     public List<Component> getItemContents() {

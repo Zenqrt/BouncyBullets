@@ -48,7 +48,7 @@ public final class ClassSelectGui extends ChestGui {
         OutlinePane pane = new OutlinePane(7, 1);
 
         for (PlayerClassType classType : PlayerClassType.values()) {
-            ItemStack icon = ItemUtils.clone(classType.getIcon());
+            ItemStack icon = ItemUtils.clone(classType.getSelectionUIIcon());
 
             icon.setData(
                     DataComponentTypes.TOOLTIP_DISPLAY,
@@ -153,7 +153,7 @@ public final class ClassSelectGui extends ChestGui {
         private void displayInfo() {
             StaticPane classPane = new StaticPane(1, 1);
 
-            ItemStack icon = ItemUtils.clone(classType.getIcon());
+            ItemStack icon = ItemUtils.clone(classType.getSelectionUIIcon());
             icon.setData(
                     DataComponentTypes.TOOLTIP_DISPLAY,
                     TooltipDisplay.tooltipDisplay()

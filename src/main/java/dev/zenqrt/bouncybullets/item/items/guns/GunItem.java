@@ -9,7 +9,8 @@ import dev.zenqrt.bouncybullets.item.GameItem;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
 import dev.zenqrt.bouncybullets.packet.PacketSender;
-import dev.zenqrt.bouncybullets.player.BouncyBulletsHUD;
+import dev.zenqrt.bouncybullets.player.hud.GameplayHud;
+import dev.zenqrt.bouncybullets.player.hud.actionbar.BouncyBulletsHUD;
 import dev.zenqrt.bouncybullets.utils.MiniMessageUtils;
 import dev.zenqrt.bouncybullets.utils.NMSConverter;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
@@ -137,10 +138,9 @@ public abstract class GunItem extends GameItem {
         final BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
 
         int ammo = getAmmo(itemStack);
-        int magSize = this.getGunProperties().magazineSize();
 
-        gamePlayer.getHud().updateAmmo(ammo, magSize);
-        gamePlayer.getHud().updateHudText();
+        gamePlayer.getHud().setAmmo(ammo);
+        gamePlayer.getHud().showAmmo();
 
         player.setCooldown(itemStack.getType(), this.getGunProperties().pullOutTicks());
     }
@@ -150,7 +150,6 @@ public abstract class GunItem extends GameItem {
         final BouncyBulletGamePlayer gamePlayer = game.findPlayerOrThrow(player.getUniqueId());
 
         gamePlayer.getHud().hideAmmo();
-        gamePlayer.getHud().updateHudText();
 
         if (gamePlayer.isAiming())
             gamePlayer.stopAiming(game, itemStack);
@@ -161,8 +160,8 @@ public abstract class GunItem extends GameItem {
             AttributeInstance movementSpeed = PlayerUtils.requireNonNullAttribute(player, Attribute.MOVEMENT_SPEED);
             movementSpeed.removeModifier(RELOAD_SLOWDOWN_MODIFIER);
 
-            gamePlayer.getHud().removeDisplay("reloading");
-            gamePlayer.getHud().updateHudText();
+            gamePlayer.getOldHud().removeDisplay("reloading");
+            gamePlayer.getOldHud().updateHudText();
             player.stopSound(getReloadSound());
 
             BukkitTask reloadTask = this.reloadTaskMap.remove(gamePlayer.getUuid());
@@ -206,7 +205,7 @@ public abstract class GunItem extends GameItem {
         playCameraEffect(game.getPlugin(), nmsPlayer, gamePlayer.isAiming());
 
         shootProjectile(game, gamePlayer, event.getBulletProperties());
-        useAmmo(itemStack, hud);
+        useAmmo(itemStack, gamePlayer.getHud());
     }
 
     private void playCameraEffect(Plugin plugin, ServerPlayer nmsPlayer, boolean focused) {
@@ -337,7 +336,7 @@ public abstract class GunItem extends GameItem {
         );
     }
 
-    protected final void useAmmo(ItemStack itemStack, BouncyBulletsHUD hud) {
+    protected final void useAmmo(ItemStack itemStack, GameplayHud hud) {
         itemStack.editMeta(meta -> {
             PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
             int ammo = dataContainer.getOrDefault(AMMO_KEY, PersistentDataType.INTEGER, this.gunProperties.magazineSize());
@@ -345,8 +344,7 @@ public abstract class GunItem extends GameItem {
 
             dataContainer.set(AMMO_KEY, PersistentDataType.INTEGER, newAmmo);
 
-            hud.updateAmmo(newAmmo, this.gunProperties.magazineSize());
-            hud.updateHudText();
+            hud.setAmmo(newAmmo);
         });
     }
 
