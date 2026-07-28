@@ -5,7 +5,7 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGame;
 import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.loadout.gun.BulletProperties;
 import dev.zenqrt.bouncybullets.loadout.gun.GunProperties;
-import dev.zenqrt.bouncybullets.player.hud.actionbar.BouncyBulletsHUD;
+import dev.zenqrt.bouncybullets.hud.actionbar.BouncyBulletsHUD;
 import dev.zenqrt.bouncybullets.tasks.ShootBulletTaskV2;
 import dev.zenqrt.bouncybullets.utils.PlayerUtils;
 import dev.zenqrt.bouncybullets.utils.Sounds;

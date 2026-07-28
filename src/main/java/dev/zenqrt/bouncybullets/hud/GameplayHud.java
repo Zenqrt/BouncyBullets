@@ -1,4 +1,4 @@
-package dev.zenqrt.bouncybullets.player.hud;
+package dev.zenqrt.bouncybullets.hud;
 
 import com.google.common.base.Preconditions;
 import dev.zenqrt.bouncybullets.loadout.kit.PlayerClassType;
@@ -129,35 +129,6 @@ public final class GameplayHud {
         }
     }
 
-    private static TextComponent buildHealthBar(int health, int maxHealth) {
-        int green = (int) (100F * health / maxHealth);
-
-        return Component.text("|".repeat(green), NamedTextColor.GREEN)
-                .append(Component.text("|".repeat(100 - green), NamedTextColor.DARK_GRAY))
-                .shadowColor(ShadowColor.shadowColor(0))
-                .font(ResourceKeys.hudFont("health_bar"));
-    }
-
-    private static TextComponent healthComponent(int health, int maxHealth) {
-        TextComponent healthBar = buildHealthBar(health, maxHealth);
-        TextComponent healthText = Component.text(health, NamedTextColor.WHITE)
-                .append(Component.text("/" + maxHealth, NamedTextColor.GRAY));
-
-        int healthBarWidth = FontMetrics.width(healthBar);
-        int centerSpace = calculateCenterTextBackgroundSpace(
-                healthBarWidth,
-                FontMetrics.width(healthText)
-        );
-
-        return Component.text()
-                .append(healthBar)
-                .append(Space.of(centerSpace))
-                .append(healthText)
-                .append(Space.of(healthBarWidth + centerSpace))
-                .shadowColor(ShadowColor.shadowColor(0))
-                .font(ResourceKeys.hudFont("health_big"))
-                .build();
-    }
 
     private static TextComponent infiniteAmmoComponent(int ammo) {
         return Component.text()

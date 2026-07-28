@@ -15,7 +15,7 @@ import java.util.UUID;
 
 public final class DebugCommands {
 
-    private static final Path RESOURCE_PACK_PATH = Path.of("C:\\Users\\craft\\Documents\\Development\\GitHub\\BouncyBullets\\server\\plugins\\BouncyBullets\\packs\\resource_pack.zip");
+    private static final Path RESOURCE_PACK_PATH = Path.of("C:\\Users\\craft\\OneDrive\\Documents\\GitHub\\BouncyBullets\\server\\plugins\\BouncyBullets\\packs\\resource_pack.zip");
 
     @Command("pack send")
     public void onPackSend(

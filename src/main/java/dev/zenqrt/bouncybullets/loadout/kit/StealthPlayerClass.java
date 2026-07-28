@@ -8,7 +8,7 @@ import dev.zenqrt.bouncybullets.game.games.BouncyBulletGamePlayer;
 import dev.zenqrt.bouncybullets.item.GameItems;
 import dev.zenqrt.bouncybullets.item.items.abilities.ActiveAbilityItem;
 import dev.zenqrt.bouncybullets.item.items.guns.GunItem;
-import dev.zenqrt.bouncybullets.player.hud.actionbar.BouncyBulletsHUD;
+import dev.zenqrt.bouncybullets.hud.actionbar.BouncyBulletsHUD;
 import dev.zenqrt.bouncybullets.utils.ItemUtils;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;

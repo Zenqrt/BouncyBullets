@@ -1,4 +1,4 @@
-package dev.zenqrt.bouncybullets.player.hud.actionbar;
+package dev.zenqrt.bouncybullets.hud.actionbar;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
